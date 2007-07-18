@@ -3169,6 +3169,13 @@ rtl8169_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	dev->features |= NETIF_F_HW_VLAN_TX | NETIF_F_HW_VLAN_RX;
 #endif
 
+	/* Ubuntu temporary workaround for bug #76489, disable
+	 * NETIF_F_TSO by default for RTL8111/8168B chipsets.
+	 * People can re-enable if required */
+	if (tp->mac_version == RTL_GIGA_MAC_VER_11
+				|| tp->mac_version == RTL_GIGA_MAC_VER_12)
+		dev->features &= ~NETIF_F_TSO;
+
 	tp->intr_mask = 0xffff;
 	tp->align = cfg->align;
 	tp->hw_start = cfg->hw_start;
