@@ -432,7 +432,8 @@ static int alps_hw_init(struct psmouse *psmouse, int *version)
 
 static int alps_reconnect(struct psmouse *psmouse)
 {
-	psmouse_reset(psmouse);
+	/* UBUNTU: Causes lockups on resume */
+	/* psmouse_reset(psmouse); */
 
 	if (alps_hw_init(psmouse, NULL))
 		return -1;
