@@ -38,7 +38,10 @@
 #define TULIP_BAR	0	/* CBIO */
 #endif
 
-
+#ifndef PCI_ULI5261_ID
+#define PCI_ULI5261_ID  0x526110B9      /* ULi M5261 ID*/
+#define PCI_ULI5263_ID  0x526310B9      /* ULi M5263 ID*/
+#endif
 
 struct tulip_chip_table {
 	char *chip_name;
