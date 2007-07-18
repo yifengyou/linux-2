@@ -1068,6 +1068,8 @@ static int emulate_raw(struct vc_data *vc, unsigned int keycode,
 	int code;
 
 	switch (keycode) {
+		case KEY_RESERVED:
+			break;
 		case KEY_PAUSE:
 			put_queue(vc, 0xe1);
 			put_queue(vc, 0x1d | up_flag);
@@ -1125,6 +1127,8 @@ static int emulate_raw(struct vc_data *vc, unsigned int keycode,
 
 static int emulate_raw(struct vc_data *vc, unsigned int keycode, unsigned char up_flag)
 {
+	if (keycode == KEY_RESERVED)
+		return 0;
 	if (keycode > 127)
 		return -1;
 
