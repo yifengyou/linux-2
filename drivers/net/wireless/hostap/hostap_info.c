@@ -238,6 +238,7 @@ static void hostap_report_scan_complete(local_info_t *local)
 	wrqu.data.length = 0;
 	wrqu.data.flags = 0;
 	wireless_send_event(local->dev, SIOCGIWSCAN, &wrqu, NULL);
+	wireless_send_event(local->ddev, SIOCGIWSCAN, &wrqu, NULL);
 
 	/* Allow SIOCGIWSCAN handling to occur since we have received
 	 * scanning result */
@@ -449,8 +450,10 @@ static void handle_info_queue_linkstatus(local_info_t *local)
 	 * frames and can confuse wpa_supplicant about the current association
 	 * status.
 	 */
-	if (connected || local->prev_linkstatus_connected)
+	if (connected || local->prev_linkstatus_connected) {
 		wireless_send_event(local->dev, SIOCGIWAP, &wrqu, NULL);
+		wireless_send_event(local->ddev, SIOCGIWAP, &wrqu, NULL);
+	}
 	local->prev_linkstatus_connected = connected;
 }
 

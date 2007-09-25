@@ -3383,6 +3383,7 @@ static void prism2_suspend(struct net_device *dev)
 	memset(&wrqu, 0, sizeof(wrqu));
 	wrqu.ap_addr.sa_family = ARPHRD_ETHER;
 	wireless_send_event(local->dev, SIOCGIWAP, &wrqu, NULL);
+	wireless_send_event(local->ddev, SIOCGIWAP, &wrqu, NULL);
 
 	/* Disable hardware and firmware */
 	prism2_hw_shutdown(dev, 0);

@@ -1100,6 +1100,7 @@ int prism2_sta_deauth(local_info_t *local, u16 reason)
 				   (u8 *) &val, 2);
 	memset(wrqu.ap_addr.sa_data, 0, ETH_ALEN);
 	wireless_send_event(local->dev, SIOCGIWAP, &wrqu, NULL);
+	wireless_send_event(local->ddev, SIOCGIWAP, &wrqu, NULL);
 	return ret;
 }
 
