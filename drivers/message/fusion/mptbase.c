@@ -3232,6 +3232,16 @@ GetPortFacts(MPT_ADAPTER *ioc, int portnum, int sleepFlag)
 	pfacts->IOCStatus = le16_to_cpu(pfacts->IOCStatus);
 	pfacts->IOCLogInfo = le32_to_cpu(pfacts->IOCLogInfo);
 	pfacts->MaxDevices = le16_to_cpu(pfacts->MaxDevices);
+	/*
+	 * VMware emulation is broken, its PortFact's MaxDevices reports value
+	 * programmed by IOC Init, so if you program IOC Init to 256 (which is 0,
+	 * as that field is only 8 bit), it reports back 0 in port facts, instead
+	 * of 256...  And unfortunately using 256 triggers another bug in the
+	 * code (parallel SCSI can have only 16 devices).
+	 */
+	if (pfacts->MaxDevices == 0) {
+	   pfacts->MaxDevices = 16;
+	}
 	pfacts->PortSCSIID = le16_to_cpu(pfacts->PortSCSIID);
 	pfacts->ProtocolFlags = le16_to_cpu(pfacts->ProtocolFlags);
 	pfacts->MaxPostedCmdBuffers = le16_to_cpu(pfacts->MaxPostedCmdBuffers);
