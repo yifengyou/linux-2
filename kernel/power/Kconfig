@@ -119,6 +119,21 @@ config SUSPEND_FREEZER
 config HIBERNATION_NVS
 	bool
 
+config PM_DISABLE_CONSOLE
+	bool "Disable Power Management messing with the active console"
+	depends on PM
+	default n
+	---help---
+	  By default, PM will take over the active console (generally, this means
+	  switching to the console when suspending from X). This can at times cause
+	  problems, especially if userspace suspend scripts try to do things with
+	  the console before or after suspending (e.g. calling vbestate).
+
+	  To work around this, enable this option so that PM will not handle the
+	  console.
+
+	  If unsure, say N.
+
 config HIBERNATION
 	bool "Hibernation (aka 'suspend to disk')"
 	depends on PM && SWAP && ARCH_HIBERNATION_POSSIBLE
