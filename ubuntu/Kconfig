@@ -11,5 +11,6 @@ source "ubuntu/lenovo-sl-laptop/Kconfig"
 source "ubuntu/lirc/Kconfig"
 source "ubuntu/misc/Kconfig"
 source "ubuntu/ndiswrapper/Kconfig"
+source "ubuntu/rfkill/Kconfig"
 
 endmenu
