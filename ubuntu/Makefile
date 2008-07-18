@@ -11,6 +11,7 @@ obj-$(CONFIG_BLK_DEV_DRBD)	+= drbd/
 obj-$(CONFIG_SCSI_ISCSITARGET)	+= iscsitarget/
 obj-$(CONFIG_LENOVO_SL_LAPTOP)	+= lenovo-sl-laptop/
 obj-$(CONFIG_LIRC_DEV)          += lirc/
+obj-m				+= misc/
 
 # This is a stupid trick to get kbuild to create ubuntu/built-in.o
 obj- += foo.o
