@@ -424,6 +424,8 @@ extern struct paravirt_patch_site __start_parainstructions[],
 
 void __init alternative_instructions(void)
 {
+	unsigned long flags;
+
 	/* The patching is not fully atomic, so try to avoid local interruptions
 	   that might execute the to be patched code.
 	   Other CPUs are not running. */
@@ -440,7 +442,9 @@ void __init alternative_instructions(void)
 	 * patching.
 	 */
 
+	local_irq_save(flags);
 	apply_alternatives(__alt_instructions, __alt_instructions_end);
+	local_irq_restore(flags);
 
 	/* switch to patch-once-at-boottime-only mode and free the
 	 * tables in case we know the number of CPUs will never ever
@@ -470,7 +474,9 @@ void __init alternative_instructions(void)
 			alternatives_smp_switch(0);
 	}
 #endif
+	local_irq_save(flags);
  	apply_paravirt(__parainstructions, __parainstructions_end);
+	local_irq_restore(flags);
 
 	if (smp_alt_once)
 		free_init_pages("SMP alternatives",
