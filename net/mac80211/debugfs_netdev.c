@@ -430,6 +430,7 @@ static int netdev_notify(struct notifier_block *nb,
 {
 	struct net_device *dev = ndev;
 	struct dentry *dir;
+	struct ieee80211_local *local;
 	struct ieee80211_sub_if_data *sdata;
 	char buf[10+IFNAMSIZ];
 
@@ -442,7 +443,12 @@ static int netdev_notify(struct notifier_block *nb,
 	if (dev->ieee80211_ptr->wiphy->privid != mac80211_wiphy_privid)
 		return 0;
 
-	sdata = IEEE80211_DEV_TO_SUB_IF(dev);
+	/*
+	 * Do not use IEEE80211_DEV_TO_SUB_IF because that
+	 * BUG_ONs for the master netdev which we need to
+	 * handle here.
+	 */
+	sdata = netdev_priv(dev);
 
 	dir = sdata->debugfsdir;
 
