@@ -62,7 +62,6 @@ zc0301_attach_sensor(struct zc0301_device* cam, struct zc0301_sensor* sensor);
 #define ZC0301_ID_TABLE                                                       \
 static const struct usb_device_id zc0301_id_table[] =  {                      \
 	{ ZC0301_USB_DEVICE(0x046d, 0x08ae, 0xff), }, /* PAS202 */            \
-	{ ZC0301_USB_DEVICE(0x0ac8, 0x303b, 0xff), }, /* PB-0330 */           \
 	{ }                                                                   \
 };
 #else
