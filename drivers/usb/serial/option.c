@@ -225,6 +225,7 @@ static int  option_resume(struct usb_serial *serial);
 #define AMOI_VENDOR_ID				0x1614
 #define AMOI_PRODUCT_H01			0x0800
 #define AMOI_PRODUCT_H01A			0x7002
+#define AMOI_PRODUCT_9508			0x0800
 #define AMOI_PRODUCT_H02			0x0802
 
 #define DELL_VENDOR_ID				0x413C
@@ -282,9 +283,6 @@ static int  option_resume(struct usb_serial *serial);
 #define BANDRICH_PRODUCT_1010			0x1010
 #define BANDRICH_PRODUCT_1011			0x1011
 #define BANDRICH_PRODUCT_1012			0x1012
-
-#define AMOI_VENDOR_ID			0x1614
-#define AMOI_PRODUCT_9508			0x0800
 
 #define QUALCOMM_VENDOR_ID			0x05C6
 
