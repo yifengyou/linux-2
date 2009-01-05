@@ -28,6 +28,7 @@
  *		engineering the Windows drivers
  *	Yasushi Nagato - changes for linux kernel 2.4 -> 2.5
  *	Rob Miller - TV out and hotkeys help
+ *      Daniel Silverstone - Punting of hotkeys via acpi using a thread    	
  *
  *  PLEASE NOTE
  *
@@ -48,7 +49,7 @@
  *
  */
 
-#define TOSHIBA_ACPI_VERSION	"0.19-dev"
+#define TOSHIBA_ACPI_VERSION	"0.19-dev-acpikeys"
 #define PROC_INTERFACE_VERSION	1
 
 #include <linux/kernel.h>
@@ -63,6 +64,8 @@
 #include <linux/backlight.h>
 #include <linux/platform_device.h>
 #include <linux/rfkill.h>
+#include <linux/input-polldev.h>
+#include <linux/freezer.h>
 
 #include <asm/uaccess.h>
 
@@ -374,6 +377,11 @@ static struct backlight_device *toshiba_backlight_device;
 static int force_fan;
 static int last_key_event;
 static int key_event_valid;
+static int hotkeys_over_acpi = 1;
+static int hotkeys_check_per_sec = 2;
+
+module_param(hotkeys_over_acpi, uint, 0400);
+module_param(hotkeys_check_per_sec, uint, 0400);
 
 typedef struct _ProcItem {
 	const char *name;
@@ -601,27 +609,34 @@ static char *read_keys(char *p)
 	u32 hci_result;
 	u32 value;
 
-	if (!key_event_valid) {
-		hci_read1(HCI_SYSTEM_EVENT, &value, &hci_result);
-		if (hci_result == HCI_SUCCESS) {
-			key_event_valid = 1;
-			last_key_event = value;
-		} else if (hci_result == HCI_EMPTY) {
-			/* better luck next time */
-		} else if (hci_result == HCI_NOT_SUPPORTED) {
-			/* This is a workaround for an unresolved issue on
-			 * some machines where system events sporadically
-			 * become disabled. */
-			hci_write1(HCI_SYSTEM_EVENT, 1, &hci_result);
-			printk(MY_NOTICE "Re-enabled hotkeys\n");
-		} else {
-			printk(MY_ERR "Error reading hotkey status\n");
-			goto end;
+	if (!hotkeys_over_acpi) {
+		if (!key_event_valid) {
+			hci_read1(HCI_SYSTEM_EVENT, &value, &hci_result);
+			if (hci_result == HCI_SUCCESS) {
+				key_event_valid = 1;
+				last_key_event = value;
+			} else if (hci_result == HCI_EMPTY) {
+				/* better luck next time */
+			} else if (hci_result == HCI_NOT_SUPPORTED) {
+				/* This is a workaround for an
+				 * unresolved issue on some machines
+				 * where system events sporadically
+				 * become disabled. */
+				hci_write1(HCI_SYSTEM_EVENT, 1, &hci_result);
+				printk(MY_NOTICE "Re-enabled hotkeys\n");
+			} else {
+				printk(MY_ERR "Error reading hotkey status\n");
+				goto end;
+			}
 		}
+	} else {
+		key_event_valid = 0;
+		last_key_event = 0;
 	}
 
 	p += sprintf(p, "hotkey_ready:            %d\n", key_event_valid);
 	p += sprintf(p, "hotkey:                  0x%04x\n", last_key_event);
+	p += sprintf(p, "hotkeys_via_acpi:        %d\n", hotkeys_over_acpi);
 
       end:
 	return p;
@@ -879,6 +894,133 @@ static struct backlight_ops toshiba_backlight_data = {
         .update_status  = set_lcd_status,
 };
 
+static struct semaphore thread_sem;
+static int thread_should_die;
+
+static struct acpi_device *threaded_device = 0;
+
+static void thread_deliver_button_event(u32 value)
+{
+	if (!threaded_device) return;
+	if( value == 0x0100 ) {
+		/* Ignore FN on its own */
+	} else if( value & 0x80 ) {
+		acpi_bus_generate_proc_event( threaded_device, 1, value & ~0x80 );
+	} else {
+		acpi_bus_generate_proc_event( threaded_device, 0, value );
+	}
+}
+
+static int toshiba_acpi_thread(void *data)
+{
+	int dropped = 0;
+	u32 hci_result, value;
+
+	daemonize("ktoshkeyd");
+	set_user_nice(current, 4);
+	thread_should_die = 0;
+
+	up(&thread_sem);
+
+	do {
+		/* In case we get stuck; we can rmmod the module here */
+		if (thread_should_die)
+			break;
+
+		hci_read1(HCI_SYSTEM_EVENT, &value, &hci_result);
+		if (hci_result == HCI_SUCCESS) {
+			dropped++;
+		} else if (hci_result == HCI_EMPTY) {
+                         /* better luck next time */
+		} else if (hci_result == HCI_NOT_SUPPORTED) {
+			/* This is a workaround for an unresolved issue on
+			 * some machines where system events sporadically
+			 * become disabled. */
+			hci_write1(HCI_SYSTEM_EVENT, 1, &hci_result);
+			printk(MY_NOTICE "Re-enabled hotkeys\n");
+		}
+	} while (hci_result != HCI_EMPTY);
+
+	printk(MY_INFO "Dropped %d keys from the queue on startup\n", dropped);
+
+	for (;;) {
+		set_current_state(TASK_INTERRUPTIBLE);
+		schedule_timeout(HZ / hotkeys_check_per_sec);
+
+		if (thread_should_die)
+			break;
+
+		if (try_to_freeze())
+			continue;
+
+		do {
+			hci_read1(HCI_SYSTEM_EVENT, &value, &hci_result);
+			if (hci_result == HCI_SUCCESS) {
+				thread_deliver_button_event(value);
+			} else if (hci_result == HCI_EMPTY) {
+				/* better luck next time */
+			} else if (hci_result == HCI_NOT_SUPPORTED) {
+				/* This is a workaround for an
+				 * unresolved issue on some machines
+				 * where system events sporadically
+				 * become disabled. */
+				hci_write1(HCI_SYSTEM_EVENT, 1, &hci_result);
+				printk(MY_NOTICE "Re-enabled hotkeys\n");
+			}
+		} while (hci_result == HCI_SUCCESS);
+	}
+	set_user_nice(current, -20);	/* Become nasty so we are cleaned up
+					 * before the module exits making us oops */
+	up(&thread_sem);
+	return 0;
+}
+
+static int acpi_toshkeys_add (struct acpi_device *device)
+{
+	threaded_device = device;
+	strcpy(acpi_device_name(device), "Toshiba laptop hotkeys");
+	strcpy(acpi_device_class(device), "hkey");
+	return 0;
+}
+
+static int acpi_toshkeys_remove (struct acpi_device *device, int type)
+{
+	if (threaded_device == device)
+		threaded_device = 0;
+	return 0;
+}
+
+static const struct acpi_device_id acpi_toshkeys_ids[] = {
+	{ "TOS6200", 0 },
+	{ "TOS6207", 0 },
+	{ "TOS6208", 0 },
+ 	{"", 0}
+};
+
+static struct acpi_driver acpi_threaded_toshkeys = {
+	.name = "Toshiba laptop hotkeys driver",
+	.class = "hkey",
+	.ids = acpi_toshkeys_ids,
+	.ops = {
+		.add = acpi_toshkeys_add,
+		.remove = acpi_toshkeys_remove,
+	},
+};
+
+static int __init init_threaded_acpi(void)
+{
+        acpi_status result = AE_OK;
+        result = acpi_bus_register_driver(&acpi_threaded_toshkeys);
+        if( result < 0 )
+                printk(MY_ERR "Registration of toshkeys acpi device failed\n");
+        return result;
+}
+
+static void kill_threaded_acpi(void)
+{
+        acpi_bus_unregister_driver(&acpi_threaded_toshkeys);
+}
+
 static void toshiba_acpi_exit(void)
 {
 	if (toshiba_acpi.bt_rfk) {
@@ -888,6 +1030,12 @@ static void toshiba_acpi_exit(void)
 
 	if (toshiba_backlight_device)
 		backlight_device_unregister(toshiba_backlight_device);
+
+	if (hotkeys_over_acpi) {
+		thread_should_die = 1;
+		down(&thread_sem);
+		kill_threaded_acpi();
+	}
 
 	remove_device();
 
@@ -969,6 +1117,26 @@ static int __init toshiba_acpi_init(void)
 		return ret;
 	}
         toshiba_backlight_device->props.max_brightness = HCI_LCD_BRIGHTNESS_LEVELS - 1;
+
+	if (hotkeys_over_acpi && ACPI_SUCCESS(status)) {
+		printk(MY_INFO "Toshiba hotkeys are sent as ACPI events\n");
+		if (hotkeys_check_per_sec < 1)
+			hotkeys_check_per_sec = 1;
+		if (hotkeys_check_per_sec > 10)
+			hotkeys_check_per_sec = 10;
+		printk(MY_INFO "ktoshkeyd will check %d time%s per second\n",
+			hotkeys_check_per_sec, hotkeys_check_per_sec==1?"":"s");
+		if (init_threaded_acpi() >= 0) {
+			init_MUTEX_LOCKED(&thread_sem);
+			kernel_thread(toshiba_acpi_thread, NULL, CLONE_KERNEL);
+			down(&thread_sem);
+		} else {
+			remove_device();
+			remove_proc_entry(PROC_TOSHIBA, acpi_root_dir);
+			status = AE_ERROR;
+			printk(MY_INFO "ktoshkeyd initialisation failed. Refusing to load module\n");
+		}
+	}
 
 	/* Register rfkill switch for Bluetooth */
 	if (hci_get_bt_present(&bt_present) == HCI_SUCCESS && bt_present) {
