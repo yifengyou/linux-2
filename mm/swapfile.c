@@ -586,8 +586,12 @@ static int swap_entry_free(struct swap_info_struct *p,
 		nr_swap_pages++;
 		p->inuse_pages--;
 	}
-	if (!swap_count(count))
+	if (!swap_count(count)) {
 		mem_cgroup_uncharge_swap(ent);
+			if (p->notify_swap_entry_free_fn)
+				p->notify_swap_entry_free_fn(offset);
+	}
+
 	return count;
 }
 
@@ -2165,6 +2169,23 @@ get_swap_info_struct(unsigned type)
 {
 	return &swap_info[type];
 }
+
+/*
+ * Sets callback for event when swap_map[offset] == 0
+ * i.e. page at this swap offset is not longer used.
+ *
+ * type: identifies swap file
+ * fn: callback function
+ */
+void set_notify_swap_entry_free(unsigned type, void (*fn) (unsigned long))
+{
+	struct swap_info_struct *sis;
+	sis = get_swap_info_struct(type);
+	BUG_ON(!sis);
+	sis->notify_swap_entry_free_fn = fn;
+	return;
+}
+EXPORT_SYMBOL(set_notify_swap_entry_free);
 
 /*
  * swap_lock prevents swap_map being freed. Don't grab an extra
