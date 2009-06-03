@@ -245,7 +245,12 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
 		kfree(mq->bounce_buf);
 	mq->bounce_buf = NULL;
 
-	blk_cleanup_queue(mq->queue);
+	/*
+	 * Calling blk_cleanup_queue() would be too soon here. As long as
+	 * the gendisk has a reference to it and is not released we should
+	 * keep the queue. It has been shutdown and will not accept any new
+	 * requests, so that should be safe.
+	 */
 
 	mq->card = NULL;
 }

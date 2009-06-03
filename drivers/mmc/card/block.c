@@ -88,6 +88,12 @@ static void mmc_blk_put(struct mmc_blk_data *md)
 		int devidx = MINOR(disk_devt(md->disk)) >> MMC_SHIFT;
 		__clear_bit(devidx, dev_use);
 
+		/*
+		 * We are about to drop the last reference to the disk object.
+		 * Nothing else should now be looking at the queue pointer, so
+		 * now it won't hurt if we release it.
+		 */
+		blk_cleanup_queue(md->disk->queue);
 		put_disk(md->disk);
 		kfree(md);
 	}
