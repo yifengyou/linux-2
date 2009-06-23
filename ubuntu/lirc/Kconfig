@@ -1,0 +1,88 @@
+config LIRC_DEV
+	tristate "LIRC Device support"
+	default m
+
+config LIRC_ATIUSB
+	tristate "LIRC ATI RF Remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_BT829
+	tristate "LIRC BT829"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_I2C
+	tristate "LIRC I2C interface remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_IGORPLUGUSB
+	tristate "LIRC IGOR custom remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_IMON
+	tristate "LIRC Imon remote or pad"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_IT87
+	tristate "LIRC IT87"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_ITE8709
+	tristate "LIRC ITE8709"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_MCEUSB
+	tristate "LIRC Microsoft Media Center Remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_MCEUSB2
+	tristate "LIRC Microsoft Media Center Remote v2"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_PARALLEL
+	tristate "LIRC Parallel port custom remote"
+	default n
+	depends on LIRC_DEV
+
+config LIRC_SASEM
+	tristate "LIRC Sasem"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_SERIAL
+	tristate "LIRC Serial port remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_SIR
+	tristate "LIRC Laptop port IR (SIR))"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_STREAMZAP
+	tristate "LIRC Streamzap remote"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_TTUSBIR
+	tristate "LIRC TT USB IR device"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_CONFIG_LIRC_WPC8769L
+	tristate "LIRC WPC8769L device"
+	default m
+	depends on LIRC_DEV
+
+config LIRC_GPIO
+	tristate "LIRC TV Card GPIO remote"
+	default n
+	depends on LIRC_DEV
