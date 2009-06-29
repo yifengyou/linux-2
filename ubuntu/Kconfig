@@ -10,5 +10,6 @@ source "ubuntu/iscsitarget/Kconfig"
 source "ubuntu/lenovo-sl-laptop/Kconfig"
 source "ubuntu/lirc/Kconfig"
 source "ubuntu/misc/Kconfig"
+source "ubuntu/ndiswrapper/Kconfig"
 
 endmenu
