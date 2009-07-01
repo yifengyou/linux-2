@@ -4,5 +4,6 @@ source "ubuntu/apparmor/Kconfig"
 
 source "ubuntu/aufs/Kconfig"
 source "ubuntu/compcache/Kconfig"
+source "ubuntu/dm-raid4-5/Kconfig"
 
 endmenu
