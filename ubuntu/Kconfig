@@ -2,4 +2,6 @@ menu "Ubuntu Supplied Third-Party Device Drivers"
 
 source "ubuntu/apparmor/Kconfig"
 
+source "ubuntu/aufs/Kconfig"
+
 endmenu
