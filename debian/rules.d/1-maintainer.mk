@@ -44,6 +44,11 @@ updateconfigs:
 	$(SHELL) $(DROOT)/scripts/misc/kernelconfig oldconfig
 	rm -rf build
 
+defaultconfigs:
+	dh_testdir;
+	yes "" | $(SHELL) $(DROOT)/scripts/misc/kernelconfig defaultconfig
+	rm -rf build
+
 editconfigs:
 	dh_testdir
 	$(SHELL) $(DROOT)/scripts/misc/kernelconfig editconfig

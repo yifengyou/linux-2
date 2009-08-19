@@ -14,6 +14,7 @@ fi
 mode=${1:?"Usage: $0 [oldconfig|editconfig]"}
 case "$mode" in
     oldconfig)  ;; # All is good
+    defaultconfig)  ;; # All is good
     editconfig) ;; # All is good
     genconfig)  ;; # All is good
     *) echo "$0 called with invalid mode" 1>&2
@@ -86,6 +87,10 @@ for arch in $archs; do
 				# Weed out incorrect config parameters
 				echo "* Run silentoldconfig on $arch/$config ..."
 				make O=`pwd`/build ARCH=$kernarch silentoldconfig ;;
+			    defaultconfig)
+				# Weed out incorrect config parameters
+				echo "* Run oldconfig on $arch/$config ..."
+				make O=`pwd`/build ARCH=$kernarch oldconfig ;;
 			    editconfig)
 				# Interactively edit config parameters
 				echo " * Run menuconfig on $arch/$config... Press a key."
