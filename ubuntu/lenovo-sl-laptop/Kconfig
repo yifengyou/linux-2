@@ -1,0 +1,5 @@
+config LENOVO_SL_LAPTOP
+	tristate "Lenovo SL Thinkpads support"
+	depends on X86
+	default m
+
