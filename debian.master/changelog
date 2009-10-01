@@ -1,0 +1,1125 @@
+linux (2.6.31-11.37) karmic; urgency=low
+
+  [ Tim Gardner ]
+
+  * [Config] Increase kernel log buffer to 256K for amd64 flavours
+    - LP: #424810
+  * [Config] Set HZ=100 for amd64 flavours
+    - LP: #438234
+  * [Upstream] e1000e: Emit notice instead of an error when
+    pci_enable_pcie_error_reporting() fails
+    - LP: #436370
+
+  [ Upstream Kernel Changes ]
+
+  * n_tty: honor opost flag for echoes
+  * n_tty: move echoctl check and clean up logic
+    - LP: #438310
+
+  * Revert "[Upstream] drm/i915: Check that the relocation points to within
+    the target" - Use upstream cherry-pick.
+  * drm/i915: Check that the relocation points to within the target
+    - LP: #429241
+
+  * drm/i915: fix tiling on IGDNG
+  * drm/i915: add B43 chipset support
+  * agp/intel: Add B43 chipset support
+    Intel request from kernel team mailing list.
+
+  * HID: completely remove apple mightymouse from blacklist
+    - LP: #428111
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Mon, 28 Sep 2009 11:47:29 -0600
+
+linux (2.6.31-11.36) karmic; urgency=low
+
+  [ Brian Rogers ]
+
+  * SAUCE: (drop after 2.6.31) em28xx: ir-kbd-i2c init data needs a
+    persistent object
+  * SAUCE: (drop after 2.6.31) saa7134: ir-kbd-i2c init data needs a
+    persistent object
+
+  [ Takashi Iwai ]
+
+  * [Upstream] ALSA: hda - Add another entry for Nvidia HDMI device
+    - LP: #416482
+
+  [ Tyler Hicks ]
+
+  * SAUCE: (drop after 2.6.31) eCryptfs: Prevent lower dentry from going
+    negative during unlink
+
+  [ Upstream Kernel Changes ]
+
+  * sg: fix oops in the error path in sg_build_indirect()
+  * mpt2sas : Rescan topology from Interrupt context instead of work thread
+  * mpt2sas: Prevent sending command to FW while Host Reset
+  * mpt2sas: setting SDEV into RUNNING state from Interrupt context
+  * mpt2sas: Raid 10 Volume is showing as Raid 1E in dmesg
+  * SCSI: fix oops during scsi scanning
+  * SCSI: libsrp: fix memory leak in srp_ring_free()
+  * cfg80211: fix looping soft lockup in find_ie()
+  * ath5k: write PCU registers on initial reset
+  * binfmt_elf: fix PT_INTERP bss handling
+  * TPM: Fixup boot probe timeout for tpm_tis driver
+  * md: Fix "strchr" [drivers/md/dm-log-userspace.ko] undefined!
+  * x86/amd-iommu: fix broken check in amd_iommu_flush_all_devices
+  * fix undefined reference to user_shm_unlock
+  * perf_counter: Fix buffer overflow in perf_copy_attr()
+  * perf_counter: Start counting time enabled when group leader gets
+    enabled
+  * powerpc/perf_counters: Reduce stack usage of power_check_constraints
+  * powerpc: Fix bug where perf_counters breaks oprofile
+  * powerpc/ps3: Workaround for flash memory I/O error
+  * block: don't assume device has a request list backing in nr_requests
+    store
+  * agp/intel: remove restore in resume
+  * ALSA: cs46xx - Fix minimum period size
+  * ASoC: Fix WM835x Out4 capture enumeration
+  * sound: oxygen: work around MCE when changing volume
+  * mlx4_core: Allocate and map sufficient ICM memory for EQ context
+  * perf stat: Change noise calculation to use stddev
+  * x86: Fix x86_model test in es7000_apic_is_cluster()
+  * x86/i386: Make sure stack-protector segment base is cache aligned
+  * PCI: apply nv_msi_ht_cap_quirk on resume too
+  * x86, pat: Fix cacheflush address in change_page_attr_set_clr()
+  * ARM: 5691/1: fix cache aliasing issues between kmap() and kmap_atomic()
+    with highmem
+  * KVM guest: do not batch pte updates from interrupt context
+  * KVM: Fix coalesced interrupt reporting in IOAPIC
+  * KVM: VMX: Check cpl before emulating debug register access
+  * KVM guest: fix bogus wallclock physical address calculation
+  * KVM: x86: Disallow hypercalls for guest callers in rings > 0
+  * KVM: VMX: Fix cr8 exiting control clobbering by EPT
+  * KVM: x86 emulator: Implement zero-extended immediate decoding
+  * KVM: MMU: make __kvm_mmu_free_some_pages handle empty list
+  * KVM: x86 emulator: fix jmp far decoding (opcode 0xea)
+  * KVM: limit lapic periodic timer frequency
+  * libata: fix off-by-one error in ata_tf_read_block()
+  * PCI quirk: update 82576 device ids in SR-IOV quirks list
+  * PCI: Unhide the SMBus on the Compaq Evo D510 USDT
+  * powerpc/pseries: Fix to handle slb resize across migration
+  * Linux 2.6.31.1
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Thu, 24 Sep 2009 13:04:28 -0600
+
+linux (2.6.31-10.35) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * Disable CONFIG_UEVENT_HELPER_PATH
+
+  [ Andy Whitcroft ]
+
+  * [Config] Enable CONFIG_USB_GADGET_DUMMY_HCD
+  * remove the tlsup driver
+  * remove lmpcm logitech driver support
+
+  [ Bryan Wu ]
+
+  * Add 3 missing files to prerm remove file list
+    - LP: #345623, #415832
+
+  [ Chris Wilson ]
+
+  * [Upstream] drm/i915: Check that the relocation points to within the
+    target
+    - LP: #429241
+
+  [ Luke Yelavich ]
+
+  * [Config] Set CONFIG_EXT4_FS=y on ports architectures
+
+  [ Manoj Iyer ]
+
+  * SAUCE: Added quirk to recognize GE0301 3G modem as an interface.
+    - LP: #348861
+
+  [ Tim Gardner ]
+
+  * Revert "[Upstream] ACPI: Add Thinkpad W500, W700, & W700ds to OSI(Linux) white-list"
+  * Revert "[Upstream] ACPI: Add Thinkpad R400 & Thinkpad R500 to OSI(Linux) white-list"
+  * Revert "[Upstream] ACPI: Add Thinkpad X300 & Thinkpad X301 to OSI(Linux) white-list"
+  * Revert "[Upstream] ACPI: Add Thinkpad X200, X200s, X200t to OSI(Linux) white-list"
+  * Revert "[Upstream] ACPI: Add Thinkpad T400 & Thinkpad T500 to OSI(Linux) white-list"
+    Upstream suggests that this is not the right approach.
+
+  * [Config] Set default I/O scheduler to DEADLINE
+    CFQ seems to have some load related problems which are often exacerbated by sreadahead.
+    - LP: #381300
+
+  [ ubuntu@tjworld.net ]
+
+  * SAUCE: ipw2200: Enable LED by default
+    - LP: #21367
+
+  [ Upstream Kernel Changes ]
+
+  * ALSA: hda - Add support for new AMD HD audio devices
+    - LP: #430564
+
+ -- Andy Whitcroft <apw@canonical.com>  Wed, 16 Sep 2009 15:37:49 +0100
+
+linux (2.6.31-10.34) karmic; urgency=low
+
+  [ Ted Tso ]
+
+  * [Upstream] ext3: Don't update superblock write time when filesystem is
+    read-only
+    - LP: #427822
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Tue, 15 Sep 2009 16:00:45 -0600
+
+linux (2.6.31-10.33) karmic; urgency=low
+
+  [ Leann Ogasawara ]
+
+  * [Upstream] dvb-usb: fix tuning with Cinergy T2
+    - LP: #421258
+
+  [ Tim Gardner ]
+
+  * [Config] Unconditionally copy files from sub-flavours lists.
+    (really, really fix it this time)
+    - LP: #423426
+  * [Config] Set CONFIG_CACHEFILES=m for all flavours
+
+  [ Upstream Kernel Changes ]
+
+  * ext4: Don't update superblock write time when filesystem is read-only
+    - LP: #427822
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Tue, 15 Sep 2009 07:50:21 -0600
+
+linux (2.6.31-10.32) karmic; urgency=low
+
+  [ Eric Miao ]
+
+  * [Config] enable module support for memory stick
+    - LP: #159951
+
+  [ Tim Gardner ]
+
+  * [Config] Unconditionally copy files from sub-flavours lists.
+    - LP: #423426
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Thu, 10 Sep 2009 15:57:55 -0600
+
+linux (2.6.31-10.31) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * rebase to v2.6.31 final
+
+  [ Colin Watson ]
+
+  * [Config] Recommend grub-pc in linux-image
+    - LP: #385741
+
+  [ Ike Panhc ]
+
+  * [Upstream] Pull latest update of lenovo-sl-laptop
+
+  [ Peter Feuerer ]
+
+  * [Upstream] (drop after 2.6.31) acerhdf: fix fan control for AOA150
+    model
+    - LP: #426691
+
+  [ Tim Gardner ]
+
+  * [Config] De-macro some package names.
+
+  [ Upstream Changes ]
+
+  * rebase to 2.6.31 final.
+
+ -- Andy Whitcroft <apw@canonical.com>  Thu, 10 Sep 2009 09:38:10 +0100
+
+linux (2.6.31-10.30) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * [Config] Enable CONFIG_USB_DEVICEFS
+    - LP: #417748
+  * [Config] Populate the config-update template a bit more
+
+  [ Andy Whitcroft ]
+
+  * rebase to v2.6.31-rc9
+  * [Config] update configs following rebase to v2.6.31-rc9
+  * [Config] update ports configs following rebase to v2.6.31-rc9
+
+  [ Colin Ian King ]
+
+  * SAUCE: wireless: hostap, fix oops due to early probing interrupt
+    - LP: #254837
+
+  [ Jerone Young ]
+
+  * [Upstream] ACPI: Add Thinkpad T400 & Thinkpad T500 to OSI(Linux)
+    white-list
+    - LP: #281732
+  * [Upstream] ACPI: Add Thinkpad X200, X200s, X200t to OSI(Linux)
+    white-list
+    - LP: #281732
+  * [Upstream] ACPI: Add Thinkpad X300 & Thinkpad X301 to OSI(Linux)
+    white-list
+    - LP: #281732
+  * [Upstream] ACPI: Add Thinkpad R400 & Thinkpad R500 to OSI(Linux)
+    white-list
+    - LP: #281732
+  * [Upstream] ACPI: Add Thinkpad W500, W700, & W700ds to OSI(Linux)
+    white-list
+    - LP: #281732
+
+  [ John Johansen ]
+
+  * SAUCE: AppArmor: Fix profile attachment for regexp based profile names
+    - LP: #419308
+  * SAUCE: AppArmor: Return the correct error codes on profile
+    addition/removal
+    - LP: #408473
+  * SAUCE: AppArmor: Fix OOPS in profile listing, and display full list
+    - LP: #408454
+  * SAUCE: AppArmor: Fix mapping of pux to new internal permission format
+    - LP: #419222
+  * SAUCE: AppArmor: Fix change_profile failure
+    - LP: #401931
+  * SAUCE: AppArmor: Tell git to ignore generated include files
+    - LP: #419505
+
+  [ Stefan Bader ]
+
+  * [Upstream] acpi: video: Loosen strictness of video bus detection code
+    - LP: #333386
+  * SAUCE: Remove ov511 driver from ubuntu subdirectory
+
+  [ Tim Gardner ]
+
+  * [Config] Exclude char-modules from non-x86 udeb creation
+  * SAUCE: Notify the ACPI call chain of AC events
+  * [Config] CONFIG_SATA_VIA=m
+    - LP: #403385
+  * [Config] Build in all phylib support modules.
+  * [Config] Don't fail when sub-flavour files are missing
+    - LP: #423426
+  * [Config] Set CONFIG_LSM_MMAP_MIN_ADDR=0
+    - LP: #423513
+
+  [ Upstream ]
+
+  * Rebased against v2.6.31-rc9
+
+ -- Andy Whitcroft <apw@canonical.com>  Mon, 07 Sep 2009 11:33:45 +0100
+
+linux (2.6.31-9.29) karmic; urgency=low
+
+  [ Leann Ogasawara ]
+
+  * [Upstream] agp/intel: support for new chip variant of IGDNG mobile
+    - LP: #419993
+  * [Config] d-i/modules: Add new char-modules file, initialize with
+    intel-agp
+    - LP: #420605
+
+  [ Upstream ]
+
+  * Rebased against 2.6.31-rc8 plus some inotify regression patches:
+    up through git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
+    adda766193ea1cf3137484a9521972d080d0b7af.
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Fri, 28 Aug 2009 06:31:30 -0600
+
+linux (2.6.31-8.28) karmic; urgency=low
+
+  [ Ike Panhc ]
+
+  * [Config] Let nic-shared-modules depends on crypto-modules
+    - LP: #360966
+
+  [ Leann Ogasawara ]
+
+  * [Upstream] (drop after 2.6.31) drm/i915: increase default latency
+    constant
+    - LP: #412492
+
+  [ Mario Limonciello ]
+
+  * [Upstream]: (drop after 2.6.31) dell-laptop: don't change softblock
+    status if HW switch is disabled
+    - LP: #418721
+  * [Upstream]: (drop after 2.6.31) compal-laptop: Add support for known
+    Compal made Dell laptops
+  * [Upstream]: (drop after 2.6.31) compal-laptop: Replace sysfs support
+    with rfkill support
+
+  [ Tim Gardner ]
+
+  * [Config] Add acpiphp to virtual sub-flavour
+    - LP: #364916
+  * Drop KSM patch set for now because of instabilities with encrypted swap.
+    - LP: #418781
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Wed, 26 Aug 2009 08:14:26 -0600
+
+linux (2.6.31-7.27) karmic; urgency=low
+
+  [ Tim Gardner ]
+
+  * [Config] updateconfigs updateportsconfigs after 2.6.31-rc7 rebase
+  * SAUCE: (drop after 2.6.31) Added KSM from mmotm-2009-08-20-19-18
+    Replaces previous ksm patches from 2.6.31-6.25
+  * [Config] KSM=y
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Sat, 22 Aug 2009 20:32:11 -0600
+
+linux (2.6.31-6.26) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * [Config] enable CONFIG_AUFS_BR_RAMFS
+    - LP: #414738
+  * split out debian directory ready for abstraction
+  * add printdebian target to find branch target
+  * abstracted debian -- debian/files is not abstracted
+  * abstracted debian -- packages must be built in debian/<pkg>
+  * abstracted debian -- kernel-wedge needs to work in debian/
+  * abstracted debian -- ensure we install the copyright file
+  * abstracted-debian -- drop the debian directories from headers
+  * abstracted-debian -- drop the debian directories from headers part 2
+  * SAUCE: ubuntu-insert-changes -- follow abstracted debian
+  * [Upstream] aoe: ensure we initialise the request_queue correctly V2
+    - LP: #410198
+
+  [ Luke Yelavich ]
+
+  * [Config] Ports: Disable CONFIG_CPU_FREQ_DEBUG on powerpc-smp
+  * [Config] Ports: Re-enable windfarm modules on powerpc64-smp
+    - LP: #413150
+  * [Config] Ports: Build all cpu frequency scaling governors into ports
+    kernels
+  * [Config] Ports: Build ext2 and ext3 modules into ports kernels
+  * [Config] Ports: CONFIG_PACKET=y for all ports kernels
+  * [Config] Ports: Enable PS3 network driver
+
+  [ Stefan Bader ]
+
+  * abstracted debian -- call $(DEBIAN)/rules using make
+
+  [ Tim Gardner ]
+
+  * [Config] Abstract the debian directory
+  * SAUCE: Improve error reporting in postinst
+    - LP: #358564
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Sun, 16 Aug 2009 20:33:28 -0600
+
+linux (2.6.31-6.25) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * script to generate Ubuntu changes from changelog
+  * [Config] standardise ANDROID options
+  * [Config] standardise CONFIG_ATM as module
+  * [Config] standardise CONFIG_LIB80211 as module
+  * [Config] disable CONFIG_PRINT_QUOTA_WARNING
+  * [Config] set CONFIG_CRAMFS as module
+  * [Config] enable CONFIG_DAB and modules
+  * [Config] set CONFIG_MAC80211_HWSIM as module
+  * [Config] set CONFIG_NET_CLS_FLOW as module
+  * [Config] set CONFIG_NF_CONNTRACK_SANE as module
+  * [Config] set CONFIG_NF_CT_PROTO_DCCP as module
+  * [Config] set CONFIG_RTC_DRV_DS1511 as module
+  * [Config] set CONFIG_RTC_DRV_R9701 as module
+  * [Config] set CONFIG_RTC_DRV_S35390A as module
+  * [Config] set CONFIG_TOIM3232_DONGLE as module
+  * [Config] standardise CONFIG_USB_MIDI_GADGET as module
+  * [Config] standardise CONFIG_USB_G_PRINTER as module
+  * [Config] standardise CONFIG_USB_SERIAL_IR as module
+  * [Config] set CONFIG_USB_SERIAL_IUU as module
+  * [Config] standardise CONFIG_USB_STORAGE_CYPRESS_ATACB as module
+  * [Config] standardise CONFIG_USB_STORAGE_ONETOUCH as module
+  * cleanup remains of dm-loop
+  * drop thinkpad ec and smapi support
+  * drop appleir
+  * [Config] update configs following rebase to v2.6.31-rc6
+
+  [ Hugh Dickins ]
+
+  * SAUCE: ksm patch 1, drop after 2.6.31
+  * SAUCE: ksm patch 2, drop after 2.6.31
+  * SAUCE: ksm patch 3, drop after 2.6.31
+  * SAUCE: ksm patch 4, drop after 2.6.31
+  * SAUCE: ksm patch 5, drop after 2.6.31
+  * SAUCE: ksm patch 7, drop after 2.6.31
+
+  [ Izik Eidus ]
+
+  * SAUCE: ksm patch 0, drop after 2.6.31
+  * SAUCE: ksm patch 6, drop after 2.6.31
+  * SAUCE: ksm patch 8, drop after 2.6.31
+  * SAUCE: ksm patch 9, drop after 2.6.31
+
+  [ Luke Yelavich ]
+
+  * [Config] Ports: Re-add PS3 modules to udebs
+
+  [ Michael Casadevall ]
+
+  * [Config] Update SPARC config and d-i files to reflect what can be built
+
+  [ Tim Gardner ]
+
+  * [Config] Removed armel package support
+  * [Config] Enabled CONFIG_KSM=y
+
+  [ Upstream Kernel Changes ]
+
+  * ARM: Cleanup: Revert "ARM: Add more cache memory types macros"
+  * ARM: Cleanup: Revert "Do not use OOB with MLC NAND"
+  * ARM: Cleanup: Revert "ARM: Make ARM arch aware of ubuntu/ drivers"
+  * ARM: Cleanup: Revert "ARM: IMX51: Make video capture drivers compile"
+  * ARM: Cleanup: Revert "ARM: IMX51: Fix isl29003 HWMON driver for i2c
+    changes"
+  * ARM: Cleanup: Revert "ARM: IMX51: IPU irq handler deadlock fix"
+  * ARM: Cleanup: Revert "ARM: IMX51: Babbage 2.5 needs a different system
+    revision"
+  * ARM: Cleanup: Revert "ARM: IMX51: Compile-in the IMX51 cpufreq driver
+    by default"
+  * ARM: Cleanup: Revert "ARM: IMX51: Enable ZONE_DMA for ARCH_MXC"
+  * ARM: Cleanup: Revert "ARM: IMX51: Make ARCH_MXC auto-enable
+    ARCH_MXC_CANONICAL"
+  * ARM: Cleanup: Revert "ARM: IMX51: Unconditionally disable
+    CONFIG_GPIOLIB"
+  * ARM: Cleanup: Revert "ARM: IMX51: Minimal changes for USB to work on
+    2.6.31"
+  * ARM: Cleanup: Revert "ARM: IMX51: Fix plat-mxc/timer.c to handle imx51"
+  * ARM: Cleanup: Revert "ARM: IMX51: Make it compile."
+  * ARM: Cleanup: Revert "ARM: IMX51: Clean-up the craziness of including
+    mxc_uart.h _everywhere_"
+  * ARM: Cleanup: Revert "ARM: IMX51: Move board-mx51* header files to the
+    correct location"
+  * ARM: Cleanup: Revert "ARM: IMX51: Changed from snd_card_new to
+    snd_card_create"
+  * ARM: Cleanup: Revert "ARM: IMX51: Fix up merge error in Kconfig"
+  * ARM: Cleanup: Revert "ARM: IMX51: mxc_timer_init prototype"
+  * ARM: Cleanup: Revert "ARM: IMX51: Removed the mxc_gpio_port structure."
+  * ARM: Cleanup: Revert "ARM: IMX51: Added external declaration for
+    mxc_map_io."
+  * ARM: Cleanup: Revert "ARM: IMX51: Get to bus_id by calling dev_name."
+  * ARM: Cleanup: Revert "ARM: IMX51: Get to bus_id by calling dev_name."
+  * ARM: Cleanup: Revert "ARM: IMX51: snd_soc_machine structure replaced
+    with snd_soc_card."
+  * ARM: Cleanup: Revert "ARM: IMX51: codec structure was moved to the card
+    structure"
+  * ARM: Cleanup: Revert "ARM: IMX51: Hack to add defines for
+    DMA_MODE_READ/WRITE/MASK"
+  * ARM: Cleanup: Revert "ARM: IMX51: Add SoC and board support for
+    Freescale mx51 platform"
+  * Driver core: add new device to bus's list before probing
+  * [Upstream] (drop after 2.6.31) ALSA: hda - Reduce click noise at
+    power-saving
+    - LP: #381693, #399750, #380892
+
+ -- Andy Whitcroft <apw@canonical.com>  Fri, 14 Aug 2009 11:32:23 +0100
+
+linux (2.6.31-5.24) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * ARM: IMX51: Make video capture drivers compile
+  * [Config] IMX51: Config updates
+
+  [ Andy Whitcroft ]
+
+  * remove leftovers of dm-bbr
+
+  [ Leann Ogasawara ]
+
+  * Add pata_cs5535 to pata-modules
+    - LP: #318805
+
+  [ Luke Yelavich ]
+
+  * [Config] CONFIG_PPC64=y for powerpc64-smp
+  * [Config] Set the maximum number of CPUs to 1024 for powerpc64-smp
+  * [Config] CONFIG_PPC_PS3=y for powerpc64-smp
+  * [Config] CONFIG_PPC_MAPLE=y on powerpc64-smp
+  * [Config] CONFIG_PPC_PASEMI=y on powerpc64-smp
+  * [Config] CONFIG_CPU_FREQ_PMAC64=y on powerpc64-smp
+  * [Config] Enable all PS3 drivers in powerpc64-smp
+
+  [ Mario Limonciello ]
+
+  * LIRC -- fix lirc-i2c 2.6.31 compilation
+
+  [ Matthew Garrett ]
+
+  * [Upstream] dell-laptop: Fix rfkill state queries
+
+  [ Tim Gardner ]
+
+  * [Config] Ignore armel ABI and module changes
+  * [Config] Update configs after rebase against 2.6.31-rc5
+
+  [ Upstream ]
+
+  * Rebased to 2.6.31-rc5
+
+ -- Andy Whitcroft <apw@canonical.com>  Tue, 28 Jul 2009 10:10:09 +0100
+
+linux (2.6.31-4.23) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * AUFS -- update to aufs2-30 20090727
+  * [Config] enable AUFS FUSE support
+
+  [ Luke Yelavich ]
+
+  * [Config] CONFIG_JFS_FS=m on sparc
+
+  [ Tim Gardner ]
+
+  * [Upstream] dell-laptop: Fix rfkill state setting.
+
+ -- Andy Whitcroft <apw@canonical.com>  Mon, 27 Jul 2009 11:11:47 +0100
+
+linux (2.6.31-4.22) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * ARM: IMX51: Add SoC and board support for Freescale mx51 platform
+  * ARM: IMX51: Move board-mx51* header files to the correct location
+  * ARM: IMX51: Clean-up the craziness of including mxc_uart.h _everywhere_
+  * ARM: IMX51: Make it compile.
+  * ARM: IMX51: Unconditionally disable CONFIG_GPIOLIB
+  * ARM: IMX51: Make ARCH_MXC auto-enable ARCH_MXC_CANONICAL
+  * ARM: IMX51: Enable ZONE_DMA for ARCH_MXC
+  * ARM: IMX51: Compile-in the IMX51 cpufreq driver by default
+  * ARM: IMX51: Fix isl29003 HWMON driver for i2c changes
+  * ARM: USB: musb: Refer to musb_otg_timer_func under correct #ifdef
+  * ARM: staging: udlfb: Add vmalloc.h include
+  * UBUNTU [Config]: Bring imx51 config upto date with other flavours
+
+  [ Brad Figg ]
+
+  * ARM: IMX51: Hack to add defines for DMA_MODE_READ/WRITE/MASK
+  * ARM: IMX51: codec structure was moved to the card structure
+  * ARM: IMX51: snd_soc_machine structure replaced with snd_soc_card.
+  * ARM: IMX51: Get to bus_id by calling dev_name.
+  * ARM: IMX51: Get to bus_id by calling dev_name.
+  * ARM: IMX51: Added external declaration for mxc_map_io.
+  * ARM: IMX51: Removed the mxc_gpio_port structure.
+  * ARM: IMX51: mxc_timer_init prototype
+  * ARM: IMX51: Fix up merge error in Kconfig
+  * ARM: IMX51: Changed from snd_card_new to snd_card_create
+
+  [ Dinh Nguyen ]
+
+  * ARM: IMX51: Fix plat-mxc/timer.c to handle imx51
+  * ARM: IMX51: Minimal changes for USB to work on 2.6.31
+  * ARM: IMX51: Babbage 2.5 needs a different system revision
+  * ARM: IMX51: IPU irq handler deadlock fix
+
+  [ Tim Gardner ]
+
+  * [Config] Enabled CONFIG_CAN=m
+    - LP: #327243
+  * [Config] Enabled CONFIG_SERIAL=m
+    - LP: #397189
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Fri, 24 Jul 2009 06:19:10 -0600
+
+linux (2.6.31-4.21) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * dm-raid-4-5: Add missing brackets around test_bit()
+
+  [ John Johansen ]
+
+  * AppArmor: Fix change_profile failing lpn401931
+  * AppArmor: Fix determination of forced AUDIT messages.
+  * AppArmor: Fix oops in auditing of the policy interface offset
+
+ -- Andy Whitcroft <apw@canonical.com>  Thu, 23 Jul 2009 19:18:30 +0100
+
+linux (2.6.31-4.20) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * SAUCE: iscsitarget -- update to SVN revision r214
+  * SAUCE: iscsitarget -- renable driver
+  * [Config] consolidate lpia/lpia and i386/generic configs
+  * [Config] enable CRYPTO modules for all architectures
+  * [Config] enable cryptoloop
+  * [Config] enable various filesystems for armel
+  * [Config] sync i386 generic and generic-pae
+  * [Config] add the 386 (486 processors and above) flavour
+  * [Config] re-set DEFAULT_MMAP_MIN_ADDR
+    - LP: #399914
+  * add genconfigs/genportsconfigs to extract the built configs
+  * updateconfigs -- alter concatenation order allow easier updates
+  * intelfb -- INTELFB now conflicts with DRM_I915
+  * printchanges -- rebase tree does not have stable tags use changelog
+  * AppArmor: fix argument size missmatch on 64 bit builds
+
+  [ Ike Panhc ]
+
+  * Ship bnx2x firmware in nic-modules udeb
+    - LP: #360966
+
+  [ Jeff Mahoney ]
+
+  * AppArmor: fix build failure on ia64
+
+  [ John Johansen ]
+
+  * AppArmour: ensure apparmor enabled parmater is off if AppArmor fails to
+    initialize.
+  * AppArmour: fix auditing of domain transitions to include target profile
+    information
+  * AppArmor: fix C99 violation
+  * AppArmor: revert reporting of create to write permission.
+  * SAUCE: Add config option to set a default LSM
+  * [Config] enable AppArmor by default
+  * AppArmor: Fix NULL pointer dereference oops in profile attachment.
+
+  [ Keith Packard ]
+
+  * SAUCE: drm/i915: Allow frame buffers up to 4096x4096 on 915/945 class
+    hardware
+    - LP: #351756
+
+  [ Luke Yelavich ]
+
+  * [Config] add .o files found in arch/powerpc/lib to all powerpc kernel
+    header packages
+    - LP: #355344
+
+  [ Michael Casadevall ]
+
+  * [Config] update SPARC config files to allow success build
+
+  [ Scott James Remnant ]
+
+  * SAUCE: trace: add trace_event for the open() syscall
+
+  [ Stefan Bader ]
+
+  * SAUCE: jfs: Fix early release of acl in jfs_get_acl
+    - LP: #396780
+
+  [ Tim Gardner ]
+
+  * [Upstream] Fix Soltech TA12 volume hotkeys not sending key release
+    - LP: #397499
+  * [Upstream] USB Option driver - Add USB ID for Novatel MC727/U727/USB727
+    refresh
+    - LP: #365291
+  * [Config] SSB/B44 are common across all arches/flavours.
+
+  [ Upstream ]
+
+  * Rebased to 2.6.31-rc4
+
+ -- Andy Whitcroft <apw@canonical.com>  Thu, 23 Jul 2009 08:41:39 +0100
+
+linux (2.6.31-3.19) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * Revert "[Config] Disabled NDISWRAPPER"
+  * ndiswrapper -- fix i386 compilation failures on cmpxchg8b
+  * AUFS -- export various core functions
+  * AUFS -- export various core functions -- fixes
+  * AUFS -- core filesystem
+  * AUFS -- track changes in v2.6.31
+  * [Config] Enable AUFS
+  * droppped 'iwl3945: do not send scan command if channel count zero' as it
+    is already upstream but failed to auto-drop on rebase.
+
+  [ Eric Paris ]
+
+  * SAUCE: fsnotify: use def_bool in kconfig instead of letting the user
+    choose
+  * SAUCE: inotify: check filename before dropping repeat events
+  * SAUCE: fsnotify: fix inotify tail drop check with path entries
+
+ -- Andy Whitcroft <apw@canonical.com>  Tue, 14 Jul 2009 12:52:55 +0100
+
+linux (2.6.31-3.18) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * Revert "Add splice-2.6.23.patch from AUFS to export a symbol needed by
+    AUFS"
+  * Revert "Add put_filp.patch from AUFS to export a symbol needed by AUFS"
+  * Revert "Add sec_perm-2.6.24.patch from AUFS - export
+    security_inode_permission"
+  * clear out left over AUFS files and modifications
+
+  [ Luke Yelavich ]
+
+  * [Config] Enable CONFIG_USB_ISP116X_HCD on sparc
+  * SAUCE: Explicitly include header files to allow apparmor to build on
+    powerpc
+  * [Config] Enable CONFIG_BLK_DEV_IDECD on powerpc
+
+  [ Tim Gardner ]
+
+  * [Config] Dropped ubuntu/misc/wireless/acx
+  * [Config] Disabled NDISWRAPPER until the compile issues are fixed.
+
+  [ Upstream ]
+
+  * Rebased to 2.6.31-rc3
+
+ -- Andy Whitcroft <apw@canonical.com>  Fri, 10 Jul 2009 18:59:33 +0100
+
+linux (2.6.31-2.17) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * [Config] CONFIG_BLK_DEV_CRYPTOLOOP=m for sparc
+  * compcache -- remove redundant Kconfig entries part 2
+  * compcache -- clean up CCFLAGS declarations
+  * [Config] enable AppArmor
+  * AppArmor: fix operator precidence issue in as_path_link
+
+  [ John Johansen ]
+
+  * AppArmor security module
+  * AppArmor: Correct mapping of file permissions.
+  * AppArmor: Turn auditing of ptrace on
+
+  [ Luke Yelavich ]
+
+  * [Config] disable CONFIG_DM_RAID45 on powerpc
+
+ -- Andy Whitcroft <apw@canonical.com>  Fri, 10 Jul 2009 15:02:05 +0100
+
+linux (2.6.31-2.16) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * compcache -- remove redundant Kconfig entries
+    added ignore and ignore.modules for all arches since the compcache update
+    changes the modules names as well as some compcache ABI values.
+
+  [ Manoj Iyer ]
+
+  * SAUCE: updated dm-raid45 module version to 2009.04.24 (2.6.30-rc3)
+  * SAUCE: update compcache version to 0.5.3
+
+  [ Tim Gardner ]
+
+  * [Config]: Fix sparc FTBS by adding ignore.modules
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Mon, 06 Jul 2009 13:35:29 -0600
+
+linux (2.6.31-2.15) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * SAUCE: default ATI Radeon KMS to off until userspace catches up
+  * [Config] Update configs following rebase to 2.6.31-rc2
+  * [Config] update ports configs following update to 2.6.31-rc2
+
+  [ Luke Yelavich ]
+
+  * [Config] powerpc - Disable CONFIG_RDS
+
+  [ Matt Zimmerman ]
+
+  * Rename linux-doc-PKGVER to linux-doc and clean up its description
+    - LP: #382115
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to mainline 2.6.31-rc2
+
+ -- Andy Whitcroft <apw@canonical.com>  Sat, 04 Jul 2009 17:39:13 +0100
+
+linux (2.6.31-1.14) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * update ndiswrapper to 1.55
+  * remove leftovers of gfs
+  * [Config] powerpc: enable CONFIG_PPC_DISABLE_WERROR
+
+  [ Luke Yelavich ]
+
+  * [Config] re-enable and build the ide-pmac driver into powerpc kernels
+  * [Config] Build the ServerWorks Frodo / Apple K2 SATA driver into the
+    kernel
+
+  [ Manoj Iyer ]
+
+  * Remove snd-bt-sco ubuntu driver
+
+  [ Michael Casadevall ]
+
+  * [Config] updates ia64 config and d-i folders to allow succesful build
+  * [Config] Update powerpc and sparc for 2.6.31
+
+  [ Upstream Kernel Changes ]
+
+  * intel-iommu: fix Identity Mapping to be arch independent
+    - LP: #384695
+  * ACPI: video: prevent NULL deref in acpi_get_pci_dev()
+
+ -- Andy Whitcroft <apw@canonical.com>  Tue, 30 Jun 2009 17:47:32 +0100
+
+linux (2.6.31-1.13) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * REBASE: rebased to mainline 2.6.31-rc1
+    - "UBUNTU: SAUCE: UHCI USB quirk for resume"
+      no longer applies, using deprecated interfaces, LPIA only, dropped
+    - "UBUNTU: SAUCE: Mask off garbage in Dell WMI scan code data"
+      changes now upstream, dropped
+  * [Config] Update configs following rebase to 2.6.31-rc1
+  * [Config] update ports configs following update to 2.6.31-rc1
+
+  * [Config] disable broken staging driver CONFIG_STLC45XX
+  * SAUCE: fix compcache to use updates accessors
+  * [Config] disable staging driver CONFIG_VT6655
+  * SAUCE: fix DRDB to use updates accessors
+  * [Disable] ndiswrapper needs update
+  * [Disable] LIRC I2C needs update
+  * [Disable] CONFIG_LENOVO_SL_LAPTOP needs update
+  * [Config] disable I2C_DESIGNWARE does not compile
+  * [Config] disable CONFIG_TLSUP for lpia
+  * [Config] disable CONFIG_FB_UDL for arm
+  * SAUCE: disable adding scsi headers to linux-libc-dev
+
+  [ Mario Limonciello ]
+
+  * SAUCE: Add LIRC drivers
+
+ -- Andy Whitcroft <apw@canonical.com>  Thu, 25 Jun 2009 12:06:22 +0100
+
+linux (2.6.30-10.12) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * [Config] split out the ports configs into their own family
+  * [Config] update configs following introduction of ports family
+
+  [ Upstream Kernel Changes ]
+
+  * Revert "Rename linux-doc-PKGVER to linux-doc and clean up its
+    description". Fixes linux-doc package name conflicts for now.
+    - LP: #382115
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Mon, 22 Jun 2009 09:17:14 -0600
+
+linux (2.6.30-10.11) karmic; urgency=low
+
+  [ Amit Kucheria ]
+
+  * [Config] Comment splitconfig.pl and misc cleanup
+  * [Config] Rename all configs to the new naming scheme
+  * [Config] Splitconfig rework
+  * [Config] Rename scripts/misc/oldconfig to kernelconfig
+  * [Config] Fix build system for new config split
+  * [Config] Run updateconfigs after the splitconfig rework
+
+  [ Andy Whitcroft ]
+
+  * Revert "SAUCE: Default to i915.modeset=0 if CONFIG_DRM_I915_KMS=y"
+  * [Config] standardise CONFIG_STAGING=y
+  * [Config] standardise CONFIG_RD_LZMA=y
+  * [Config] CONFIG_PCI_IOV=y
+  * [Config] CONFIG_PCI_STUB=m
+  * [Config] merge kernel configs more agressively
+
+  [ Colin Watson ]
+
+  * [Config] Run kernel-wedge in $(builddir) rather than at the top level
+  * [Config] Add support for including firmware in udebs
+  * [Config] Ship bnx2 firmware in nic-modules udeb
+    - LP: #384861
+
+  [ Luke Yelavich ]
+
+  * [Config] ports - Import of ports architectures into kernel packaging
+    infrastructure
+  * [Config] ports - Do not update ports kernel configurations by default
+  * [Config] ports - Disable ABI checking for ports architectures
+  * [Config] ports - Build drivers in ubuntu sub-directory on powerpc
+  * [Config] ports - Add control.d/vars.* files for ports architectures
+  * [Config] ports - Add ports architectures for linux-libc-dev
+  * [Config] ports - Create powerpc specific message-modules and
+    block-modules udebs
+  * [Config] ports - Add configuration files for ports architectures
+
+  [ Manoj Iyer ]
+
+  * [Config] Enable CONFIG_BLK_DEV_AEC62XX=m for amd64 and i386
+    - LP: #329864
+
+  [ Michael Casadevall ]
+
+  * [Config] ports - Fix compression of kernels
+
+  [ Stefan Bader ]
+
+  * [Upstream] mmc: prevent dangling block device from accessing stale
+    queues
+    - LP: #383668
+
+  [ Tim Gardner ]
+
+  * [Config] Recommend grub-pc in linux-image
+    - LP: #385741
+  * [Config] Implement i386 generic and generic-pae flavours
+  * [Config] ports - Add control info after integrating ports arches
+  * [Config] Removed auto-generated files from git
+  * [Config] Added netxen_nic to nic-modules
+    - LP: #389603
+
+  [ Matt Zimmerman ]
+
+  * Rename linux-doc-PKGVER to linux-doc and clean up its description
+    - LP: #382115
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Mon, 15 Jun 2009 14:38:26 -0600
+
+linux (2.6.30-9.10) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * [Config] CONFIG_SECURITY_TOMOYO=y (amd64, i386, lpia)
+  * [Config] CONFIG_KEXEC_JUMP=y (amd64, lpia)
+  * [Config] CONFIG_LENOVO_SL_LAPTOP=m (amd64, lpia)
+  * [Config] CONFIG_POHMELFS_CRYPTO=y (i386, amd64)
+  * [Config] CONFIG_SERIAL_MAX3100=m (i386, amd64, lpia)
+  * [Config] CONFIG_VIDEO_GO7007=m (amd64, i386)
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30 final
+
+ -- Andy Whitcroft <apw@canonical.com>  Fri, 05 Jun 2009 11:42:53 +0100
+
+linux (2.6.30-8.9) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * Config update removed the following options:
+        CONFIG_EDAC_AMD8111=m
+        CONFIG_EDAC_AMD8131=m
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30-rc8
+
+ -- Andy Whitcroft <apw@canonical.com>  Wed, 03 Jun 2009 09:21:13 +0100
+
+linux (2.6.30-7.8) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * Enabled NEW configration options:
+      Paravirtualization layer for spinlocks (PARAVIRT_SPINLOCKS) [N/y/?] Y
+      Cisco FNIC Driver (FCOE_FNIC) [N/m/y/?] M
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30-rc7
+
+ -- Andy Whitcroft <apw@canonical.com>  Sat, 23 May 2009 23:47:24 +0100
+
+linux (2.6.30-6.7) karmic; urgency=low
+
+  [ Andy Whitcroft ]
+
+  * Dropped: UBUNTU: SAUCE: input: Blacklist digitizers from joydev.c (now
+    upstream)
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30-rc6
+
+ -- Andy Whitcroft <apw@canonical.com>  Mon, 18 May 2009 18:05:54 +0100
+
+linux (2.6.30-5.6) karmic; urgency=low
+
+  [ Tim Gardner ]
+
+  * [Config] Enable Keyspan USB serial device firmware in kernel module
+    - LP: #334285
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30-rc5
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Mon, 11 May 2009 12:02:16 -0600
+
+linux (2.6.30-4.5) karmic; urgency=low
+
+  [ Colin Watson ]
+
+  * Build-Conflict with findutils (= 4.4.1-1ubuntu1), to avoid
+    /usr/include/asm/* going missing
+    - LP: #373214
+
+ -- Stefan Bader <stefan.bader@canonical.com>  Fri, 08 May 2009 11:09:08 +0200
+
+linux (2.6.30-3.4) karmic; urgency=low
+
+  [ Kees Cook ]
+
+  * SAUCE: [x86] implement cs-limit nx-emulation for ia32
+    - LP: #369978
+
+  [ Stefan Bader ]
+
+  * SAUCE: input: Blacklist digitizers from joydev.c
+    - LP: #300143
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Fri, 01 May 2009 14:00:42 -0600
+
+linux (2.6.30-2.3) karmic; urgency=low
+
+  [ Tim Gardner ]
+
+  * [Config] Enabled CC_STACKPROTECTOR=y for all x86en
+    - LP: #369152
+  * SAUCE: Default to i915_modeset=0 if CONFIG_DRM_I915_KMS=y
+  * [Config] CONFIG_DRM_I915_KMS=y
+  * [Config] Set CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR to appropriate ARCH
+    minimums
+
+  [ Upstream Kernel Changes ]
+
+  * rebased to 2.6.30-rc4
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Thu, 30 Apr 2009 09:17:05 -0600
+
+linux (2.6.30-1.2) karmic; urgency=low
+
+  [ Tim Gardner ]
+
+  * [Config] armel: disable staging drivers, fixes FTBS
+  * [Config] armel imx51: Disable CONFIG_MTD_NAND_MXC, fixes FTBS
+
+  [ Upstream Kernel Changes ]
+
+  * mpt2sas: Change reset_type enum to avoid namespace collision.
+    Submitted upstream.
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Tue, 28 Apr 2009 16:54:41 -0600
+
+linux (2.6.30-1.1) karmic; urgency=low
+
+  * Initial release after rebasing against v2.6.30-rc3
+
+ --  Tim Gardner <tim.gardner@canonical.com>  Thu, 12 Mar 2009 19:16:07 -0600

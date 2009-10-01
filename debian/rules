@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+#
+# $(DEBIAN)/rules for Ubuntu linux
+#
+# Use this however you want, just give credit where credit is due.
+#
+# Copyright (c) 2007 Ben Collins <bcollins@ubuntu.com>
+#
+
+ifeq ($(DEBIAN),)
+DEBIAN=debian.master
+endif
+
+DENV=debian/debian.env
+
+printdebian:
+	@echo "$(DEBIAN)"
+
+# Debian Build System targets
+%:
+	@if [ ! -f $(DENV) ] ; then echo DEBIAN=$(DEBIAN) > $(DENV); chmod +x $(DENV); fi
+	@$(MAKE) --no-print-directory -f $(DEBIAN)/rules $@ DEBIAN=$(DEBIAN)

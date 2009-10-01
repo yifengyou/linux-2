@@ -1,0 +1,8 @@
+arch="lpia"
+supported="Intel Atom"
+desc="Intel Atom processors"
+target="Geared toward LPIA-based mobile devices"
+bootloader="grub-pc | grub | lilo (>= 19.1)"
+provides="kvm-api-4, redhat-cluster-modules"
+section_image="universe/base"
+do_debug="Yes"

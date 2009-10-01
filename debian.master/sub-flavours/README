@@ -1,0 +1,12 @@
+Sub flavours are flavours that are built based on other builds. IOW, they
+are usually a subset of something else.
+
+Requirements:
+
+debian/sub-flavours/<sub>.list	: The file list, uses glob syntax
+debian/sub-flavours/<sub>.vars	: The make vars, similar to normal flavours
+debian/rules.d/<arch>.mk	: Add <base>_sub var listing the <sub>, e.g.
+				  server_sub = virtual would mean virtual is
+				  based on the server flavour.
+
+Note, the vars must include a conflicts with the flavour it was built on.
