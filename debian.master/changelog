@@ -404,6 +404,10 @@ linux (2.6.31-7.27) karmic; urgency=low
     Replaces previous ksm patches from 2.6.31-6.25
   * [Config] KSM=y
 
+  [ Upstream ]
+
+  * Rebased against v2.6.31-rc7
+
  --  Tim Gardner <tim.gardner@canonical.com>  Sat, 22 Aug 2009 20:32:11 -0600
 
 linux (2.6.31-6.26) karmic; urgency=low
@@ -476,6 +480,7 @@ linux (2.6.31-6.25) karmic; urgency=low
   * drop thinkpad ec and smapi support
   * drop appleir
   * [Config] update configs following rebase to v2.6.31-rc6
+  * rebase to v2.6.31-rc6
 
   [ Hugh Dickins ]
 
@@ -508,6 +513,7 @@ linux (2.6.31-6.25) karmic; urgency=low
 
   [ Upstream Kernel Changes ]
 
+  * Rebased against v2.6.31-rc6
   * ARM: Cleanup: Revert "ARM: Add more cache memory types macros"
   * ARM: Cleanup: Revert "Do not use OOB with MLC NAND"
   * ARM: Cleanup: Revert "ARM: Make ARM arch aware of ubuntu/ drivers"
