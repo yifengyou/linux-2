@@ -3,7 +3,7 @@ Section: devel
 Priority: optional
 Maintainer: Ubuntu Kernel Team <kernel-team@lists.ubuntu.com>
 Standards-Version: 3.6.1
-Build-Depends: debhelper (>= 3), module-init-tools, kernel-wedge (>= 2.24ubuntu1), makedumpfile [amd64 i386 lpia], device-tree-compiler [powerpc]
+Build-Depends: debhelper (>= 3), cpio, module-init-tools, kernel-wedge (>= 2.24ubuntu1), makedumpfile [amd64 i386 lpia], device-tree-compiler [powerpc]
 Build-Depends-Indep: xmlto, docbook-utils, gs, transfig, bzip2, sharutils
 Build-Conflicts: findutils (= 4.4.1-1ubuntu1)
 Vcs-Git: http://kernel.ubuntu.com/git-repos/ubuntu/ubuntu-karmic.git
