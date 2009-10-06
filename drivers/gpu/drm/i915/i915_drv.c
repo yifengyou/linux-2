@@ -396,6 +396,7 @@ static void __exit i915_exit(void)
 module_init(i915_init);
 module_exit(i915_exit);
 
+MODULE_IMPORT(intel_agp);
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE("GPL and additional rights");
