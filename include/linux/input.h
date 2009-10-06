@@ -1118,6 +1118,7 @@ struct input_dev {
 	int (*event)(struct input_dev *dev, unsigned int type, unsigned int code, int value);
 
 	struct input_handle *grab;
+	struct input_handle *filter;
 
 	spinlock_t event_lock;
 	struct mutex mutex;
@@ -1218,6 +1219,7 @@ struct input_handler {
 	void *private;
 
 	void (*event)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
+	bool (*filter)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
 	int (*connect)(struct input_handler *handler, struct input_dev *dev, const struct input_device_id *id);
 	void (*disconnect)(struct input_handle *handle);
 	void (*start)(struct input_handle *handle);
@@ -1294,6 +1296,9 @@ void input_unregister_handle(struct input_handle *);
 
 int input_grab_device(struct input_handle *);
 void input_release_device(struct input_handle *);
+
+int input_filter_device(struct input_handle *);
+void input_unfilter_device(struct input_handle *);
 
 int input_open_device(struct input_handle *);
 void input_close_device(struct input_handle *);
