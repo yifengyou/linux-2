@@ -729,7 +729,8 @@ static inline void module_bug_cleanup(struct module *mod) {}
  * and modprobe do the heavy lifting of loading the modules in the
  * correct dependency order.
  */
-#define MODULE_EXPORT(mod_name) int mod_name; EXPORT_SYMBOL(mod_name);
-#define MODULE_IMPORT(mod_name) extern int mod_name;
+#define MODULE_EXPORT(mod_name) int sym_link_##mod_name; EXPORT_SYMBOL(sym_link_##mod_name);
+#define MODULE_IMPORT(mod_name) extern int sym_link_##mod_name; int func_sym_link_##mod_name(void) {sym_link_##mod_name=1;}; EXPORT_SYMBOL(func_sym_link_##mod_name);
+
 
 #endif /* _LINUX_MODULE_H */
