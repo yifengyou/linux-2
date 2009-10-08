@@ -49,7 +49,7 @@ int aa_getprocattr(struct aa_namespace *ns, struct aa_profile *profile,
 
 		len = strlen(unconfined_str);
 		if (ns != default_namespace)
-			len += strlen(ns->base.name) + 1;
+			len += strlen(ns->base.name) + 3;	/* :// */
 
 		str = kmalloc(len + 1, GFP_ATOMIC);
 		if (!str)
