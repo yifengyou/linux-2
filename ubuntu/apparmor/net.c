@@ -110,9 +110,8 @@ int aa_net_perm(struct aa_profile *profile, char *operation,
 
 	family_mask = profile->net.allowed[family];
 
-	sa.base.error = (family_mask & (1 << type)) ? 0 : -EACCES;
-
 	memset(&sa, 0, sizeof(sa));
+	sa.base.error = (family_mask & (1 << type)) ? 0 : -EACCES;
 	sa.base.operation = operation;
 	sa.base.gfp_mask = GFP_KERNEL;
 	sa.family = family;
