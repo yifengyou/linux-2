@@ -3,6 +3,6 @@ blowfish
 twofish
 serpent
 sha256_generic
-cbc
-ecb
+cbc ?
+ecb ?
 crc32c
