@@ -14,7 +14,7 @@
 
 Package: linux-image-PKGVER-ABINUM-FLAVOUR
 Architecture: ARCH
-Section: base
+Section: admin
 Priority: optional
 Pre-Depends: dpkg (>= 1.10.24)
 Provides: linux-image, linux-image-2.6, fuse-module, =PROVIDES=
