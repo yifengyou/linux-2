@@ -163,7 +163,15 @@ static unsigned int duty_cycle = 50;   /* duty cycle of 50% */
 #define LIRC_IRQ 4
 #endif
 #ifndef LIRC_PORT
+/* for external dongles, default to com1 */
+#if defined(LIRC_SIR_ACTISYS_ACT200L) || \
+    defined(LIRC_SIR_ACTISYS_ACT220L) || \
+    defined(LIRC_SIR_TEKRAM)
+#define LIRC_PORT 0x3f8
+#else
+/* onboard sir ports are typically com3 */
 #define LIRC_PORT 0x3e8
+#endif
 #endif
 
 static int io = LIRC_PORT;

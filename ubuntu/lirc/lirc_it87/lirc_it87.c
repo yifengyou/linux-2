@@ -1,7 +1,7 @@
 /*
- * LIRC driver for ITE IT8712/IT8705 CIR port
+ * LIRC driver for ITE IT8712/IT8705/IT8720 CIR port
  *
- * Copyright (C) 2001 Hans-Günter Lütke Uphues <hg_lu@web.de>
+ * Copyright (C) 2001 Hans-GÃ¼nter LÃ¼tke Uphues <hg_lu@web.de>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA
  *
- * ITE IT8705 and IT8712(not tested) CIR-port support for lirc based
+ * ITE IT8705, IT8712(not tested) and IT8720 CIR-port support for lirc based
  * via cut and paste from lirc_sir.c (C) 2000 Milan Pikula
  *
  * Attention: Sendmode only tested with debugging logs
@@ -816,9 +816,11 @@ static int init_port(void)
 		return retval;
 	}
 	it87_chipid = it87_read(IT87_CHIP_ID2);
-	if ((it87_chipid != 0x12) && (it87_chipid != 0x05)) {
+	if ((it87_chipid != 0x12) &&
+		(it87_chipid != 0x05) &&
+		(it87_chipid != 0x20)) {
 		printk(KERN_INFO LIRC_DRIVER_NAME
-		       ": no IT8705/12 found, exiting..\n");
+		       ": no IT8705/12/20 found, exiting..\n");
 		retval = -ENXIO;
 		return retval;
 	}
@@ -908,16 +910,16 @@ static void drop_port(void)
 #if 0
 	unsigned char init_bytes[4] = IT87_INIT;
 
-	/ * Enter MB PnP Mode * /
+	/* Enter MB PnP Mode */
 	outb(init_bytes[0], IT87_ADRPORT);
 	outb(init_bytes[1], IT87_ADRPORT);
 	outb(init_bytes[2], IT87_ADRPORT);
 	outb(init_bytes[3], IT87_ADRPORT);
 
-	/ * deactivate CIR-Device * /
+	/* deactivate CIR-Device */
 	it87_write(IT87_CIR_ACT, 0x0);
 
-	/ * Leaving MB PnP Mode * /
+	/* Leaving MB PnP Mode */
 	it87_write(IT87_CFGCTRL, 0x2);
 #endif
 
@@ -969,7 +971,7 @@ module_init(lirc_it87_init);
 module_exit(lirc_it87_exit);
 
 MODULE_DESCRIPTION("LIRC driver for ITE IT8712/IT8705 CIR port");
-MODULE_AUTHOR("Hans-Günter Lütke Uphues");
+MODULE_AUTHOR("Hans-GÃ¼nter LÃ¼tke Uphues");
 MODULE_LICENSE("GPL");
 
 module_param(io, int, S_IRUGO);

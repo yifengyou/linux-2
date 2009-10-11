@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id: lirc_dev.c,v 1.93 2009/03/29 10:55:31 lirc Exp $
+ * $Id: lirc_dev.c,v 1.96 2009/08/31 16:57:55 lirc Exp $
  *
  */
 
@@ -106,7 +106,7 @@ struct irctl {
 #endif
 };
 
-static DEFINE_MUTEX(driver_lock);
+static DEFINE_MUTEX(lirc_dev_lock);
 
 static struct irctl *irctls[MAX_IRCTL_DEVICES];
 static struct file_operations fops;
@@ -307,14 +307,7 @@ int lirc_register_driver(struct lirc_driver *d)
 		}
 	}
 
-	if (d->owner == NULL) {
-		printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-				    "no module owner registered\n");
-		err = -EBADRQC;
-		goto out;
-	}
-
-	mutex_lock(&driver_lock);
+	mutex_lock(&lirc_dev_lock);
 
 	minor = d->minor;
 
@@ -421,7 +414,7 @@ int lirc_register_driver(struct lirc_driver *d)
 #endif
 	}
 	ir->attached = 1;
-	mutex_unlock(&driver_lock);
+	mutex_unlock(&lirc_dev_lock);
 
 /*
  * Recent kernels should handle this autmatically by increasing/decreasing
@@ -445,7 +438,7 @@ out_sysfs:
 	devfs_remove(DEV_LIRC "/%i", ir->d.minor);
 #endif
 out_lock:
-	mutex_unlock(&driver_lock);
+	mutex_unlock(&lirc_dev_lock);
 out:
 	return err;
 }
@@ -468,12 +461,12 @@ int lirc_unregister_driver(int minor)
 
 	ir = irctls[minor];
 
-	mutex_lock(&driver_lock);
+	mutex_lock(&lirc_dev_lock);
 
 	if (ir->d.minor != minor) {
 		printk(KERN_ERR "lirc_dev: lirc_unregister_driver: "
 		       "minor (%d) device not registered!", minor);
-		mutex_unlock(&driver_lock);
+		mutex_unlock(&lirc_dev_lock);
 		return -ENOENT;
 	}
 
@@ -531,7 +524,7 @@ int lirc_unregister_driver(int minor)
 	lirc_device_destroy(lirc_class,
 			    MKDEV(IRCTL_DEV_MAJOR, ir->d.minor));
 
-	mutex_unlock(&driver_lock);
+	mutex_unlock(&lirc_dev_lock);
 
 /*
  * Recent kernels should handle this autmatically by increasing/decreasing
@@ -564,7 +557,7 @@ static int irctl_open(struct inode *inode, struct file *file)
 	if (ir->d.fops && ir->d.fops->open)
 		return ir->d.fops->open(inode, file);
 
-	if (mutex_lock_interruptible(&driver_lock))
+	if (mutex_lock_interruptible(&lirc_dev_lock))
 		return -ERESTARTSYS;
 
 	if (ir->d.minor == NOPLUG) {
@@ -577,7 +570,7 @@ static int irctl_open(struct inode *inode, struct file *file)
 		goto error;
 	}
 
-	if (ir->d.owner != NULL && try_module_get(ir->d.owner)) {
+	if (try_module_get(ir->d.owner)) {
 		++ir->open;
 		retval = ir->d.set_use_inc(ir->d.data);
 
@@ -598,20 +591,13 @@ static int irctl_open(struct inode *inode, struct file *file)
 		if (ir->task)
 			wake_up_process(ir->task);
 #endif
-	} else {
-		if (ir->d.owner == NULL)
-			dprintk(LOGHEAD "no module owner!!!\n",
-				ir->d.name, ir->d.minor);
-
-		retval = -ENODEV;
 	}
-
  error:
 	if (ir)
 		dprintk(LOGHEAD "open result = %d\n", ir->d.name, ir->d.minor,
 			retval);
 
-	mutex_unlock(&driver_lock);
+	mutex_unlock(&lirc_dev_lock);
 
 	return retval;
 }
@@ -626,7 +612,7 @@ static int irctl_close(struct inode *inode, struct file *file)
 	if (ir->d.fops && ir->d.fops->release)
 		return ir->d.fops->release(inode, file);
 
-	if (mutex_lock_interruptible(&driver_lock))
+	if (mutex_lock_interruptible(&lirc_dev_lock))
 		return -ERESTARTSYS;
 
 	--ir->open;
@@ -639,7 +625,7 @@ static int irctl_close(struct inode *inode, struct file *file)
 		kfree(ir);
 	}
 
-	mutex_unlock(&driver_lock);
+	mutex_unlock(&lirc_dev_lock);
 
 	return 0;
 }
@@ -784,7 +770,7 @@ static long irctl_compat_ioctl(struct file *file,
 
 		cmd = _IOC(_IOC_DIR(cmd32), _IOC_TYPE(cmd32), _IOC_NR(cmd32),
 			   (_IOC_TYPECHECK(unsigned long)));
-		ret = irctl_ioctl(file->f_path.dentry->d_inode, file,
+		ret = irctl_ioctl(file->f_dentry->d_inode, file,
 				  cmd, (unsigned long)(&val));
 
 		set_fs(old_fs);
@@ -818,7 +804,7 @@ static long irctl_compat_ioctl(struct file *file,
 		 */
 		lock_kernel();
 		cmd = cmd32;
-		ret = irctl_ioctl(file->f_path.dentry->d_inode,
+		ret = irctl_ioctl(file->f_dentry->d_inode,
 				  file, cmd, arg);
 		unlock_kernel();
 		return ret;

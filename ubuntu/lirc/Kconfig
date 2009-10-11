@@ -12,6 +12,11 @@ config LIRC_BT829
 	default m
 	depends on LIRC_DEV
 
+config LIRC_ENE0100
+	tristate "LIRC ENE0100"
+	default m
+	depends on LIRC_DEV
+
 config LIRC_I2C
 	tristate "LIRC I2C interface remote"
 	default m
@@ -39,11 +44,6 @@ config LIRC_ITE8709
 
 config LIRC_MCEUSB
 	tristate "LIRC Microsoft Media Center Remote"
-	default m
-	depends on LIRC_DEV
-
-config LIRC_MCEUSB2
-	tristate "LIRC Microsoft Media Center Remote v2"
 	default m
 	depends on LIRC_DEV
 
