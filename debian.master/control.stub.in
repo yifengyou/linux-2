@@ -56,7 +56,7 @@ Description: Header files related to Linux kernel version PKGVER
  /usr/share/doc/SRCPKGNAME-headers-PKGVER-ABINUM/debian.README.gz for details
 
 Package: SRCPKGNAME-libc-dev
-Architecture: i386 amd64 lpia ia64 powerpc sparc
+Architecture: i386 amd64 lpia ia64 powerpc sparc armel
 Conflicts: libc6-dev (<< 2.3.2.ds1-6), libc6.1-dev (<< 2.3.2.ds1-6), dvb-dev (<< 1.0.1-6), amd64-libs-dev (<= 1.1), SRCPKGNAME-kernel-headers
 Replaces: libc6-dev (<< 2.3.2.ds1-6), libc6.1-dev (<< 2.3.2.ds1-6), dvb-dev (<< 1.0.1-6), SRCPKGNAME-kernel-headers, libdrm-dev
 Provides: SRCPKGNAME-kernel-headers
