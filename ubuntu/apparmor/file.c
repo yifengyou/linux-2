@@ -363,7 +363,7 @@ audit:
 
 static inline int aa_is_deleted_file(struct dentry *dentry)
 {
-	if (d_unhashed(dentry) && dentry->d_inode->i_nlink == 0)
+	if (d_unhashed(dentry))
 		return 1;
 	return 0;
 }
