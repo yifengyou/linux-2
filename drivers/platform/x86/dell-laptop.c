@@ -26,6 +26,10 @@
 #include "../../firmware/dcdbas.h"
 
 #define BRIGHTNESS_TOKEN 0x7d
+#define WLAN_SWITCH_MASK 0
+#define BT_SWITCH_MASK 1
+#define WWAN_SWITCH_MASK 2
+#define HW_SWITCH_MASK 16
 
 /* This structure will be modified by the firmware when we enter
  * system management mode, hence the volatiles */
@@ -63,6 +67,13 @@ static struct backlight_device *dell_backlight_device;
 static struct rfkill *wifi_rfkill;
 static struct rfkill *bluetooth_rfkill;
 static struct rfkill *wwan_rfkill;
+
+/*
+ * RFkill status is maintained in software because the BIOS has an annoying
+ * habit of emitting a KEY_WLAN key press event before the BIOS state is updated, making
+ * dell_send_request() racy.
+ */
+static int   hw_switch_status;
 
 static const struct dmi_system_id __initdata dell_device_table[] = {
 	{
@@ -181,14 +192,11 @@ static int dell_rfkill_set(void *data, bool blocked)
 	int disable = blocked ? 1 : 0;
 	unsigned long radio = (unsigned long)data;
 
-	memset(&buffer, 0, sizeof(struct calling_interface_buffer));
-	dell_send_request(&buffer, 17, 11);
-	if (!(buffer.output[1] & BIT(16)))
-		return -EINVAL;
-
-	buffer.input[0] = (1 | (radio<<8) | (disable << 16));
-	dell_send_request(&buffer, 17, 11);
-
+	if (!(hw_switch_status & BIT(radio-1)) || !(hw_switch_status & BIT(HW_SWITCH_MASK))) {
+		memset(&buffer, 0, sizeof(struct calling_interface_buffer));
+		buffer.input[0] = (1 | (radio<<8) | (disable << 16));
+		dell_send_request(&buffer, 17, 11);
+	}
 	return 0;
 }
 
@@ -196,14 +204,32 @@ static void dell_rfkill_query(struct rfkill *rfkill, void *data)
 {
 	struct calling_interface_buffer buffer;
 	int status;
-	int bit = (unsigned long)data + 16;
+	int bit = (unsigned long)data - 1;
 
 	memset(&buffer, 0, sizeof(struct calling_interface_buffer));
 	dell_send_request(&buffer, 17, 11);
 	status = buffer.output[1];
 
-	rfkill_set_sw_state(rfkill, !!(status & BIT(bit)));
-	rfkill_set_hw_state(rfkill, !(status & BIT(16)));
+	hw_switch_status |= (status & BIT(HW_SWITCH_MASK)) ^ BIT(HW_SWITCH_MASK);
+
+	/* HW switch control not supported
+	   explicitly set it to all 3 as they'll change in unison then */
+	if (!(status & BIT(0)))
+		hw_switch_status |= BIT(WLAN_SWITCH_MASK) | BIT(BT_SWITCH_MASK) | (WWAN_SWITCH_MASK);
+	else {
+		/* rerun the query to see what is really supported */
+		memset(&buffer, 0, sizeof(struct calling_interface_buffer));
+		buffer.input[0] = 2;
+		dell_send_request(&buffer, 17, 11);
+		status = buffer.output[1];
+
+		hw_switch_status |= status & BIT(bit);
+	}
+
+	if (hw_switch_status & BIT(bit))
+		rfkill_set_hw_state(rfkill, hw_switch_status & BIT(HW_SWITCH_MASK));
+	else
+		rfkill_set_hw_state(rfkill, 0);
 }
 
 static const struct rfkill_ops dell_rfkill_ops = {
@@ -211,14 +237,27 @@ static const struct rfkill_ops dell_rfkill_ops = {
 	.query = dell_rfkill_query,
 };
 
+/*
+ * Called for each KEY_WLAN key press event. Note that a physical
+ * rf-kill switch change also causes the BIOS to emit a KEY_WLAN.
+ */
 static void dell_rfkill_update(void)
 {
-	if (wifi_rfkill)
-		dell_rfkill_query(wifi_rfkill, (void *)1);
-	if (bluetooth_rfkill)
-		dell_rfkill_query(bluetooth_rfkill, (void *)2);
-	if (wwan_rfkill)
-		dell_rfkill_query(wwan_rfkill, (void *)3);
+	hw_switch_status ^= BIT(HW_SWITCH_MASK);
+	if (wifi_rfkill && (hw_switch_status & BIT(WLAN_SWITCH_MASK))) {
+		rfkill_set_hw_state(wifi_rfkill, hw_switch_status & BIT(HW_SWITCH_MASK));
+		dell_rfkill_set((void*)1, rfkill_blocked(wifi_rfkill));
+	}
+
+	if (bluetooth_rfkill && (hw_switch_status & BIT(BT_SWITCH_MASK))) {
+		rfkill_set_hw_state(bluetooth_rfkill, hw_switch_status & BIT(HW_SWITCH_MASK));
+		dell_rfkill_set((void*)2, rfkill_blocked(bluetooth_rfkill));
+	}
+
+	if (wwan_rfkill && (hw_switch_status & BIT(WWAN_SWITCH_MASK))) {
+		rfkill_set_hw_state(wwan_rfkill, hw_switch_status & BIT(HW_SWITCH_MASK));
+		dell_rfkill_set((void*)3, rfkill_blocked(wwan_rfkill));
+	}
 }
 
 static int dell_setup_rfkill(void)
@@ -226,6 +265,7 @@ static int dell_setup_rfkill(void)
 	struct calling_interface_buffer buffer;
 	int status;
 	int ret;
+	hw_switch_status = 0;
 
 	memset(&buffer, 0, sizeof(struct calling_interface_buffer));
 	dell_send_request(&buffer, 17, 11);
