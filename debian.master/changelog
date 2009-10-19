@@ -7,6 +7,7 @@ linux (2.6.32-1.1) UNRELEASED; urgency=low
   [ Upstream Kernel Changes ]
 
   * rebase to v2.6.32-rc3
+  * rebase to v2.6.32-rc5
 
  -- Andy Whitcroft <apw@canonical.com>  Mon, 05 Oct 2009 15:48:58 +0100
 
