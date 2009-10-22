@@ -399,7 +399,6 @@ static struct i2c_driver driver = {
 		.name	= "i2c ir driver",
 	},
 #endif
-	.id		= I2C_DRIVERID_EXP3, /* FIXME */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 31)
 	.attach_adapter	= ir_probe,
 	.detach_client	= ir_remove,
