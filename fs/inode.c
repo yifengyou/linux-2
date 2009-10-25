@@ -1624,3 +1624,7 @@ void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
 				  inode->i_ino);
 }
 EXPORT_SYMBOL(init_special_inode);
+
+#define CREATE_TRACE_POINTS
+#include <trace/events/vfs.h>
+
