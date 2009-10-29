@@ -150,9 +150,9 @@ int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa)
 		if ((denied & mask) &&
 		    PROFILE_AUDIT_MODE(profile) != AUDIT_NOQUIET &&
 		    PROFILE_AUDIT_MODE(profile) != AUDIT_ALL)
-			sa->request &= ~mask;
+			denied &= ~mask;
 
-		if (!sa->request)
+		if (!denied)
 			return PROFILE_COMPLAIN(profile) ? 0 : sa->base.error;
 	}
 	return aa_audit(type, profile, (struct aa_audit *)sa, file_audit_cb);
