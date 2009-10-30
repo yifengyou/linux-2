@@ -27,7 +27,7 @@ do
 	#
 	if echo "$line" | grep '\*' > /dev/null
 	then
-		if [ `eval find "$line" -name '*.ko'|wc -l` -lt 1 ]
+		if [ `eval find "$line" -name '*.ko' 2>/dev/null|wc -l` -lt 1 ]
 		then
 			echo SUB_INST Warning - No files in $line
 		fi
@@ -46,7 +46,7 @@ cat ${DEBIAN}/sub-flavours/$TO.list | while read line; do
 	cd debian/$from_pkg/lib/modules/$ABI_RELEASE-$FROM/kernel;
 	if echo "$line" | grep '\*' > /dev/null
 	then
-		eval find "$line" -name '*.ko'
+		eval find "$line" -name '*.ko' 2>/dev/null || true
 	elif [ -f "$line" ]
 	then
 		echo "$line"
@@ -60,7 +60,7 @@ done | while read mod; do
 	while read m; do
 		m="${fromdir}$m"
 		test -f debian/$to_pkg/$m && continue
-		echo "SUB_INST installing: $mod"
+		echo "SUB_INST installing: $m"
 		install -D -m644 debian/$from_pkg/$m \
 			debian/$to_pkg/$m
 	done
