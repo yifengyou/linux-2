@@ -659,7 +659,6 @@ gcm
 gdth
 generic
 generic_bl
-generic_serial
 gen_probe
 geode-aes
 geode-rng
@@ -1675,7 +1674,6 @@ rfc1051
 rfc1201
 rfd_ftl
 ricoh_mmc
-rio
 rio500
 riscom8
 rivafb
@@ -2181,7 +2179,6 @@ sunrpc
 svcrdma
 svgalib
 sworks-agp
-sx
 sx8
 sym53c416
 sym53c500_cs
