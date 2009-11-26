@@ -1,0 +1,10 @@
+crypto-modules
+fb-modules
+fs-core-modules
+fs-secondary-modules
+nic-modules
+nic-pcmcia-modules
+nic-usb-modules
+scsi-modules
+storage-core-modules
+nfs-modules
