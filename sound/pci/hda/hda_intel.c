@@ -2275,7 +2275,7 @@ static struct snd_pci_quirk probe_mask_list[] __devinitdata = {
 	SND_PCI_QUIRK(0x1046, 0x1262, "ASUS W5F", 0x103),
 	/* conflict of ALC268 in slot#3 (digital I/O); a temporary fix */
 	SND_PCI_QUIRK(0x1179, 0xff00, "Toshiba laptop", 0x03),
-	SND_PCI_QUIRK(0x1028, 0x0271, "Dell Studio XPS 1340", 0x09),
+	SND_PCI_QUIRK(0x1028, 0x0271, "unknown Dell", 0x11),
 	{}
 };
 
