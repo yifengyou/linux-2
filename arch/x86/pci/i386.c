@@ -129,7 +129,7 @@ static void __init pcibios_allocate_bus_resources(struct list_head *bus_list)
 					continue;
 				if (!r->start ||
 				    pci_claim_resource(dev, idx) < 0) {
-					dev_warn(&dev->dev, "BAR %d: can't allocate resource\n", idx);
+					dev_info(&dev->dev, "BAR %d: can't allocate resource\n", idx);
 					/*
 					 * Something is wrong with the region.
 					 * Invalidate the resource to prevent
@@ -169,7 +169,7 @@ static void __init pcibios_allocate_resources(int pass)
 					(unsigned long long) r->end,
 					r->flags, disabled, pass);
 				if (pci_claim_resource(dev, idx) < 0) {
-					dev_warn(&dev->dev, "BAR %d: can't allocate resource\n", idx);
+					dev_info(&dev->dev, "BAR %d: can't allocate resource\n", idx);
 					/* We'll assign a new address later */
 					r->end -= r->start;
 					r->start = 0;
