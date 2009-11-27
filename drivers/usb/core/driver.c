@@ -989,11 +989,6 @@ static int usb_suspend_interface(struct usb_device *udev,
 	return status;
 }
 
-#ifdef CONFIG_X86_LPIA
-struct usb_hub;
-void hub_port_logical_disconnect(struct usb_hub *hub, int port1);
-#endif
-
 /* Caller has locked intf's usb_device's pm_mutex */
 static int usb_resume_interface(struct usb_device *udev,
 		struct usb_interface *intf, pm_message_t msg, int reset_resume)
@@ -1033,19 +1028,9 @@ static int usb_resume_interface(struct usb_device *udev,
 				dev_err(&intf->dev, "%s error %d\n",
 						"reset_resume", status);
 		} else {
-#ifdef CONFIG_X86_LPIA
-			struct usb_device *udev = interface_to_usbdev(intf);
-			struct usb_device *pdev = udev->parent;
-#endif
 			intf->needs_binding = 1;
 			dev_warn(&intf->dev, "no %s for driver %s?\n",
 					"reset_resume", driver->name);
-#ifdef CONFIG_X86_LPIA
-			if (pdev) {
-				struct usb_hub *phub = usb_get_intfdata(pdev->actconfig->interface[0]);
-				hub_port_logical_disconnect(phub, udev->portnum);
-			}
-#endif
 		}
 	} else {
 		if (driver->resume) {
