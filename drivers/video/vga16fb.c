@@ -1440,6 +1440,8 @@ static void __exit vga16fb_exit(void)
 
 MODULE_DESCRIPTION("Legacy VGA framebuffer device driver");
 MODULE_LICENSE("GPL");
+/* Attempt to load for any VGA compatible device. */
+MODULE_ALIAS("pci:*bc03sc00i*");
 module_init(vga16fb_init);
 module_exit(vga16fb_exit);
 
