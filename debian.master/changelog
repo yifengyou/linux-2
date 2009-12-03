@@ -4,6 +4,10 @@ linux (2.6.32-6.9) UNRELEASED; urgency=low
   CHANGELOG: Use the printchanges target to see the curent changes.
   CHANGELOG: Use the insertchanges target to create the final log.
 
+  [ Upstream changes ]
+
+  * rebased to v2.6.32
+
  -- Andy Whitcroft <apw@canonical.com>  Tue, 01 Dec 2009 15:52:17 +0000
 
 linux (2.6.32-6.8) lucid; urgency=low
