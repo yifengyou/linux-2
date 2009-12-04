@@ -525,16 +525,15 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 	struct aa_task_context *cxt;
 	struct aa_profile *profile, *previous_profile, *hat = NULL;
 	struct aa_audit_file sa;
-	char *name = NULL;
 
 	memset(&sa, 0, sizeof(sa));
 	sa.base.gfp_mask = GFP_KERNEL;
 	sa.base.operation = "change_hat";
-	sa.request = AA_MAY_CHANGEHAT;
 
 	cred = aa_current_policy(&profile);
 	cxt = cred->security;
 	previous_profile = cxt->sys.previous;
+	token = cxt->sys.token;
 
 	if (!profile) {
 		sa.base.info = "unconfined";
@@ -543,6 +542,11 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 	}
 
 	if (hat_name) {
+		if (previous_profile)
+			sa.name = previous_profile->fqname;
+		else
+			sa.name = profile->fqname;
+
 		sa.name2 = profile->ns->base.name;
 
 		if (PROFILE_IS_HAT(profile))
@@ -550,33 +554,20 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 		else
 			hat = aa_find_child(profile, hat_name);
 		if (!hat) {
-			if (PROFILE_IS_HAT(profile))
-				name = new_compound_name(profile->parent->fqname,
-							 hat_name);
-			else
-				name = new_compound_name(profile->fqname,
-							 hat_name);
-			sa.name = name;
 			sa.base.info = "hat not found";
 			sa.base.error = -ENOENT;
 			if (permtest || !PROFILE_COMPLAIN(profile))
-				/* probing is an expected unfortunate behavior
-				 * of the change_hat api is traditionally quiet
-				 */
-				goto out;
+				goto audit;
 			hat = aa_alloc_null_profile(profile, 1);
 			if (!hat) {
 				sa.base.info = "failed null profile create";
 				sa.base.error = -ENOMEM;
 				goto audit;
 			}
-		} else {
-			sa.name = hat->fqname;
-			if (!PROFILE_IS_HAT(hat)) {
-				sa.base.info = "target not hat";
-				sa.base.error = -EPERM;
-				goto audit;
-			}
+		} else if (!PROFILE_IS_HAT(hat)) {
+			sa.base.info = "target not hat";
+			sa.base.error = -EPERM;
+			goto audit;
 		}
 
 		sa.base.error = aa_may_change_ptraced_domain(current, hat);
@@ -594,15 +585,10 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 							 profile, &sa.base,
 							 file_audit_cb);
 				goto out;
-			} else if (name && !sa.base.error)
-				/* reset error for learning of new hats */
-				sa.base.error = -ENOENT;
+			}
 		}
-	} else if (previous_profile) {
-		sa.name = previous_profile->fqname;
+	} else if (previous_profile)
 		sa.base.error = aa_restore_previous_profile(token);
-		sa.perms.kill = AA_MAY_CHANGEHAT;
-	}
 	/* else
 		 ignore restores when there is no saved profile
 	*/
@@ -614,7 +600,6 @@ audit:
 
 out:
 	aa_put_profile(hat);
-	kfree(name);
 
 	return sa.base.error;
 }
