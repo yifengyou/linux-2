@@ -121,10 +121,6 @@ int d_namespace_path(struct path *path, char *buf, int buflen, char **name)
 		 * strip it.
 		 */
 		buf[buflen - 11] = 0;	/* - (len(" (deleted)") +\0) */
-	} else if (d_unhashed(path->dentry) && (buf + buflen) - res > 11 &&
-		   strcmp(buf + buflen - 11, " (deleted)") == 0) {
-		/* For now allow mediation of deleted paths */
-		buf[buflen - 11] = 0;	/* - (len(" (deleted)") +\0) */
 	} else if (!IS_ROOT(path->dentry) && d_unhashed(path->dentry)) {
 		error = -ENOENT;
 #if 0
