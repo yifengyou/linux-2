@@ -64,10 +64,6 @@ static int aa_may_change_ptraced_domain(struct task_struct *task,
 		cred = aa_get_task_policy(tracer, &tracerp);
 	rcu_read_unlock();
 
-	/* not ptraced */
-	if (!tracer)
-		return 0;
-
 	if (!tracerp)
 		goto out;
 
