@@ -110,17 +110,6 @@ int d_namespace_path(struct path *path, char *buf, int buflen, char **name)
 	if (IS_ERR(res)) {
 		error = PTR_ERR(res);
 		*name = buf;
-	} else if (d_unhashed(path->dentry) && !path->dentry->d_inode) {
-		/* On some filesystems, newly allocated dentries appear
-		 * to the security_path hooks as a deleted
-		 * dentry except without an inode allocated.
-		 *
-		 * Remove the appended deleted text and return as a
-		 * string for normal mediation.  The (deleted) string
-		 * is guarenteed to be added in this case, so just
-		 * strip it.
-		 */
-		buf[buflen - 11] = 0;	/* - (len(" (deleted)") +\0) */
 	} else if (!IS_ROOT(path->dentry) && d_unhashed(path->dentry)) {
 		error = -ENOENT;
 #if 0
