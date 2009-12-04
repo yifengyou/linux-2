@@ -15,8 +15,6 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/errno.h>
-#include <linux/mm.h>
-#include <linux/vmalloc.h>
 
 /* TODO: remove !!!! */
 // #include <linux/fs.h>
@@ -24,14 +22,6 @@
 #include "include/apparmor.h"
 #include "include/match.h"
 #include "include/file.h"
-
-static void free_table(struct table_header *table)
-{
-	if (is_vmalloc_addr(table))
-		vfree(table);
-	else
-		kfree(table);
-}
 
 static struct table_header *unpack_table(void *blob, size_t bsize)
 {
@@ -56,8 +46,6 @@ static struct table_header *unpack_table(void *blob, size_t bsize)
 		goto out;
 
 	table = kmalloc(tsize, GFP_KERNEL);
-	if (!table)
-		table = vmalloc(tsize);
 	if (table) {
 		*table = th;
 		if (th.td_flags == YYTD_DATA8)
@@ -122,7 +110,7 @@ int unpack_dfa(struct aa_dfa *dfa, void *blob, size_t size)
 				goto fail;
 			break;
 		default:
-			free_table(table);
+			kfree(table);
 			goto fail;
 		}
 
@@ -134,7 +122,7 @@ int unpack_dfa(struct aa_dfa *dfa, void *blob, size_t size)
 
 fail:
 	for (i = 0; i < ARRAY_SIZE(dfa->tables); i++) {
-		free_table(dfa->tables[i]);
+		kfree(dfa->tables[i]);
 		dfa->tables[i] = NULL;
 	}
 	return error;
@@ -219,7 +207,7 @@ void aa_match_free(struct aa_dfa *dfa)
 		int i;
 
 		for (i = 0; i < ARRAY_SIZE(dfa->tables); i++)
-			free_table(dfa->tables[i]);
+			kfree(dfa->tables[i]);
 	}
 	kfree(dfa);
 }
