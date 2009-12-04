@@ -322,7 +322,7 @@ void __aa_remove_profile(struct aa_profile *profile,
 	if (replacement)
 		profile->replacedby = aa_get_profile(replacement);
 	else
-		profile->replacedby = aa_get_profile(profile->ns->unconfined);
+		profile->replacedby = ERR_PTR(-EINVAL);
 	list_del_init(&profile->base.list);
 	if (!(profile->flags & PFLAG_NO_LIST_REF))
 		aa_put_profile(profile);
