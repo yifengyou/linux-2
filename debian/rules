@@ -7,6 +7,8 @@
 # Copyright (c) 2007 Ben Collins <bcollins@ubuntu.com>
 #
 
+JLOAD=$(shell expr `getconf _NPROCESSORS_ONLN` \* 1)
+
 ifeq ($(DEBIAN),)
 DEBIAN=debian.master
 endif
@@ -19,4 +21,4 @@ printdebian:
 # Debian Build System targets
 %:
 	@if [ ! -f $(DENV) ] ; then echo DEBIAN=$(DEBIAN) > $(DENV); chmod +x $(DENV); fi
-	@$(MAKE) --no-print-directory -f $(DEBIAN)/rules $@ DEBIAN=$(DEBIAN)
+	@$(MAKE) -j$(JLOAD) --no-print-directory -f $(DEBIAN)/rules $@ DEBIAN=$(DEBIAN)
