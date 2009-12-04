@@ -248,7 +248,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	sa.base.error = aa_get_name(&bprm->file->f_path, 0, &buffer,
 				    (char **) &sa.name);
 	if (sa.base.error) {
-		if (!profile || profile->flags & PFLAG_IX_ON_NAME_ERROR)
+		if (profile || profile->flags & PFLAG_IX_ON_NAME_ERROR)
 			sa.base.error = 0;
 		sa.base.info = "Exec failed name resolution";
 		sa.name = bprm->filename;
