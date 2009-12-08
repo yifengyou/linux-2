@@ -11,6 +11,7 @@ obj-$(CONFIG_FSAM7400)		+= fsam7400/
 obj-$(CONFIG_LENOVO_SL_LAPTOP)	+= lenovo-sl-laptop/
 obj-$(CONFIG_LIRC_DEV)          += lirc/
 obj-$(CONFIG_NDISWRAPPER)	+= ndiswrapper/
+obj-$(CONFIG_OMNIBOOK)		+= omnibook/
 obj-m				+= rfkill/
 
 # This is a stupid trick to get kbuild to create ubuntu/built-in.o
