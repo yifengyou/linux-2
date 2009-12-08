@@ -30,7 +30,7 @@ AUTOBUILD=
 #      LOCAL_ENV_CC="ccache distcc"
 #      LOCAL_ENV_DISTCC_HOSTS="localhost 10.0.2.5 10.0.2.221"
 #
--include $(CURDIR)/../.karmic-env
+-include $(CURDIR)/../.lucid-env
 
 ifneq ($(AUTOBUILD),)
 skipabi		= true
