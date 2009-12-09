@@ -25,7 +25,7 @@ struct lockdep_map;
  */
 #define XXX_LOCK_USAGE_STATES		(1+3*4)
 
-#define MAX_LOCKDEP_SUBCLASSES		12UL
+#define MAX_LOCKDEP_SUBCLASSES		8UL
 
 /*
  * Lock-classes are keyed via unique addresses, by embedding the
