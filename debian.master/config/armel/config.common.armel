@@ -7,7 +7,6 @@
 # CONFIG_ATALK is not set
 # CONFIG_ATA_OVER_ETH is not set
 # CONFIG_ATM is not set
-# CONFIG_AUDIT is not set
 # CONFIG_B43 is not set
 # CONFIG_B43LEGACY is not set
 # CONFIG_B44 is not set
