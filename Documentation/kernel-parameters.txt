@@ -91,7 +91,6 @@ parameter is applicable:
 			A lot of drivers has their options described inside of
 			Documentation/scsi/.
 	SECURITY Different security models are enabled.
-	SECURITY_DEFAULT set a default security module
 	SELINUX SELinux support is enabled.
 	SERIAL	Serial support is enabled.
 	SH	SuperH architecture is enabled.
