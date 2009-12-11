@@ -6,7 +6,10 @@ use strict;
 
 my $P = 'check-config';
 
-if ($#ARGV != 4) {
+my $test = -1;
+if ($ARGV[0] eq '--test') {
+	$test = $ARGV[1] + 0;
+} elsif ($#ARGV != 4) {
 	die "Usage: $P <config> <arch> <flavour> <commonconfig> <warn-only>\n";
 }
 
@@ -135,6 +138,205 @@ sub pred_exec {
 	}
 	#print " return res<$res> sep<$sep>\n";
 	return $res;
+}
+
+#
+# PREDICATE TESTS
+#
+my $test_total = 1;
+my $test_good = 0;
+sub pred_test {
+	my ($pred, $eres, $eerr) = @_;
+	my ($res, $err, $fail);
+
+	$test_total++;
+	if ($test != 0 && $test != $test_total - 1) {
+		return;
+	}
+
+	eval {
+		$res = pred_exec($pred);
+	};
+	$err = $@;
+	chomp($err);
+
+	$res = !!$res;
+	$eres = !!$eres;
+
+	$fail = '';
+	if (defined $eres && $res != $eres) {
+		$fail = "result missmatch, expected $eres returned $res";
+	}
+	if (defined $eerr && $err eq '') {
+		$fail = "error missmatch, expected '$eerr' returned success";
+	} elsif (defined $eerr && $err !~ /$eerr/) {
+		$fail = "error missmatch, expected '$eerr' returned '$err'";
+	} elsif (!defined $eerr && $err ne '') {
+		$fail = "error missmatch, expected success returned '$err'";
+	}
+	
+	if ($fail eq '') {
+		$test_good++;
+	} else {
+		print "$pred: $test_total: FAIL: $fail\n";
+	}
+	#print "TEST<$pred> eres<$eres> eerr<$eerr> res<$res> err<$err>\n";
+}
+if ($test >= 0) {
+	$arch = 'MYARCH';
+	$flavour = 'MYFLAVOUR';
+	%values = ( 'ENABLED' => 'y', 'DISABLED' => 'n' );
+
+	# Errors.
+	my $eunkn = 'unknown predicate';
+	my $epred = 'malformed';
+	my $eclose = 'missing close parenthesis';
+	my $eopen = 'missing open parenthesis';
+	my $ebinary = 'malformed binary operator';
+
+	# Basic predicate tests.
+	print "TEST: $test_total: basic predicate tests ...\n";
+
+	pred_test('nosuchcommand', undef, $eunkn);
+	pred_test('arch', undef, $epred);
+	pred_test('arch MYARCH MYARCH', undef, $epred);
+	pred_test('arch MYARCH', 1, undef);
+	pred_test('arch NOTMYARCH', 0, undef);
+
+	pred_test('flavour', undef, $epred);
+	pred_test('flavour MYFLAVOUR myflavour', undef, $epred);
+	pred_test('flavour MYFLAVOUR', 1, undef);
+	pred_test('flavour NOTMYFLAVOUR', 0, undef);
+
+	pred_test('value', undef, $epred);
+	pred_test('value ENABLED', undef, $epred);
+	pred_test('value ENABLED ENABLED ENABLED', undef, $epred);
+	pred_test('value ENABLED y', 1, undef);
+	pred_test('value ENABLED n', 0, undef);
+	pred_test('value DISABLED n', 1, undef);
+	pred_test('value DISABLED y', 0, undef);
+
+	pred_test('exists', undef, $epred);
+	pred_test('exists ENABLED ENABLED', undef, $epred);
+	pred_test('exists ENABLED', 1, undef);
+	pred_test('exists DISABLED', 1, undef);
+	pred_test('exists MISSING', 0, undef);
+
+	print "TEST: $test_total: inversion tests ...\n";	
+	pred_test('!exists ENABLED', 0, undef);
+	pred_test('!exists MISSING', 1, undef);
+	pred_test('!!exists ENABLED', 1, undef);
+	pred_test('!!exists MISSING', 0, undef);
+	pred_test('!!!exists ENABLED', 0, undef);
+	pred_test('!!!exists MISSING', 1, undef);
+
+	print "TEST: $test_total: parentheses tests ...\n";	
+	pred_test('(exists ENABLED)', 1, undef);
+	pred_test('((exists ENABLED))', 1, undef);
+	pred_test('(((exists ENABLED)))', 1, undef);
+	pred_test('(exists MISSING)', 0, undef);
+	pred_test('((exists MISSING))', 0, undef);
+	pred_test('(((exists MISSING)))', 0, undef);
+
+	pred_test('(!exists ENABLED)', 0, undef);
+	pred_test('((!exists ENABLED))', 0, undef);
+	pred_test('(((!exists ENABLED)))', 0, undef);
+	pred_test('(!exists MISSING)', 1, undef);
+	pred_test('((!exists MISSING))', 1, undef);
+	pred_test('(((!exists MISSING)))', 1, undef);
+
+	pred_test('((!(exists ENABLED)))', 0, undef);
+	pred_test('((!(exists MISSING)))', 1, undef);
+	pred_test('(!((exists ENABLED)))', 0, undef);
+	pred_test('(!((exists MISSING)))', 1, undef);
+	pred_test('!(((exists ENABLED)))', 0, undef);
+	pred_test('!(((exists MISSING)))', 1, undef);
+	pred_test('!((!(exists ENABLED)))', 1, undef);
+	pred_test('!((!(exists MISSING)))', 0, undef);
+	pred_test('!(!(!(exists ENABLED)))', 0, undef);
+	pred_test('!(!(!(exists MISSING)))', 1, undef);
+
+	pred_test('(', undef, $eclose);
+	pred_test('()(', undef, $eclose);
+	pred_test('(())(', undef, $eclose);
+	pred_test('((()))(', undef, $eclose);
+	pred_test('(()', undef, $eclose);
+	pred_test('((())', undef, $eclose);
+	pred_test('(((()))', undef, $eclose);
+	pred_test('(()()', undef, $eclose);
+	pred_test('((())()', undef, $eclose);
+
+	pred_test(')', undef, $eopen);
+	pred_test('())', undef, $eopen);
+	pred_test('(()))', undef, $eopen);
+	pred_test('((())))', undef, $eopen);
+
+	print "TEST: $test_total: binary and tests ...\n";
+
+	pred_test('exists ENABLED &', undef, $ebinary);
+	pred_test('& exists ENABLED', undef, $ebinary);
+	pred_test('exists ENABLED & & exists ENABLED', undef, $ebinary);
+
+	pred_test('exists MISSING & exists MISSING', 0, undef);
+	pred_test('exists MISSING & exists ENABLED', 0, undef);
+	pred_test('exists ENABLED & exists MISSING', 0, undef);
+	pred_test('exists ENABLED & exists ENABLED', 1, undef);
+
+	pred_test('exists MISSING & exists MISSING & exists MISSING', 0, undef);
+	pred_test('exists MISSING & exists MISSING & exists ENABLED', 0, undef);
+	pred_test('exists MISSING & exists ENABLED & exists MISSING', 0, undef);
+	pred_test('exists MISSING & exists ENABLED & exists ENABLED', 0, undef);
+	pred_test('exists ENABLED & exists MISSING & exists MISSING', 0, undef);
+	pred_test('exists ENABLED & exists MISSING & exists ENABLED', 0, undef);
+	pred_test('exists ENABLED & exists ENABLED & exists MISSING', 0, undef);
+	pred_test('exists ENABLED & exists ENABLED & exists ENABLED', 1, undef);
+
+	print "TEST: $test_total: binary or tests ...\n";
+
+	pred_test('exists ENABLED |', undef, $ebinary);
+	pred_test('| exists ENABLED', undef, $ebinary);
+	pred_test('exists ENABLED | | exists ENABLED', undef, $ebinary);
+
+	pred_test('exists MISSING | exists MISSING', 0, undef);
+	pred_test('exists MISSING | exists ENABLED', 1, undef);
+	pred_test('exists ENABLED | exists MISSING', 1, undef);
+	pred_test('exists ENABLED | exists ENABLED', 1, undef);
+
+	pred_test('exists MISSING | exists MISSING | exists MISSING', 0, undef);
+	pred_test('exists MISSING | exists MISSING | exists ENABLED', 1, undef);
+	pred_test('exists MISSING | exists ENABLED | exists MISSING', 1, undef);
+	pred_test('exists MISSING | exists ENABLED | exists ENABLED', 1, undef);
+	pred_test('exists ENABLED | exists MISSING | exists MISSING', 1, undef);
+	pred_test('exists ENABLED | exists MISSING | exists ENABLED', 1, undef);
+	pred_test('exists ENABLED | exists ENABLED | exists MISSING', 1, undef);
+	pred_test('exists ENABLED | exists ENABLED | exists ENABLED', 1, undef);
+
+	print "TEST: $test_total: binary or/and combination tests ...\n";
+
+	pred_test('exists MISSING | exists MISSING & exists MISSING', 0, undef);
+	pred_test('exists MISSING | exists MISSING & exists ENABLED', 0, undef);
+	pred_test('exists MISSING | exists ENABLED & exists MISSING', 0, undef);
+	pred_test('exists MISSING | exists ENABLED & exists ENABLED', 1, undef);
+	pred_test('exists ENABLED | exists MISSING & exists MISSING', 1, undef);
+	pred_test('exists ENABLED | exists MISSING & exists ENABLED', 1, undef);
+	pred_test('exists ENABLED | exists ENABLED & exists MISSING', 1, undef);
+	pred_test('exists ENABLED | exists ENABLED & exists ENABLED', 1, undef);
+
+	print "TEST: $test_total: binary and/or combination tests ...\n";
+
+	pred_test('exists MISSING & exists MISSING | exists MISSING', 0, undef);
+	pred_test('exists MISSING & exists MISSING | exists ENABLED', 0, undef);
+	pred_test('exists MISSING & exists ENABLED | exists MISSING', 0, undef);
+	pred_test('exists MISSING & exists ENABLED | exists ENABLED', 0, undef);
+	pred_test('exists ENABLED & exists MISSING | exists MISSING', 0, undef);
+	pred_test('exists ENABLED & exists MISSING | exists ENABLED', 1, undef);
+	pred_test('exists ENABLED & exists ENABLED | exists MISSING', 1, undef);
+	pred_test('exists ENABLED & exists ENABLED | exists ENABLED', 1, undef);
+
+	$test_total--;
+	print "TEST: $test_good/$test_total succeeded\n";
+
+	exit $exit_val;
 }
 
 # Load up the current configuration values -- FATAL if this fails
