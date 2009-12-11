@@ -3,7 +3,7 @@
 
 # Prepare the out-of-tree build directory
 
-prepare-%: $(stampdir)/stamp-prepare-%
+prepare-%: $(stampdir)/stamp-prepare-% prepare-checks-%
 	@# Empty for make to be happy
 $(stampdir)/stamp-prepare-%: target_flavour = $*
 $(stampdir)/stamp-prepare-%: $(commonconfdir)/config.common.$(family) $(archconfdir)/config.common.$(arch) $(archconfdir)/config.flavour.%

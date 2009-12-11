@@ -1,0 +1,187 @@
+#!/usr/bin/perl
+#
+# check-config -- check the current config for issues
+#
+use strict;
+
+my $P = 'check-config';
+
+if ($#ARGV != 4) {
+	die "Usage: $P <config> <arch> <flavour> <commonconfig> <warn-only>\n";
+}
+
+my ($config, $arch, $flavour, $commonconfig, $warn_only) = @ARGV;
+
+my $checks = "$commonconfig/enforce";
+my %values = ();
+
+# If we are in overridden then still perform the checks and emit the messages
+# but do not return failure.  Those items marked FATAL will alway trigger
+# failure.
+my $fail_exit = 1;
+$fail_exit = 0 if ($warn_only eq 'true' || $warn_only eq '1');
+my $exit_val = 0;
+
+# Predicate execution engine.
+sub pred_first {
+	my ($rest) = @_;
+	my $depth = 0;
+	my $off;
+	my $char;
+	my $pred;
+	
+	for ($off = 0; $off <= length($rest); $off++) {
+		$char = substr($rest, $off, 1);
+		if ($char eq '(') {
+			$depth++;
+		} elsif ($char eq ')') {
+			$depth--;
+		} elsif ($depth == 0 && $char eq '&') {
+			last;
+		} elsif ($depth == 0 && $char eq '|') {
+			last;
+		}
+	}
+	if ($depth > 0) {
+		die "$P: $rest: missing close parenthesis ')'\n";
+	} elsif ($depth < 0) {
+		die "$P: $rest: missing open parenthesis '('\n";
+	}
+
+	($pred, $rest) = (substr($rest, 0, $off), substr($rest, $off + 1));
+
+	$pred =~ s/^\s*//;
+	$pred =~ s/\s*$//;
+
+	#print "pred<$pred> rest<$rest> char<$char>\n";
+	($pred, $rest, $char);
+}
+		
+sub pred_do {
+	my ($pred) = @_;
+	my (@a) = split(' ', $pred);
+
+	if ($a[0] eq 'arch') {
+		die "$P: $pred: malformed -- $pred <arch>\n" if ($#a != 1);
+		#print "    *** ARCH<$arch ?? $a[1]>\n";
+		return ($arch eq $a[1])
+	} elsif ($a[0] eq 'flavour') {
+		die "$P: $pred: malformed -- $pred <flavour>\n" if ($#a != 1);
+		#print "    *** FLAVOUR<$flavour ?? $a[1]>\n";
+		return ($flavour eq $a[1])
+	} elsif ($a[0] eq 'value') {
+		die "$P: $pred: malformed -- $pred <name> <val>\n" if ($#a != 2);
+		#print "    *** CHECK<$a[1] $a[2] ?? " . $values{$a[1]} . ">\n";
+		return ($values{$a[1]} eq $a[2]);
+	} elsif ($a[0] eq 'exists') {
+		die "$P: $pred: malformed -- $pred <name>\n" if ($#a != 1);
+		return (defined $values{$a[1]});
+	} else {
+		die "$P: $pred: unknown predicate\n";
+	}
+	return 1;
+}
+sub pred_exec {
+	my ($rest) = @_;
+	my $pred;
+	my $res;
+	my $sep;
+
+	#print "pred_exec<$rest>\n";
+
+	($pred, $rest, $sep) = pred_first($rest);
+
+	# Leading ! implies inversion.
+	if ($pred =~ /^\s*!\s*(.*)$/) {
+		#print " invert<$1>\n";
+		$res = !pred_exec($1);
+
+	# Recurse left for complex expressions.
+	} elsif ($pred =~ /^\s*\((.*)\)\s*$/) {
+		#print " left<$1>\n";
+		$res = pred_exec($1);
+
+	# Check for common syntax issues.
+	} elsif ($pred eq '') {
+		if ($sep eq '&' || $sep eq '|') {
+			die "$P: $pred$rest: malformed binary operator\n";
+		} else {
+			die "$P: $pred$rest: syntax error\n";
+		}
+		
+	# A predicate, execute it.
+	} else {
+		#print " DO<$pred> sep<$sep>\n";
+		$res = pred_do($pred);
+	}
+
+	#print " pre-return res<$res> sep<$sep>\n";
+	if ($sep eq '') {
+		#
+		
+	# Recurse right for binary operators -- note these are lazy.
+	} elsif ($sep eq '&' || $sep eq '|') {
+		#print " right<$rest> ? sep<$sep> res<$res>\n";
+		if ($rest =~ /^\s*($|\||\&)/) {
+			die "$P: $pred$rest: malformed binary operator\n";
+		}
+		if (($res && $sep eq '&') || (!$res && $sep eq '|')) {
+			#print " right<$rest>\n";
+			$res = pred_exec($rest);
+		}
+
+	} else {
+		die "$P: $pred$rest: malformed predicate\n";
+	}
+	#print " return res<$res> sep<$sep>\n";
+	return $res;
+}
+
+# Load up the current configuration values -- FATAL if this fails
+print "$P: $config: loading config\n";
+open(CONFIG, "<$config") || die "$P: $config: open failed -- $! -- aborting\n";
+while (<CONFIG>) {
+	# Pull out values.
+	/^#*\s*(CONFIG_\w+)[\s=](.*)$/ or next;
+	if ($2 eq 'is not set') {
+		$values{$1} = 'n';
+	} else {
+		$values{$1} = $2;
+	}
+}
+close(CONFIG);
+
+# FATAL: Check if we have an enforcement list.
+my $pass = 0;
+my $total = 0;
+my $line = '';
+print "$P: $checks: loading checks\n";
+open(CHECKS, "<$checks") || die "$P: $checks: open failed -- $! -- aborting\n";
+while (<CHECKS>) {
+	/^#/ && next;
+	chomp;
+
+	$line .= $_;
+	if ($line =~ /\\$/) {
+		chop($line);
+		$line .= " ";
+		next;
+	}
+	$line =~ /^\s*$/ && next;
+
+	#print "CHECK: <$line>\n";
+	$total++;
+	my $result = pred_exec($line);
+	if (!$result) {
+		print "$P: FAIL: $line\n";
+		$exit_val = $fail_exit;
+	} else {
+		$pass++;
+	}
+
+	$line = '';
+}
+close(CHECKS);
+
+print "$P: $pass/$total checks passed -- exit $exit_val\n";
+exit $exit_val;

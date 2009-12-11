@@ -116,7 +116,6 @@ for arch in $archs; do
 done
 
 rm -f $common_conf
-rm -rf build
 
 # Now run splitconfig.pl on all the config.common.<arch> copied to
 # $tmpdir
@@ -130,3 +129,27 @@ rm -rf build
 			>$arch/config.common.$arch
 	done
 )
+
+echo ""
+echo "Running config-check for all configurations ..."
+echo ""
+fail=0
+for arch in $archs; do
+	archconfdir=$confdir/$arch
+	flavourconfigs=$(cd $archconfdir && ls config.flavour.*)
+	for config in $flavourconfigs; do
+		if [ -f $archconfdir/$config ]; then
+			fullconf="$tmpdir/$arch-$config-full"
+			"$bindir/../config-check" "$fullconf" "$arch" "$config" "$confdir" "0" || let "fail=$fail+1"
+		fi
+	done
+done
+
+if [ "$fail" != 0 ]; then
+	echo ""
+	echo "*** ERROR: $fail config-check failures detected"
+	echo ""
+fi
+
+rm -rf build
+

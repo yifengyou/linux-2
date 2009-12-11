@@ -1,0 +1,25 @@
+#
+# SECURITY items
+#
+# Ensure this option is enabled.
+value CONFIG_COMPAT_BRK n
+value CONFIG_DEVKMEM n
+value CONFIG_LSM_MMAP_MIN_ADDR 0
+value CONFIG_SECCOMP y
+value CONFIG_SECURITY y
+value CONFIG_SECURITY_FILE_CAPABILITIES y
+value CONFIG_SECURITY_SMACK y
+value CONFIG_SYN_COOKIES y
+# For architectures which support this option ensure it is enabled.
+!exists CONFIG_CC_STACKPROTECTOR | value CONFIG_CC_STACKPROTECTOR y
+!exists CONFIG_DEBUG_RODATA | value CONFIG_DEBUG_RODATA y
+!exists CONFIG_STRICT_DEVMEM | value CONFIG_STRICT_DEVMEM y
+# For architectures which support this option ensure it is disabled.
+!exists CONFIG_COMPAT_VDSO | value CONFIG_COMPAT_VDSO n
+# Default to 32768 for armel, 65536 for everything else.
+(( arch armel | arch sparc ) & value CONFIG_DEFAULT_MMAP_MIN_ADDR 32768 ) | \
+	( value CONFIG_DEFAULT_MMAP_MIN_ADDR 65536)
+
+# CONFIG_USB_DEVICE_FS breaks udev USB firmware loading and is deprecated
+# ensure it is disabled.
+value CONFIG_USB_DEVICEFS n
