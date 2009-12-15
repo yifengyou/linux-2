@@ -176,12 +176,16 @@ endif
 	 run-parts -v $(DEBIAN)/tests
 
 	#
-	# Remove files which are generated at installation by postinst, except for
-	# modules.order.
+	# Remove files which are generated at installation by postinst,
+	# except for modules.order and modules.builtin
 	#
 	mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.order \
 		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.order
+	mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin \
+		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin
 	rm -f $(pkgdir)/lib/modules/$(abi_release)-$*/modules.*
+	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin \
+		$(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin
 	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_modules.order \
 		$(pkgdir)/lib/modules/$(abi_release)-$*/modules.order
 
