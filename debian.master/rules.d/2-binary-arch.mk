@@ -3,10 +3,12 @@
 
 # Prepare the out-of-tree build directory
 
-prepare-%: $(stampdir)/stamp-prepare-% prepare-checks-%
+prepare-%: $(stampdir)/stamp-prepare-%
 	@# Empty for make to be happy
-$(stampdir)/stamp-prepare-%: target_flavour = $*
-$(stampdir)/stamp-prepare-%: $(commonconfdir)/config.common.$(family) $(archconfdir)/config.common.$(arch) $(archconfdir)/config.flavour.%
+$(stampdir)/stamp-prepare-%: $(stampdir)/stamp-prepare-tree-% prepare-checks-%
+	@touch $@
+$(stampdir)/stamp-prepare-tree-%: target_flavour = $*
+$(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(archconfdir)/config.common.$(arch) $(archconfdir)/config.flavour.%
 	@echo "Preparing $*..."
 	install -d $(builddir)/build-$*
 	touch $(builddir)/build-$*/ubuntu-build
@@ -20,7 +22,7 @@ $(stampdir)/stamp-prepare-%: $(commonconfdir)/config.common.$(family) $(archconf
 build-%: $(stampdir)/stamp-build-%
 	@# Empty for make to be happy
 $(stampdir)/stamp-build-%: target_flavour = $*
-$(stampdir)/stamp-build-%: $(stampdir)/stamp-prepare-%
+$(stampdir)/stamp-build-%: prepare-%
 	@echo "Building $*..."
 	$(kmake) O=$(builddir)/build-$* $(conc_level) $(build_image)
 	$(kmake) O=$(builddir)/build-$* $(conc_level) modules

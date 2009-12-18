@@ -26,7 +26,7 @@ checks-%: abi-check-% module-check-%
 	@# Will be calling more stuff later
 
 # Check the config against the known options list.
-config-prepare-check-%: $(stampdir)/stamp-prepare-%
+config-prepare-check-%: $(stampdir)/stamp-prepare-tree-%
 	@perl -f $(DEBIAN)/scripts/config-check \
 		$(builddir)/build-$*/.config "$(arch)" "$*" "$(commonconfdir)" "$(skipconfig)"
 
