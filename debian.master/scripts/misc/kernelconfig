@@ -32,6 +32,7 @@ fi
 bindir="`pwd`/${DEBIAN}/scripts/misc"
 common_conf="$confdir/config.common.$family"
 tmpdir=`mktemp -d`
+mkdir "$tmpdir/CONFIGS"
 
 if [ "$mode" = "genconfig" ]; then
 	keep=1
@@ -97,6 +98,7 @@ for arch in $archs; do
 				exit 1 ;;
 			esac
 			cat build/.config > $archconfdir/$config
+			cat build/.config > "$tmpdir/CONFIGS/$arch-$config"
 			if [ "$keep" = "1" ]; then
 				cat build/.config > CONFIGS/$arch-$config
 			fi
@@ -139,7 +141,7 @@ for arch in $archs; do
 	flavourconfigs=$(cd $archconfdir && ls config.flavour.*)
 	for config in $flavourconfigs; do
 		if [ -f $archconfdir/$config ]; then
-			fullconf="$tmpdir/$arch-$config-full"
+			fullconf="$tmpdir/CONFIGS/$arch-$config"
 			"$bindir/../config-check" "$fullconf" "$arch" "$config" "$confdir" "0" || let "fail=$fail+1"
 		fi
 	done
