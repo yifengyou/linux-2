@@ -186,6 +186,7 @@ extern void (*late_time_init)(void);
 
 #define core_initcall(fn)		__define_initcall("1",fn,1)
 #define core_initcall_sync(fn)		__define_initcall("1s",fn,1s)
+#define earlyrootfs_initcall(fn)	__define_initcall("earlyrootfs",fn,rootfs)
 #define postcore_initcall(fn)		__define_initcall("2",fn,2)
 #define postcore_initcall_sync(fn)	__define_initcall("2s",fn,2s)
 #define arch_initcall(fn)		__define_initcall("3",fn,3)
