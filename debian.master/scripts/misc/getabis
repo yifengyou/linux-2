@@ -74,7 +74,6 @@ echo $abi > $abidir/abiname
 # NOTE: The flavours are hardcoded, because they may have changed from the
 # current build.
 
-getall lpia lpia
 getall armel versatile
 getall amd64 generic server
 getall i386 generic generic-pae 386
