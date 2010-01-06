@@ -4,7 +4,7 @@
  * This file contains AppArmor function for pathnames
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -59,6 +59,9 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 	/* There is a race window between path lookup here and the
 	 * need to strip the " (deleted) string that __d_path applies
 	 * Detect the race and relookup the path
+	 *
+	 * The stripping of (deleted) is a hack that could be removed
+	 * with an updated __d_path
 	 */
 	do {
 		tmp = ns_root;
@@ -75,10 +78,6 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 		error = PTR_ERR(res);
 		*name = buf;
 	} else if (deleted) {
-		/* The stripping of (deleted) is a hack that could be removed
-		 * with an updated __d_path
-		 */
-
 		if (!path->dentry->d_inode || flags & PFLAG_DELETED_NAMES)
 			/* On some filesystems, newly allocated dentries appear
 			 * to the security_path hooks as a deleted
@@ -132,7 +131,7 @@ static int get_name_to_buffer(struct path *path, int is_dir, char *buffer,
  * Returns an error code if the there was a failure in obtaining the
  * name.
  *
- * @name is apointer to the beginning of the pathname (which usually differs
+ * @name is a pointer to the beginning of the pathname (which usually differs
  * from the beginning of the buffer), or NULL.  If there is an error @name
  * may contain a partial or invalid name (in the case of a deleted file), that
  * can be used for audit purposes, but it can not be used for mediation.

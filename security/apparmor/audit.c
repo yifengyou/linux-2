@@ -4,7 +4,7 @@
  * This file contains AppArmor auditing functions
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -89,11 +89,11 @@ static int aa_audit_base(int type, struct aa_profile *profile,
 		pid_t pid = task->real_parent->pid;
 		audit_log_format(ab, " parent=%d", pid);
 		audit_log_format(ab, " profile=");
-		audit_log_untrustedstring(ab, profile->fqname);
+		audit_log_untrustedstring(ab, profile->base.hname);
 
 		if (profile->ns != default_namespace) {
 			audit_log_format(ab, " namespace=");
-			audit_log_untrustedstring(ab, profile->ns->base.name);
+			audit_log_untrustedstring(ab, profile->ns->base.hname);
 		}
 	}
 

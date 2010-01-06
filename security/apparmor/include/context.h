@@ -4,7 +4,7 @@
  * This file contains AppArmor contexts used to associate "labels" to objects.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -71,75 +71,82 @@ struct aa_task_context *aa_alloc_task_context(gfp_t flags);
 void aa_free_task_context(struct aa_task_context *cxt);
 void aa_dup_task_context(struct aa_task_context *new,
 			 const struct aa_task_context *old);
-void aa_cred_policy(const struct cred *cred, struct aa_profile **sys);
-struct cred *aa_get_task_policy(const struct task_struct *task,
+struct cred *aa_get_task_cred(const struct task_struct *task,
 				struct aa_profile **sys);
 int aa_replace_current_profiles(struct aa_profile *sys);
-void aa_put_task_policy(struct cred *cred);
 int aa_set_current_onexec(struct aa_profile *sys);
 int aa_set_current_hat(struct aa_profile *profile, u64 token);
 int aa_restore_previous_profile(u64 cookie);
-
-static inline struct aa_task_context *__aa_task_cxt(struct task_struct *task)
-{
-	return __task_cred(task)->security;
-}
 
 /**
  * __aa_task_is_confined - determine if @task has any confinement
  * @task: task to check confinement of
  *
- * If @task != current needs to be in RCU safe critical section
+ * If @task != current needs to be called in RCU safe critical section
  */
-static inline int __aa_task_is_confined(struct task_struct *task)
+static inline bool __aa_task_is_confined(struct task_struct *task)
 {
-	struct aa_task_context *cxt;
-	int rc = 1;
+	struct aa_task_context *cxt = __task_cred(task)->security;
 
-	cxt = __aa_task_cxt(task);
-	if (!cxt || (cxt->sys.profile->flags & PFLAG_UNCONFINED))
-		rc = 0;
-
-	return rc;
-}
-
-static inline const struct cred *aa_current_policy(struct aa_profile **sys)
-{
-	const struct cred *cred = current_cred();
-	struct aa_task_context *cxt = cred->security;
 	BUG_ON(!cxt);
-	*sys = aa_confining_profile(cxt->sys.profile);
+	if (!aa_confined(cxt->sys.profile))
+		return 0;
 
-	return cred;
+	return 1;
 }
 
-static inline const struct cred *aa_current_policy_wupd(struct aa_profile **sys)
+/**
+ * aa_cred_policy - obtain cred's profiles
+ * @cred: cred to obtain profiles from
+ *
+ * Returns: system confining profile
+ *
+ * does NOT increment reference count
+ */
+static inline struct aa_profile *aa_cred_policy(const struct cred *cred)
 {
-	const struct cred *cred = current_cred();
-	struct aa_task_context *cxt = cred->security;
-	BUG_ON(!cxt);
-
-	*sys = aa_profile_newest(cxt->sys.profile);
-	if (unlikely((cxt->sys.profile != *sys)))
-		aa_replace_current_profiles(*sys);
-	*sys = aa_filter_profile(*sys);
-
-	return cred;
-}
-
-static inline struct aa_profile *aa_current_profile(void)
-{
-	const struct cred *cred = current_cred();
 	struct aa_task_context *cxt = cred->security;
 	BUG_ON(!cxt);
 	return aa_confining_profile(cxt->sys.profile);
 }
 
-static inline struct aa_profile *aa_current_profile_wupd(void)
+/**
+ * __aa_current_profile - find the current tasks confining profile
+ *
+ * Returns: up to date confining profile or NULL if task is unconfined
+ *
+ * This fn will not update the tasks cred to the most up to date version
+ * of the profile so it is safe to call when inside of locks.
+ */
+static inline struct aa_profile *__aa_current_profile(void)
 {
-	struct aa_profile *p;
-	aa_current_policy_wupd(&p);
-	return p;
+	return aa_cred_policy(current_cred());
+}
+
+/**
+ * aa_current_profile - find the current tasks confining profile and do updates
+ *
+ * Returns: up to date confinging profile or NULL if task is unconfined
+ *
+ * This fn will update the tasks cred structure if the profile has been
+ * replaced.  Not safe to call inside locks
+ */
+static inline struct aa_profile *aa_current_profile(void)
+{
+	const struct aa_task_context *cxt = current_cred()->security;
+	struct aa_profile *profile;
+	BUG_ON(!cxt);
+
+	profile = aa_profile_newest(cxt->sys.profile);
+	/*
+	 * Whether or not replacement succeeds, use newest profile so
+	 * there is no need to update it after replacement.
+	 */
+	if (unlikely((cxt->sys.profile != profile)))
+		aa_replace_current_profiles(profile);
+	profile = aa_filter_profile(profile);
+
+	return profile;
 }
 
 #endif /* __AA_CONTEXT_H */

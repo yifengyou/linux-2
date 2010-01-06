@@ -4,7 +4,7 @@
  * This file contains AppArmor /proc/<pid>/attr/ interface functions
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -16,47 +16,40 @@
 #include "include/policy.h"
 #include "include/domain.h"
 
-int aa_getprocattr(struct aa_namespace *ns, struct aa_profile *profile,
-		   char **string)
+/**
+ * aa_getprocattr - Return the profile information for @profile
+ * @profile: the profile to print profile info about
+ * @string: the string that will contain the profile and namespace info
+ *
+ * Returns: length of @string on success else error on failure
+ *
+ * Requires: profile != NULL
+ *
+ * Creates a string containing the namespace_name://profile_name for
+ * @profile.
+ */
+int aa_getprocattr(struct aa_profile *profile, char **string)
 {
 	char *str;
-	int len = 0;
+	int len = 0, mode_len, name_len, ns_len = 0;
+	const char *mode_str = profile_mode_names[profile->mode];
+	struct aa_namespace *ns = profile->ns;
+	char *s;
 
-	if (profile) {
-		int mode_len, name_len, ns_len = 0;
-		const char *mode_str = profile_mode_names[profile->mode];
-		char *s;
+	mode_len = strlen(mode_str) + 3;	/* + 3 for _() */
+	name_len = strlen(profile->base.hname);
+	if (ns != default_namespace)
+		ns_len = strlen(ns->base.name) + 3; /*+ 3 for :// */
+	len = mode_len + ns_len + name_len + 1;	    /*+ 1 for \n */
+	s = str = kmalloc(len + 1, GFP_ATOMIC);	    /* + 1 \0 */
+	if (!str)
+		return -ENOMEM;
 
-		mode_len = strlen(mode_str) + 3;	/* + 3 for _() */
-		name_len = strlen(profile->fqname);
-		if (ns != default_namespace)
-			ns_len = strlen(ns->base.name) + 3; /*+ 3 for :// */
-		len = mode_len + ns_len + name_len + 1;	    /*+ 1 for \n */
-		s = str = kmalloc(len + 1, GFP_ATOMIC);	    /* + 1 \0 */
-		if (!str)
-			return -ENOMEM;
-
-		if (ns_len) {
-			sprintf(s, "%s://", ns->base.name);
-			s += ns_len;
-		}
-		sprintf(s, "%s (%s)\n",profile->fqname, mode_str);
-	} else {
-		const char unconfined_str[] = "unconfined\n";
-
-		len = sizeof(unconfined_str) - 1;	/* - 1 for \0 */
-		if (ns != default_namespace)
-			len += strlen(ns->base.name) + 3; /* + 3 for :// */
-
-		str = kmalloc(len + 1, GFP_ATOMIC);
-		if (!str)
-			return -ENOMEM;
-
-		if (ns != default_namespace)
-			sprintf(str, "%s://%s", ns->base.name, unconfined_str);
-		else
-			memcpy(str, unconfined_str, len);
+	if (ns_len) {
+		sprintf(s, "%s://", ns->base.name);
+		s += ns_len;
 	}
+	sprintf(s, "%s (%s)\n",profile->base.hname, mode_str);
 	*string = str;
 
 	/* NOTE: len does not include \0 of string, not saved as part of file */
@@ -99,15 +92,15 @@ int aa_setprocattr_changehat(char *args, int test)
 	return aa_change_hat(hat, token, test);
 }
 
-int aa_setprocattr_changeprofile(char *args, int onexec, int test)
+int aa_setprocattr_changeprofile(char *fqname, int onexec, int test)
 {
 	char *name, *ns_name;
 
-	name = aa_split_name_from_ns(args, &ns_name);
+	name = aa_split_fqname(fqname, &ns_name);
 	return aa_change_profile(ns_name, name, onexec, test);
 }
 
-int aa_setprocattr_permipc(char *args)
+int aa_setprocattr_permipc(char *fqname)
 {
 	/* TODO: add ipc permission querying */
 	return -ENOTSUPP;

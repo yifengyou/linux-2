@@ -4,7 +4,7 @@
  * This file contains basic common functions used in AppArmor
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -18,22 +18,37 @@
 #include "include/audit.h"
 
 
-char *aa_split_name_from_ns(char *args, char **ns_name)
+/**
+ * aa_split_fqname - split a fqname into a profile and namespace name
+ * @fqname: a full qualified name in namespace profile format
+ * @ns_name: pointer to portion of the string containing the ns name
+ *
+ * Returns: profile name or NULL if one is not specified
+ *
+ * Split a namespace name from a profile name (see policy.c for naming
+ * description).  If a portion of the name is missing it returns NULL for
+ * that portion.
+ *
+ * NOTE: may modifiy the @fqname string.  The pointers returned point
+ *       into the @fqname string.
+ */
+char *aa_split_fqname(char *fqname, char **ns_name)
 {
-	char *name = strstrip(args);
+	char *name = strstrip(fqname);
 
 	*ns_name = NULL;
-	if (args[0] == ':') {
-		char *split = strstrip(strchr(&args[1], ':'));
-
-		if (!split)
-			return NULL;
-
-		*split = 0;
-		*ns_name = &args[1];
-		name = strstrip(split + 1);
+	if (fqname[0] == ':') {
+		char *split = strchr(&fqname[1], ':');
+		if (split) {
+			/* overwrite ':' with \0 */
+			*split = 0;
+			name = strstrip(split + 1);
+		} else
+			/* a ns name without a following profile is allowed */
+			name = NULL;
+		*ns_name = &fqname[1];
 	}
-	if (*name == 0)
+	if (name && *name == 0)
 		name = NULL;
 
 	return name;

@@ -3,7 +3,7 @@
  *
  * This file contains AppArmor security identifier (sid) definitions
  *
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

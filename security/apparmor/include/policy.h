@@ -4,7 +4,7 @@
  * This file contains AppArmor policy definitions.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -67,6 +67,7 @@ enum profile_flags {
 	PFLAG_MMAP_MIN_ADDR = 0x80,	/* profile controls mmap_min_addr */
 	PFLAG_DELETED_NAMES = 0x100,	/* mediate deleted paths */
 	PFLAG_CONNECT_PATH = 0x200,	/* connect disconnected paths to / */
+	PFLAG_OLD_NULL_TRANS = 0x400,	/* use // as the null transition */
 };
 
 #define AA_NEW_SID 0
@@ -75,6 +76,7 @@ struct aa_profile;
 
 /* struct aa_policy_common - common part of both namespaces and profiles
  * @name: name of the object
+ * @hname - The hierarchical name
  * @count: reference count of the obj
  * lock: lock for modifying the object
  * @list: list object is on
@@ -82,6 +84,7 @@ struct aa_profile;
  */
 struct aa_policy_common {
 	char *name;
+	char *hname;
 	struct kref count;
 	rwlock_t lock;
 	struct list_head list;
@@ -131,7 +134,6 @@ struct aa_namespace {
 
 /* struct aa_profile - basic confinement data
  * @base - base componets of the profile (name, refcount, lists, lock ...)
- * @fqname - The fully qualified profile name, less the namespace name
  * @ns: namespace the profile is in
  * @parent: parent profile of this profile, if one exists
  * @replacedby: is set profile that replaced this profile
@@ -164,12 +166,13 @@ struct aa_namespace {
  */
 struct aa_profile {
 	struct aa_policy_common base;
-	char *fqname;
 
 	struct aa_namespace *ns;
 	struct aa_profile *parent;
-	struct aa_profile *replacedby;
-
+	union {
+		struct aa_profile *replacedby;
+		const char *rename;
+	};
 	struct aa_dfa *xmatch;
 	int xmatch_len;
 	u32 sid;
@@ -197,7 +200,7 @@ void aa_add_profile(struct aa_policy_common *common,
 
 int aa_alloc_default_namespace(void);
 void aa_free_default_namespace(void);
-void free_aa_namespace_kref(struct kref *kref);
+void aa_free_namespace_kref(struct kref *kref);
 
 struct aa_namespace *aa_find_namespace(const char *name);
 void aa_profile_ns_list_release(void);
@@ -221,20 +224,29 @@ static inline struct aa_namespace *aa_get_namespace(struct aa_namespace *ns)
 static inline void aa_put_namespace(struct aa_namespace *ns)
 {
 	if (ns)
-		kref_put(&ns->base.count, free_aa_namespace_kref);
+		kref_put(&ns->base.count, aa_free_namespace_kref);
 }
 
-struct aa_profile *alloc_aa_profile(const char *name);
-struct aa_profile *aa_alloc_null_profile(struct aa_profile *parent, int hat);
-void free_aa_profile_kref(struct kref *kref);
-void free_aa_profile(struct aa_profile *profile);
+struct aa_profile *aa_alloc_profile(const char *name);
+struct aa_profile *aa_new_null_profile(struct aa_profile *parent, int hat);
+void aa_free_profile_kref(struct kref *kref);
 struct aa_profile *aa_find_child(struct aa_profile *parent, const char *name);
 struct aa_profile *aa_find_profile(struct aa_namespace *ns, const char *name);
 struct aa_profile *aa_match_profile(struct aa_namespace *ns, const char *name);
 
-ssize_t aa_interface_add_profiles(void *data, size_t size);
-ssize_t aa_interface_replace_profiles(void *udata, size_t size);
+ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only);
 ssize_t aa_interface_remove_profiles(char *name, size_t size);
+
+/**
+ * aa_confined - test whether @profile is confining
+ * @profile: profile to test if is confining
+ *
+ * Returns: true if profile will confine a task
+ */
+static inline bool aa_confined(struct aa_profile *profile)
+{
+	return !(profile->flags & PFLAG_UNCONFINED);
+}
 
 /**
  * aa_filter_profile - filter out profiles that shouldn't be used to mediate
@@ -246,11 +258,10 @@ ssize_t aa_interface_remove_profiles(char *name, size_t size);
  */
 static inline struct aa_profile *aa_filter_profile(struct aa_profile *profile)
 {
-	if (profile->flags & PFLAG_UNCONFINED)
+	if (!aa_confined(profile))
 		return NULL;
 	return profile;
 }
-
 
 /**
  * aa_profile_newest - find the newest version of @profile
@@ -303,7 +314,7 @@ static inline struct aa_profile *aa_get_profile(struct aa_profile *p)
 static inline void aa_put_profile(struct aa_profile *p)
 {
 	if (p)
-		kref_put(&p->base.count, free_aa_profile_kref);
+		kref_put(&p->base.count, aa_free_profile_kref);
 }
 
 static inline int PROFILE_AUDIT_MODE(struct aa_profile *profile)

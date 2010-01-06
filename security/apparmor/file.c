@@ -4,7 +4,7 @@
  * This file contains AppArmor mediation of files
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -261,6 +261,16 @@ int aa_path_perm(struct aa_profile *profile, const char *operation,
 	return sa.base.error;
 }
 
+/* helper for aa_path_link - test target xindex == OR subset of link xindex */
+static inline bool xindex_is_subset(u16 link, u16 target)
+{
+	if (((link & ~AA_X_UNSAFE) != (target & ~AA_X_UNSAFE)) ||
+	    ((link & AA_X_UNSAFE) && !(target & AA_X_UNSAFE)))
+		return 0;
+
+	return 1;
+}
+
 /**
  * aa_path_link - Handle hard link permission check
  * @profile: the profile being enforced
@@ -313,18 +323,36 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 	sa.base.error = -EACCES;
 
 	/* aa_str_perms - handles the case of the dfa being NULL */
-	sa.perms = aa_str_perms(profile->file.dfa, DFA_START, sa.name, &cond,
+	sa.perms = aa_str_perms(profile->file.dfa, DFA_START, lname, &cond,
 				&state);
 	sa.perms.audit &= AA_MAY_LINK;
 	sa.perms.quiet &= AA_MAY_LINK;
 	sa.perms.kill &= AA_MAY_LINK;
 
+	/* Test for single entry link file perm, the link target is implied.
+	 * This is equivalent to a link pair rule of
+	 * link subset /link/name -> / **
+	 */
+	if (sa.perms.allowed & AA_LINK_SINGLE) {
+		/* map AA_LINK_SUBSET to AA_MAY_LINK perm for common code */
+		sa.perms.allowed |= AA_MAY_LINK;
+		sa.perms.audit &= ~AA_MAY_LINK;
+		sa.perms.quiet &= ~AA_MAY_LINK;
+		sa.perms.kill &= ~AA_MAY_LINK;
+		sa.perms.audit |= (sa.perms.audit & AA_LINK_SUBSET) >> 4;
+		sa.perms.quiet |= (sa.perms.quiet & AA_LINK_SUBSET) >> 4;
+		sa.perms.kill |= (sa.perms.kill & AA_LINK_SUBSET) >> 4;
+		goto subset_test;
+	}
+
+	/* Do link pair permission check  (link file -> target file) */
 	if (!(sa.perms.allowed & AA_MAY_LINK))
 		goto audit;
 
 	/* test to see if target can be paired with link */
-	state = aa_dfa_null_transition(profile->file.dfa, state);
-	perms = aa_str_perms(profile->file.dfa, state, sa.name2, &cond, NULL);
+	state = aa_dfa_null_transition(profile->file.dfa, state,
+				       profile->flags & PFLAG_OLD_NULL_TRANS);
+	perms = aa_str_perms(profile->file.dfa, state, tname, &cond, NULL);
 	if (!(perms.allowed & AA_MAY_LINK)) {
 		sa.base.info = "target restricted";
 		goto audit;
@@ -332,12 +360,13 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 
 	/* done if link subset test is not required */
 	if (!(perms.allowed & AA_LINK_SUBSET))
-		goto audit;
+		goto done_tests;
 
+subset_test:
 	/* Do link perm subset test requiring allowed permission on link are a
 	 * subset of the allowed permissions on target.
 	 */
-	perms = aa_str_perms(profile->file.dfa, DFA_START, sa.name2, &cond,
+	perms = aa_str_perms(profile->file.dfa, DFA_START, tname, &cond,
 			     NULL);
 
 	/* AA_MAY_LINK is not considered in the subset test */
@@ -345,19 +374,17 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 	sa.perms.allowed &= perms.allowed | AA_MAY_LINK;
 
 	sa.request |= AA_AUDIT_FILE_MASK & (sa.perms.allowed & ~perms.allowed);
-	if (sa.request & ~sa.perms.allowed)
-		sa.base.error = -EACCES;
-	else if (sa.perms.allowed & MAY_EXEC) {
-		if (((sa.perms.xindex & ~AA_X_UNSAFE) !=
-		     (perms.xindex & ~AA_X_UNSAFE)) ||
-		    ((sa.perms.xindex & AA_X_UNSAFE) &&
-		     !(perms.xindex & AA_X_UNSAFE))) {
-			sa.perms.allowed &= ~MAY_EXEC;
-			sa.request |= MAY_EXEC;
-			sa.base.info = "link not subset of target";
-		}
+	if (sa.request & ~sa.perms.allowed) {
+		goto audit;
+	} else if ((sa.perms.allowed & MAY_EXEC) &&
+		   !xindex_is_subset(sa.perms.xindex, perms.xindex)) {
+		sa.perms.allowed &= ~MAY_EXEC;
+		sa.request |= MAY_EXEC;
+		sa.base.info = "link not subset of target";
+		goto audit;
 	}
 
+done_tests:
 	sa.base.error = 0;
 
 audit:
@@ -397,7 +424,7 @@ static int aa_file_common_perm(struct aa_profile *profile,
 		if (sa.base.error == -ENOENT &&
 		    aa_is_deleted_file(file->f_path.dentry)) {
 			/* Access to open files that are deleted are
-			 * give a pass (implicit delegation
+			 * give a pass (implicit delegation)
 			 */
 			sa.base.error = 0;
 			sa.perms.allowed = sa.request;

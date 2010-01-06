@@ -4,7 +4,7 @@
  * This file contains AppArmor LSM hooks.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -96,6 +96,12 @@ static void apparmor_cred_transfer(struct cred *new, const struct cred *old)
 static int apparmor_ptrace_access_check(struct task_struct *child,
 					unsigned int mode)
 {
+	int rc;
+
+	rc = cap_ptrace_access_check(child, mode);
+	if (rc)
+		return rc;
+
 	return aa_ptrace(current, child, mode);
 }
 
@@ -113,7 +119,7 @@ static int apparmor_capget(struct task_struct *target, kernel_cap_t *effective,
 
 	rcu_read_lock();
 	cred = __task_cred(target);
-	aa_cred_policy(cred, &profile);
+	profile = aa_cred_policy(cred);
 
 	*effective = cred->cap_effective;
 	*inheritable = cred->cap_inheritable;
@@ -135,7 +141,7 @@ static int apparmor_capable(struct task_struct *task, const struct cred *cred,
 	/* cap_capable returns 0 on success, else -EPERM */
 	int error = cap_capable(task, cred, cap, audit);
 
-	aa_cred_policy(cred, &profile);
+	profile = aa_cred_policy(cred);
 	if (profile && (!error || cap_raised(profile->caps.set, cap)))
 		error = aa_capable(task, profile, cap, audit);
 
@@ -145,7 +151,7 @@ static int apparmor_capable(struct task_struct *task, const struct cred *cred,
 static int apparmor_sysctl(struct ctl_table *table, int op)
 {
 	int error = 0;
-	struct aa_profile *profile = aa_current_profile_wupd();
+	struct aa_profile *profile = aa_current_profile();
 
 	if (profile) {
 		char *buffer, *name;
@@ -188,7 +194,7 @@ static int common_perm(const char *op, struct path *path, u16 mask,
 	struct aa_profile *profile;
 	int error = 0;
 
-	profile = aa_current_profile();
+	profile = __aa_current_profile();
 	if (profile)
 		error = aa_path_perm(profile, op, path, mask, cond);
 
@@ -280,7 +286,7 @@ static int apparmor_path_link(struct dentry *old_dentry, struct path *new_dir,
 	if (!mediated_filesystem(old_dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile_wupd();
+	profile = aa_current_profile();
 	if (profile)
 		error = aa_path_link(profile, old_dentry, new_dir, new_dentry);
 	return error;
@@ -295,7 +301,7 @@ static int apparmor_path_rename(struct path *old_dir, struct dentry *old_dentry,
 	if (!mediated_filesystem(old_dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile_wupd();
+	profile = aa_current_profile();
 	if (profile) {
 		struct path old_path = { old_dir->mnt, old_dentry };
 		struct path new_path = { new_dir->mnt, new_dentry };
@@ -322,7 +328,7 @@ static int apparmor_path_chmod(struct dentry *dentry, struct vfsmount *mnt,
 	if (!mediated_filesystem(dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile_wupd();
+	profile = aa_current_profile();
 	if (profile) {
 		struct path path = { mnt, dentry };
 		struct path_cond cond = { dentry->d_inode->i_uid,
@@ -344,7 +350,7 @@ static int apparmor_path_chown(struct path *path, uid_t uid, gid_t gid)
 	if (!mediated_filesystem(path->dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile_wupd();
+	profile = aa_current_profile();
 	if (profile) {
 		struct path_cond cond =  { path->dentry->d_inode->i_uid,
 					   path->dentry->d_inode->i_mode
@@ -361,12 +367,12 @@ static int apparmor_dentry_open(struct file *file, const struct cred *cred)
 	struct aa_profile *profile;
 	int error = 0;
 
-	/* If in exec permission is handled by bprm hooks */
+	/* If in exec, permission is handled by bprm hooks */
 	if (current->in_execve ||
 	    !mediated_filesystem(file->f_path.dentry->d_inode))
 		return 0;
 
-	aa_cred_policy(cred, &profile);
+	profile = aa_cred_policy(cred);
 	if (profile) {
 		struct aa_file_cxt *fcxt = file->f_security;
 		struct inode *inode = file->f_path.dentry->d_inode;
@@ -413,7 +419,7 @@ static int apparmor_file_permission(struct file *file, int mask)
 	    !mediated_filesystem(file->f_path.dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile();
+	profile = __aa_current_profile();
 
 #ifdef CONFIG_SECURITY_APPARMOR_COMPAT_24
 	/*
@@ -437,7 +443,7 @@ static int common_file_perm(const char *op, struct file *file, u16 mask)
 	    !mediated_filesystem(file->f_path.dentry->d_inode))
 		return 0;
 
-	profile = aa_current_profile_wupd();
+	profile = aa_current_profile();
 	if (profile && ((fprofile != profile) || (mask & ~fcxt->allowed)))
 		error = aa_file_perm(profile, op, file, mask);
 
@@ -466,7 +472,7 @@ static int common_mmap(struct file *file, const char *operation,
 	if (prot & PROT_READ)
 		mask |= MAY_READ;
 	/*
-	 *Private mappings don't require write perms since they don't
+	 * Private mappings don't require write perms since they don't
 	 * write back to the files
 	 */
 	if ((prot & PROT_WRITE) && !(flags & MAP_PRIVATE))
@@ -503,31 +509,19 @@ static int apparmor_getprocattr(struct task_struct *task, char *name,
 				char **value)
 {
 	int error = -ENOENT;
-	struct aa_namespace *ns;
-	struct aa_profile *profile, *onexec, *prev;
+	struct aa_profile *profile;
 	/* released below */
-	const struct cred *cred = aa_get_task_policy(task, &profile);
+	const struct cred *cred = aa_get_task_cred(task, &profile);
 	struct aa_task_context *cxt = cred->security;
-	ns = cxt->sys.profile->ns;
-	onexec = cxt->sys.onexec;
-	prev = cxt->sys.previous;
 
-	/* task must be either querying itself, unconfined or can ptrace */
-	if (current != task && profile && !capable(CAP_SYS_PTRACE)) {
-		error = -EPERM;
-	} else {
-		if (strcmp(name, "current") == 0) {
-			error = aa_getprocattr(ns, profile, value);
-		} else if (strcmp(name, "prev") == 0) {
-			if (prev)
-				error = aa_getprocattr(ns, prev, value);
-		} else if (strcmp(name, "exec") == 0) {
-			if (onexec)
-				error = aa_getprocattr(ns, onexec, value);
-		} else {
-			error = -EINVAL;
-		}
-	}
+	if (strcmp(name, "current") == 0)
+		error = aa_getprocattr(cxt->sys.profile, value);
+	else if (strcmp(name, "prev") == 0  && cxt->sys.previous)
+		error = aa_getprocattr(cxt->sys.previous, value);
+	else if (strcmp(name, "exec") == 0 && cxt->sys.onexec)
+		error = aa_getprocattr(cxt->sys.onexec, value);
+	else
+		error = -EINVAL;
 
 	put_cred(cred);
 
@@ -595,7 +589,7 @@ static int apparmor_setprocattr(struct task_struct *task, char *name,
 static int apparmor_task_setrlimit(unsigned int resource,
 				   struct rlimit *new_rlim)
 {
-	struct aa_profile *profile = aa_current_profile_wupd();
+	struct aa_profile *profile = aa_current_profile();
 	int error = 0;
 
 	if (profile)
@@ -613,7 +607,7 @@ static int apparmor_socket_create(int family, int type, int protocol, int kern)
 	if (kern)
 		return 0;
 
-	profile = aa_current_profile();
+	profile = __aa_current_profile();
 	if (profile)
 		error = aa_net_perm(profile, "socket_create", family,
 				    type, protocol);

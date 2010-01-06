@@ -4,7 +4,7 @@
  * This file contains AppArmor policy dfa matching engine definitions.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -31,6 +31,7 @@
  */
 
 #define YYTH_MAGIC	0x1B5E783D
+#define YYTH_DEF_RECURSE 0x1			/* DEF Table is recursive */
 
 struct table_set_header {
 	u32 th_magic;		/* YYTH_MAGIC */
@@ -57,6 +58,7 @@ struct table_set_header {
 #define YYTD_DATA8	1
 #define YYTD_DATA16	2
 #define YYTD_DATA32	4
+#define YYTD_DATA64	8
 
 /* Each ACCEPT2 table gets 6 dedicated flags, YYTD_DATAX define the
  * first flags
@@ -84,6 +86,7 @@ struct table_header {
 #define ACCEPT_TABLE2(DFA) ((u32 *)((DFA)->tables[YYTD_ID_ACCEPT2]->td_data))
 
 struct aa_dfa {
+	u16 flags;
 	struct table_header *tables[YYTD_ID_TSIZE];
 };
 

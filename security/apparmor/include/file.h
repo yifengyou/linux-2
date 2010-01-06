@@ -4,7 +4,7 @@
  * This file contains AppArmor file mediation function definitions.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -38,6 +38,7 @@ struct aa_profile;
 #define AA_MAY_CHMOD			0x0800
 #define AA_MAY_CHOWN			0x1000
 
+#define AA_LINK_SINGLE			0x2000	/* overlap with CHANGEHAT */
 #define AA_MAY_CHANGEHAT		0x2000	/* ctrl auditing only */
 #define AA_MAY_ONEXEC			0x4000	/* exec allows onexec */
 #define AA_MAY_CHANGE_PROFILE		0x8000

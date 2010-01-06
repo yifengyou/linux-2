@@ -4,7 +4,7 @@
  * This file contains AppArmor policy attachment and domain transitions
  *
  * Copyright (C) 2002-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -42,8 +42,9 @@ void aa_free_domain_entries(struct aa_domain *domain)
 		return;
 
 	for (i = 0; i < domain->size; i++)
-		kfree(domain->table[i]);
-	kfree(domain->table);
+		kzfree(domain->table[i]);
+	kzfree(domain->table);
+	domain->table = NULL;
 }
 
 /*
@@ -62,7 +63,7 @@ static int aa_may_change_ptraced_domain(struct task_struct *task,
 	tracer = tracehook_tracer_task(task);
 	if (tracer)
 		/* released below */
-		cred = aa_get_task_policy(tracer, &tracerp);
+		cred = aa_get_task_cred(tracer, &tracerp);
 	rcu_read_unlock();
 
 	/* not ptraced */
@@ -114,13 +115,8 @@ static struct file_perms change_profile_perms(struct aa_profile *profile,
 
 	/* try matching with namespace name and then profile */
 	state = aa_dfa_match(profile->file.dfa, DFA_START, ns->base.name);
-	state = aa_dfa_null_transition(profile->file.dfa, state);
+	state = aa_dfa_null_transition(profile->file.dfa, state, 0);
 	return aa_str_perms(profile->file.dfa, state, name, &cond, rstate);
-}
-
-static const char *next_name(int xtype, const char *name)
-{
-	return NULL;
 }
 
 /* __aa_attach_match_ - find an attachment match
@@ -176,6 +172,47 @@ static struct aa_profile *aa_sys_find_attach(struct aa_policy_common *base,
 }
 
 /**
+ * separate_fqname - separate the namespace and profile names
+ * @fqname: the fqname name to split
+ * @ns_name: the namespace name if it exists
+ *
+ * Returns: profile name if it is specified
+ *
+ * This is the xtable equivalent routine of aa_split_fqname.  It finds the
+ * split in an xtable fqname which contains an embedded \0 instead of a :
+ * if a namespace is specified.  This is done so the xtable is constant and
+ * isn't resplit on every lookup.
+ *
+ * Either the profile or namespace name may be optional but if the namespace
+ * is specified the profile name termination must be present.  This results
+ * in the following possible encodings:
+ * profile_name\0
+ * :ns_name\0profile_name\0
+ * :ns_name\0\0
+ */
+static const char *separate_fqname(const char *fqname, const char **ns_name)
+{
+	const char *name;
+
+	if (fqname[0] == ':') {
+		*ns_name = fqname + 1;		/* skip : */
+		name = *ns_name + strlen(*ns_name) + 1;
+		if (!*name)
+			name = NULL;
+	} else {
+		*ns_name = NULL;
+		name = fqname;
+	}
+
+	return name;
+}
+
+static const char *next_name(int xtype, const char *name)
+{
+	return NULL;
+}
+
+/**
  * x_to_profile - get target profile for a given xindex
  * @ns: namespace of profile
  * @profile: current profile
@@ -184,7 +221,7 @@ static struct aa_profile *aa_sys_find_attach(struct aa_policy_common *base,
  *
  * find profile for a transition index
  *
- * Returns: refcounted profile or ERR_PTR
+ * Returns: refcounted profile or NULL if not found available
  */
 static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 				       struct aa_profile *profile,
@@ -200,7 +237,7 @@ static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 	switch (xtype) {
 	case AA_X_NONE:
 		/* fail exec unless ix || ux fallback - handled by caller */
-		return ERR_PTR(-EACCES);
+		return NULL;
 	case AA_X_NAME:
 		if (xindex & AA_X_CHILD)
 			/* released by caller */
@@ -229,11 +266,11 @@ static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 			continue;
 		} else if (*name == ':') {
 			/* switching namespace */
-			const char *ns_name = name + 1;
-			name = xname = ns_name + strlen(ns_name) + 1;
-			if (!*xname)
+			const char *ns_name;
+			xname = name = separate_fqname(name, &ns_name);
+			if (!xname)
 				/* no name so use profile name */
-				xname = profile->fqname;
+				xname = profile->base.hname;
 			if (*ns_name == '@') {
 				/* TODO: variable support */
 				;
@@ -255,9 +292,6 @@ static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 	}
 
 out:
-	if (!new_profile)
-		return ERR_PTR(-ENOENT);
-
 	/* released by caller */
 	return new_profile;
 }
@@ -329,7 +363,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 		 */
 		sa.perms = change_profile_perms(profile, cxt->sys.onexec->ns,
 						sa.name, &state);
-		state = aa_dfa_null_transition(profile->file.dfa, state);
+		state = aa_dfa_null_transition(profile->file.dfa, state, 0);
 	}
 	sa.perms = aa_str_perms(profile->file.dfa, state, sa.name, &cond, NULL);
 	if (cxt->sys.onexec && sa.perms.allowed & AA_MAY_ONEXEC) {
@@ -339,7 +373,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	} else if (sa.perms.allowed & MAY_EXEC) {
 		new_profile = x_to_profile(ns, profile, sa.name,
 					   sa.perms.xindex);
-		if (IS_ERR(new_profile)) {
+		if (!new_profile) {
 			if (sa.perms.xindex & AA_X_INHERIT) {
 				/* (p|c|n)ix - don't change profile */
 				sa.base.info = "ix fallback";
@@ -348,20 +382,18 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 				new_profile = aa_get_profile(ns->unconfined);
 				sa.base.info = "ux fallback";
 			} else {
-				sa.base.error = PTR_ERR(new_profile);
-				if (sa.base.error == -ENOENT)
-					sa.base.info = "profile not found";
-				new_profile = NULL;
+				sa.base.error = -ENOENT;
+				sa.base.info = "profile not found";
 			}
 		}
 	} else if (PROFILE_COMPLAIN(profile)) {
-		new_profile = aa_alloc_null_profile(profile, 0);
+		new_profile = aa_new_null_profile(profile, 0);
 		sa.base.error = -EACCES;
 		if (!new_profile) {
 			sa.base.error = -ENOMEM;
 			sa.base.info = "could not create null profile";
 		} else
-			sa.name2 = new_profile->fqname;
+			sa.name2 = new_profile->base.hname;
 		sa.perms.xindex |= AA_X_UNSAFE;
 	} else {
 		sa.base.error = -EACCES;
@@ -403,10 +435,10 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 		bprm->unsafe |= AA_SECURE_X_NEEDED;
 
 apply:
-	sa.name2 = new_profile->fqname;
+	sa.name2 = new_profile->base.hname;
 	/* When switching namespace ensure its part of audit message */
 	if (new_profile->ns != ns)
-		sa.name3 = new_profile->ns->base.name;
+		sa.name3 = new_profile->ns->base.hname;
 
 	/* when transitioning profiles clear unsafe personality bits */
 	bprm->per_clear |= PER_CLEAR_ON_SETID;
@@ -446,18 +478,13 @@ int apparmor_bprm_secureexec(struct linux_binprm *bprm)
 
 void apparmor_bprm_committing_creds(struct linux_binprm *bprm)
 {
-	struct aa_profile *profile;
-	/* ref released below */
-	struct cred *cred = aa_get_task_policy(current, &profile);
+	struct aa_profile *profile = __aa_current_profile();
 	struct aa_task_context *new_cxt = bprm->cred->security;
 
-	/* bail out if unconfiged or not changing profile */
+	/* bail out if unconfined or not changing profile */
 	if ((new_cxt->sys.profile == profile) ||
-	    (new_cxt->sys.profile->flags & PFLAG_UNCONFINED)) {
-		put_cred(cred);
+	    (!aa_confined(new_cxt->sys.profile)))
 		return;
-	}
-	put_cred(cred);
 
 	current->pdeath_signal = 0;
 
@@ -507,7 +534,8 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 	};
 	char *name = NULL;
 
-	cred = aa_current_policy(&profile);
+	/* released below */
+	cred = aa_get_task_cred(current, &profile);
 	cxt = cred->security;
 	previous_profile = cxt->sys.previous;
 
@@ -518,13 +546,17 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 	}
 
 	if (hat_name) {
+		/* attempting to change into a new hat or switch to a sibling */
 		struct aa_profile *root;
 		root = PROFILE_IS_HAT(profile) ? profile->parent : profile;
-		sa.name2 = profile->ns->base.name;
+		sa.name2 = profile->ns->base.hname;
 
 		/* released below */
 		hat = aa_find_child(root, hat_name);
 		if (!hat) {
+			if (list_empty(&root->base.profiles) ||
+			    PROFILE_COMPLAIN(root))
+				sa.base.error = -ENOENT;
 			if (permtest || !PROFILE_COMPLAIN(root))
 				/* probing is an expected unfortunate behavior
 				 * of the change_hat api is traditionally quiet
@@ -532,20 +564,19 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 				goto out;
 
 			/* freed below */
-			name = new_compound_name(root->fqname, hat_name);
+			name = new_compound_name(root->base.hname, hat_name);
 
 			sa.name = name;
 			sa.base.info = "hat not found";
-			sa.base.error = -ENOENT;
 			/* released below */
-			hat = aa_alloc_null_profile(profile, 1);
+			hat = aa_new_null_profile(profile, 1);
 			if (!hat) {
 				sa.base.info = "failed null profile create";
 				sa.base.error = -ENOMEM;
 				goto audit;
 			}
 		} else {
-			sa.name = hat->fqname;
+			sa.name = hat->base.hname;
 			if (!PROFILE_IS_HAT(hat)) {
 				sa.base.info = "target not hat";
 				sa.base.error = -EPERM;
@@ -563,13 +594,17 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 		if (!permtest) {
 			sa.base.error = aa_set_current_hat(hat, token);
 			if (sa.base.error == -EACCES)
+				/* kill task incase of brute force attacks */
 				sa.perms.kill = AA_MAY_CHANGEHAT;
 			else if (name && !sa.base.error)
 				/* reset error for learning of new hats */
 				sa.base.error = -ENOENT;
 		}
 	} else if (previous_profile) {
-		sa.name = previous_profile->fqname;
+		/* Return to saved profile.  Kill task if restore fails
+		 * to avoid brute force attacks
+		 */
+		sa.name = previous_profile->base.hname;
 		sa.base.error = aa_restore_previous_profile(token);
 		sa.perms.kill = AA_MAY_CHANGEHAT;
 	} else
@@ -583,6 +618,7 @@ audit:
 out:
 	aa_put_profile(hat);
 	kfree(name);
+	put_cred(cred);
 
 	return sa.base.error;
 }
@@ -590,7 +626,7 @@ out:
 /**
  * aa_change_profile - perform a one-way profile transition
  * @ns_name: name of the profile namespace to change to
- * @fqname: name of profile to change to
+ * @hname: name of profile to change to
  * @onexec: whether this transition is to take place immediately or at exec
  * @permtest: true if this is just a permission test
  *
@@ -600,7 +636,7 @@ out:
  *
  * Returns %0 on success, error otherwise.
  */
-int aa_change_profile(const char *ns_name, const char *fqname, int onexec,
+int aa_change_profile(const char *ns_name, const char *hname, int onexec,
 		      int permtest)
 {
 	const struct cred *cred;
@@ -612,7 +648,7 @@ int aa_change_profile(const char *ns_name, const char *fqname, int onexec,
 		.base.gfp_mask = GFP_KERNEL,
 	};
 
-	if (!fqname && !ns_name)
+	if (!hname && !ns_name)
 		return -EINVAL;
 
 	if (onexec)
@@ -620,49 +656,50 @@ int aa_change_profile(const char *ns_name, const char *fqname, int onexec,
 	else
 		sa.base.operation = "change_profile";
 
-	cred = aa_current_policy(&profile);
+	cred = aa_get_task_cred(current, &profile);
 	cxt = cred->security;
 
 	if (ns_name) {
-		sa.name2 = ns_name;
 		/* released below */
 		ns = aa_find_namespace(ns_name);
 		if (!ns) {
 			/* we don't create new namespace in complain mode */
+			sa.name2 = ns_name;
 			sa.base.info = "namespace not found";
 			sa.base.error = -ENOENT;
 			goto audit;
 		}
+		sa.name2 = ns->base.hname;
 	} else {
 		/* released below */
 		ns = aa_get_namespace(cxt->sys.profile->ns);
-		sa.name2 = ns->base.name;
+		sa.name2 = ns->base.hname;
 	}
 
 	/* if the name was not specified, use the name of the current profile */
-	if (!fqname) {
+	if (!hname) {
 		if (!profile)
-			fqname = ns->unconfined->fqname;
+			hname = ns->unconfined->base.hname;
 		else
-			fqname = profile->fqname;
+			hname = profile->base.hname;
 	}
-	sa.name = fqname;
+	sa.name = hname;
 
-	sa.perms = change_profile_perms(profile, ns, fqname, NULL);
+	sa.perms = change_profile_perms(profile, ns, hname, NULL);
 	if (!(sa.perms.allowed & AA_MAY_CHANGE_PROFILE)) {
 		sa.base.error = -EACCES;
 		goto audit;
 	}
 
 	/* released below */
-	target = aa_find_profile(ns, fqname);
+	target = aa_find_profile(ns, hname);
 	if (!target) {
 		sa.base.info = "profile not found";
 		sa.base.error = -ENOENT;
 		if (permtest || !PROFILE_COMPLAIN(profile))
 			goto audit;
 		/* release below */
-		target = aa_alloc_null_profile(profile, 0);
+		target = aa_new_null_profile(profile, 0);
 		if (!target) {
 			sa.base.info = "failed null profile create";
 			sa.base.error = -ENOMEM;
@@ -691,6 +728,7 @@ audit:
 
 	aa_put_namespace(ns);
 	aa_put_profile(target);
+	put_cred(cred);
 
 	return sa.base.error;
 }

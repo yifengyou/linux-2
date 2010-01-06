@@ -4,7 +4,7 @@
  * This file contains AppArmor dfa based regular expression matching engine
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,7 +26,7 @@ static void free_table(struct table_header *table)
 	if (is_vmalloc_addr(table))
 		vfree(table);
 	else
-		kfree(table);
+		kzfree(table);
 }
 
 static struct table_header *unpack_table(void *blob, size_t bsize)
@@ -66,13 +66,19 @@ static struct table_header *unpack_table(void *blob, size_t bsize)
 		else if (th.td_flags == YYTD_DATA16)
 			UNPACK_ARRAY(table->td_data, blob, th.td_lolen,
 				     u16, be16_to_cpu);
-		else
+		else if (th.td_flags == YYTD_DATA32)
 			UNPACK_ARRAY(table->td_data, blob, th.td_lolen,
 				     u32, be32_to_cpu);
+		else
+			goto fail;
 	}
 
 out:
 	return table;
+fail:
+	if (table)
+		free_table(table);
+	return NULL;
 }
 
 /**
@@ -125,6 +131,7 @@ static int verify_dfa(struct aa_dfa *dfa, int flags)
 		for (i = 0; i < state_count; i++) {
 			if (DEFAULT_TABLE(dfa)[i] >= state_count)
 				goto out;
+			/* TODO: do check that DEF state recursion terminates */
 			if (BASE_TABLE(dfa)[i] >= trans_count + 256)
 				goto out;
 		}
@@ -173,6 +180,7 @@ struct aa_dfa *aa_dfa_unpack(void *blob, size_t size, int flags)
 	if (size < hsize)
 		goto fail;
 
+	dfa->flags = ntohs(*(u16 *) (blob + 12));
 	blob += hsize;
 	size -= hsize;
 
@@ -267,15 +275,45 @@ unsigned int aa_dfa_match_len(struct aa_dfa *dfa, unsigned int start,
 
 	/* current state is <state>, matching character *str */
 	if (dfa->tables[YYTD_ID_EC]) {
+		/* Equivalence class table defined */
 		u8 *equiv = EQUIV_TABLE(dfa);
-		for (; len; len--) {
-			pos = base[state] + equiv[(u8) *str++];
-			if (check[pos] == state)
+		if (dfa->flags & YYTH_DEF_RECURSE) {
+			/* default table is recursive on check */
+			for (; len; len--) {
+				int c = equiv[(u8) *str++];
+				pos = base[state] + c;
+				/* recurse through state checks */
+				while (check[pos] != state) {
+					state = def[state];
+					pos = base[state] + c;
+				}
 				state = next[pos];
-			else
+			}
+		} else {
+			/* default is direct to next state */
+			for (; len; len--) {
+				pos = base[state] + equiv[(u8) *str++];
+				if (check[pos] == state)
+					state = next[pos];
+				else
+					state = def[state];
+			}
+		}
+	} else if (dfa->flags & YYTH_DEF_RECURSE) {
+		/* No equivalence class, characters direct map */
+		/* default table is recursive on check */
+		for (; len; len--) {
+			int c = (u8) *str++;
+			pos = base[state] + c;
+			/* recurse through state checks until check matches */
+			while (check[pos] != state) {
 				state = def[state];
+				pos = base[state] + c;
+			}
+			state = next[pos];
 		}
 	} else {
+		/* default is direct to next state */
 		for (; len; len--) {
 			pos = base[state] + (u8) *str++;
 			if (check[pos] == state)
@@ -284,6 +322,7 @@ unsigned int aa_dfa_match_len(struct aa_dfa *dfa, unsigned int start,
 				state = def[state];
 		}
 	}
+
 	return state;
 }
 

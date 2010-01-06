@@ -4,7 +4,7 @@
  * This file contains AppArmor filesystem definitions.
  *
  * Copyright (C) 1998-2008 Novell/SUSE
- * Copyright 2009 Canonical Ltd.
+ * Copyright 2009-2010 Canonical Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,7 +21,6 @@ extern struct vfsmount *aa_fs_mnt;
 extern void aa_destroy_aafs(void);
 
 #ifdef CONFIG_SECURITY_APPARMOR_COMPAT_24
-extern const struct file_operations aa_fs_profiles_fops;
 extern const struct file_operations aa_fs_matching_fops;
 extern const struct file_operations aa_fs_features_fops;
 #endif
