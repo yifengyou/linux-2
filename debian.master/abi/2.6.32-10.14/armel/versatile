@@ -2777,6 +2777,7 @@ EXPORT_SYMBOL vmlinux 0xb15c3819	tcp_close
 EXPORT_SYMBOL vmlinux 0xb176258d	skb_copy_and_csum_dev
 EXPORT_SYMBOL vmlinux 0xb180a731	blk_alloc_queue_node
 EXPORT_SYMBOL vmlinux 0xb19760c3	bitmap_onto
+EXPORT_SYMBOL vmlinux 0xb1ad28e0	__gnu_mcount_nc
 EXPORT_SYMBOL vmlinux 0xb1af6e7f	sock_alloc_send_pskb
 EXPORT_SYMBOL vmlinux 0xb1c3a01a	oops_in_progress
 EXPORT_SYMBOL vmlinux 0xb1d0c8d8	scsi_remove_device
@@ -2822,6 +2823,7 @@ EXPORT_SYMBOL vmlinux 0xb41a0731	xfrm_find_acq_byseq
 EXPORT_SYMBOL vmlinux 0xb423dba1	console_blanked
 EXPORT_SYMBOL vmlinux 0xb42453d3	param_get_invbool
 EXPORT_SYMBOL vmlinux 0xb436ffa3	__cond_resched_lock
+EXPORT_SYMBOL vmlinux 0xb4390f9a	mcount
 EXPORT_SYMBOL vmlinux 0xb43fa1b5	__napi_schedule
 EXPORT_SYMBOL vmlinux 0xb4521ee0	remap_pfn_range
 EXPORT_SYMBOL vmlinux 0xb4709322	scsi_dev_info_add_list
