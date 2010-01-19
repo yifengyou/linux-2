@@ -53,7 +53,6 @@ void __init set_nx(void)
 #else
 void set_nx(void)
 {
-	nx_enabled = ( (__supported_pte_mask & _PAGE_NX) == _PAGE_NX );
 }
 #endif
 
