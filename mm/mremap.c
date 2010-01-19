@@ -414,8 +414,8 @@ unsigned long do_mremap(unsigned long addr,
 			if (vma->vm_flags & VM_MAYSHARE)
 				map_flags |= MAP_SHARED;
 
-			new_addr = get_unmapped_area_prot(vma->vm_file, 0, new_len,
-				vma->vm_pgoff, map_flags, vma->vm_flags & VM_EXEC);
+			new_addr = get_unmapped_area(vma->vm_file, 0, new_len,
+						vma->vm_pgoff, map_flags);
 			if (new_addr & ~PAGE_MASK) {
 				ret = new_addr;
 				goto out;

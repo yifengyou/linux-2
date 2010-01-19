@@ -29,7 +29,6 @@
 #include <linux/rmap.h>
 #include <linux/mmu_notifier.h>
 #include <linux/perf_event.h>
-#include <linux/random.h>
 
 #include <asm/uaccess.h>
 #include <asm/cacheflush.h>
@@ -45,18 +44,6 @@
 #ifndef arch_rebalance_pgtables
 #define arch_rebalance_pgtables(addr, len)		(addr)
 #endif
-
-/* No sane architecture will #define these to anything else */
-#ifndef arch_add_exec_range
-#define arch_add_exec_range(mm, limit)	do { ; } while (0)
-#endif
-#ifndef arch_flush_exec_range
-#define arch_flush_exec_range(mm)	do { ; } while (0)
-#endif
-#ifndef arch_remove_exec_range
-#define arch_remove_exec_range(mm, limit)	do { ; } while (0)
-#endif
-
 
 static void unmap_region(struct mm_struct *mm,
 		struct vm_area_struct *vma, struct vm_area_struct *prev,
@@ -402,8 +389,6 @@ static inline void
 __vma_link_list(struct mm_struct *mm, struct vm_area_struct *vma,
 		struct vm_area_struct *prev, struct rb_node *rb_parent)
 {
-	if (vma->vm_flags & VM_EXEC)
-		arch_add_exec_range(mm, vma->vm_end);
 	if (prev) {
 		vma->vm_next = prev->vm_next;
 		prev->vm_next = vma;
@@ -506,8 +491,6 @@ __vma_unlink(struct mm_struct *mm, struct vm_area_struct *vma,
 	rb_erase(&vma->vm_rb, &mm->mm_rb);
 	if (mm->mmap_cache == vma)
 		mm->mmap_cache = prev;
-	if (vma->vm_flags & VM_EXEC)
-		arch_remove_exec_range(mm, vma->vm_end);
 }
 
 /*
@@ -815,8 +798,6 @@ struct vm_area_struct *vma_merge(struct mm_struct *mm,
 		} else					/* cases 2, 5, 7 */
 			vma_adjust(prev, prev->vm_start,
 				end, prev->vm_pgoff, NULL);
-		if (prev->vm_flags & VM_EXEC)
-			arch_add_exec_range(mm, prev->vm_end);
 		return prev;
 	}
 
@@ -989,8 +970,7 @@ unsigned long do_mmap_pgoff(struct file *file, unsigned long addr,
 	/* Obtain the address to map to. we verify (or select) it and ensure
 	 * that it represents a valid section of the address space.
 	 */
-	addr = get_unmapped_area_prot(file, addr, len, pgoff, flags,
-		prot & PROT_EXEC);
+	addr = get_unmapped_area(file, addr, len, pgoff, flags);
 	if (addr & ~PAGE_MASK)
 		return addr;
 
@@ -1473,17 +1453,13 @@ void arch_unmap_area_topdown(struct mm_struct *mm, unsigned long addr)
 }
 
 unsigned long
-get_unmapped_area_prot(struct file *file, unsigned long addr, unsigned long len,
-		unsigned long pgoff, unsigned long flags, int exec)
+get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
+		unsigned long pgoff, unsigned long flags)
 {
 	unsigned long (*get_area)(struct file *, unsigned long,
 				  unsigned long, unsigned long, unsigned long);
 
-	if (exec && current->mm->get_unmapped_exec_area)
-		get_area = current->mm->get_unmapped_exec_area;
-	else
-		get_area = current->mm->get_unmapped_area;
-
+	get_area = current->mm->get_unmapped_area;
 	if (file && file->f_op && file->f_op->get_unmapped_area)
 		get_area = file->f_op->get_unmapped_area;
 	addr = get_area(file, addr, len, pgoff, flags);
@@ -1497,76 +1473,8 @@ get_unmapped_area_prot(struct file *file, unsigned long addr, unsigned long len,
 
 	return arch_rebalance_pgtables(addr, len);
 }
-EXPORT_SYMBOL(get_unmapped_area_prot);
 
-#define SHLIB_BASE	0x00110000
-
-unsigned long
-arch_get_unmapped_exec_area(struct file *filp, unsigned long addr0,
-		unsigned long len0, unsigned long pgoff, unsigned long flags)
-{
-	unsigned long addr = addr0, len = len0;
-	struct mm_struct *mm = current->mm;
-	struct vm_area_struct *vma;
-	unsigned long tmp;
-
-	if (len > TASK_SIZE)
-		return -ENOMEM;
-
-	if (flags & MAP_FIXED)
-		return addr;
-
-	if (!addr)
-		addr = randomize_range(SHLIB_BASE, 0x01000000, len);
-
-	if (addr) {
-		addr = PAGE_ALIGN(addr);
-		vma = find_vma(mm, addr);
-		if (TASK_SIZE - len >= addr &&
-		    (!vma || addr + len <= vma->vm_start))
-			return addr;
-	}
-
-	addr = SHLIB_BASE;
-	for (vma = find_vma(mm, addr); ; vma = vma->vm_next) {
-		/* At this point:  (!vma || addr < vma->vm_end). */
-		if (TASK_SIZE - len < addr)
-			return -ENOMEM;
-
-		if (!vma || addr + len <= vma->vm_start) {
-			/*
-			 * Must not let a PROT_EXEC mapping get into the
-			 * brk area:
-			 */
-			if (addr + len > mm->brk)
-				goto failed;
-
-			/*
-			 * Up until the brk area we randomize addresses
-			 * as much as possible:
-			 */
-			if (addr >= 0x01000000) {
-				tmp = randomize_range(0x01000000,
-					PAGE_ALIGN(max(mm->start_brk,
-					(unsigned long)0x08000000)), len);
-				vma = find_vma(mm, tmp);
-				if (TASK_SIZE - len >= tmp &&
-				    (!vma || tmp + len <= vma->vm_start))
-					return tmp;
-			}
-			/*
-			 * Ok, randomization didnt work out - return
-			 * the result of the linear search:
-			 */
-			return addr;
-		}
-		addr = vma->vm_end;
-	}
-
-failed:
-	return current->mm->get_unmapped_area(filp, addr0, len0, pgoff, flags);
-}
-
+EXPORT_SYMBOL(get_unmapped_area);
 
 /* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
 struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
@@ -1641,14 +1549,6 @@ out:
 	return prev ? prev->vm_next : vma;
 }
 
-static int over_stack_limit(unsigned long sz)
-{
-	if (sz < EXEC_STACK_BIAS)
-		return 0;
-	return (sz - EXEC_STACK_BIAS) >
-			current->signal->rlim[RLIMIT_STACK].rlim_cur;
-}
-
 /*
  * Verify that the stack growth is acceptable and
  * update accounting. This is shared with both the
@@ -1665,7 +1565,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
 		return -ENOMEM;
 
 	/* Stack limit test */
-	if (over_stack_limit(size))
+	if (size > rlim[RLIMIT_STACK].rlim_cur)
 		return -ENOMEM;
 
 	/* mlock limit tests */
@@ -1975,14 +1875,10 @@ int split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
 	if (new->vm_ops && new->vm_ops->open)
 		new->vm_ops->open(new);
 
-	if (new_below) {
-		unsigned long old_end = vma->vm_end;
-
+	if (new_below)
 		vma_adjust(vma, addr, vma->vm_end, vma->vm_pgoff +
 			((addr - new->vm_start) >> PAGE_SHIFT), new);
-		if (vma->vm_flags & VM_EXEC)
-			arch_remove_exec_range(mm, old_end);
-	} else
+	else
 		vma_adjust(vma, vma->vm_start, addr, vma->vm_pgoff, new);
 
 	return 0;
@@ -2232,7 +2128,6 @@ void exit_mmap(struct mm_struct *mm)
 
 	free_pgtables(tlb, vma, FIRST_USER_ADDRESS, 0);
 	tlb_finish_mmu(tlb, 0, end);
-	arch_flush_exec_range(mm);
 
 	/*
 	 * Walk the list again, actually closing and freeing it,

@@ -740,14 +740,6 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
 	if (retval)
 		goto out_free_dentry;
 
-#ifdef CONFIG_X86_32
-	/*
-	 * Turn off the CS limit completely if NX active:
-	 */
-	if (executable_stack != EXSTACK_DISABLE_X || nx_enabled)
-		arch_add_exec_range(current->mm, -1);
-#endif
-
 	/* OK, This is the point of no return */
 	current->flags &= ~PF_FORKNOEXEC;
 	current->mm->def_flags = def_flags;
