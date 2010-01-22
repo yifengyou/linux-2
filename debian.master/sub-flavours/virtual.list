@@ -4,7 +4,6 @@ drivers/acpi/*
 drivers/ata/ata_generic.ko
 drivers/ata/ata_piix.ko
 drivers/ata/libata.ko
-drivers/block/virtio_blk.ko
 drivers/block/nbd.ko
 drivers/block/loop.ko
 drivers/block/floppy.ko
@@ -54,13 +53,11 @@ drivers/net/slhc.ko
 drivers/net/slip.ko
 drivers/net/tun.ko
 drivers/net/veth.ko
-drivers/net/virtio_net.ko
 drivers/net/xen-netfront.ko
 drivers/parport/parport.ko
 drivers/parport/parport_pc.ko
 drivers/pci/hotplug/acpiphp.ko
 drivers/net/tulip/tulip.ko
-drivers/net/virtio_net.ko
 drivers/scsi/BusLogic.ko
 drivers/scsi/iscsi_tcp.ko
 drivers/scsi/libiscsi.ko
@@ -94,9 +91,6 @@ drivers/video/vga16fb.ko
 drivers/video/vgastate.ko
 drivers/video/xen-fbfront.ko
 drivers/virtio/virtio_balloon.ko
-drivers/virtio/virtio.ko
-drivers/virtio/virtio_pci.ko
-drivers/virtio/virtio_ring.ko
 drivers/watchdog/softdog.ko
 drivers/xen/*
 fs/*
