@@ -91,8 +91,8 @@ static void default_decode_mce(struct mce *m)
 	pr_emerg("Run the message through 'mcelog --ascii' to decode.\n");
 }
 
-void				(*cpu_specific_poll)(struct mce *);
-EXPORT_SYMBOL_GPL(cpu_specific_poll);
+void				(*mce_cpu_specific_poll)(struct mce *);
+EXPORT_SYMBOL_GPL(mce_cpu_specific_poll);
 
 /*
  * CPU/chipset specific EDAC code can register a callback here to print
@@ -562,8 +562,8 @@ void machine_check_poll(enum mcp_flags flags, mce_banks_t *b)
 		if (!(flags & MCP_TIMESTAMP))
 			m.tsc = 0;
 
-		if (cpu_specific_poll && !under_injection() && !mce_dont_log_ce)
-			cpu_specific_poll(&m);
+		if (mce_cpu_specific_poll && !under_injection() && !mce_dont_log_ce)
+			mce_cpu_specific_poll(&m);
 
 		/*
 		 * Don't get the IP here because it's unlikely to

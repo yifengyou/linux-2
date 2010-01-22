@@ -28,4 +28,4 @@ extern int mce_ser;
 
 extern struct mce_bank *mce_banks;
 
-extern void (*cpu_specific_poll)(struct mce *);
+extern void (*mce_cpu_specific_poll)(struct mce *);
