@@ -198,6 +198,7 @@ bitblit
 block2mtd
 blowfish
 bluecard_cs
+bluetooth
 bnep
 bnx2
 bnx2i
@@ -1004,6 +1005,7 @@ kvm-intel
 kxsd9
 kyrofb
 l1oip
+l2cap
 l440gx
 l64781
 lanai
@@ -1555,6 +1557,7 @@ reed_solomon
 reiserfs
 rfc1051
 rfc1201
+rfcomm
 rfd_ftl
 ricoh_mmc
 rio500
@@ -1690,6 +1693,7 @@ sch_red
 sch_sfq
 sch_tbf
 sch_teql
+sco
 scsi_debug
 scsi_dh_alua
 scsi_dh_emc
@@ -2237,6 +2241,7 @@ vme_tsi148
 vme_user
 v_midi
 vmlfb
+vmw_pvscsi
 vmxnet3
 vp27smpx
 vpx3220
