@@ -7,10 +7,6 @@
 # Copyright (c) 2007 Ben Collins <bcollins@ubuntu.com>
 #
 
-ifeq ($(DEBIAN),)
-DEBIAN=debian.master
-endif
-
 # dpkg-buildpackage passes options that are incomptatible
 # with the kernel build.
 unexport CFLAGS
