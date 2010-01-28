@@ -305,14 +305,16 @@ endif
 $(stampdir)/stamp-flavours:
 	@echo $(flavours) > $@
 
-binary-debs: $(stampdir)/stamp-flavours $(addprefix binary-,$(flavours)) \
-		binary-arch-headers
+binary-debs: $(stampdir)/stamp-flavours $(addprefix binary-,$(flavours))
 
 build-arch:  $(addprefix build-,$(flavours))
 
 binary-arch-deps = binary-debs
 ifeq ($(AUTOBUILD),)
 binary-arch-deps += binary-udebs
+endif
+ifeq ($(do_libc_dev_package),true)
+binary-arch-deps += binary-arch-headers
 endif
 ifneq ($(do_common_headers_indep),true)
 binary-arch-deps += binary-headers
