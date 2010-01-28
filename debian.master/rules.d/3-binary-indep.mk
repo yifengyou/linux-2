@@ -62,7 +62,10 @@ ifeq ($(do_linux_source_content),true)
 	rm -rf $(srcdir)
 endif
 
-install-indep-deps = install-headers
+install-indep-deps =
+ifeq ($(do_common_headers_indep),true)
+install-indep-deps += install-headers
+endif
 ifeq ($(do_doc_package),true)
 install-indep-deps += install-doc
 endif

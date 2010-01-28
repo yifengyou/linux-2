@@ -111,6 +111,9 @@ endif
 # linux-libc-dev may not be needed, default to building it.
 do_libc_dev_package=true
 
+# common headers normally is built as an indep package, but may be arch
+do_common_headers_indep=true
+
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 #
 # These 2 environment variables set the -j value of the kernel build. For example,

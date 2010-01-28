@@ -314,4 +314,7 @@ binary-arch-deps = binary-debs
 ifeq ($(AUTOBUILD),)
 binary-arch-deps += binary-udebs
 endif
+ifneq ($(do_common_headers_indep),true)
+binary-arch-deps += binary-headers
+endif
 binary-arch: $(binary-arch-deps)
