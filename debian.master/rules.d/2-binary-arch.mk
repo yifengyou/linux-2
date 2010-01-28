@@ -94,10 +94,12 @@ endif
 	done
 
 	# Install the full changelog.
+ifeq ($(do_doc_package),true)
 	install -d $(bindoc)
 	cat $(DEBIAN)/changelog $(DEBIAN)/changelog.historical | \
 		gzip -9 >$(bindoc)/changelog.Debian.old.gz
 	chmod 644 $(bindoc)/changelog.Debian.old.gz
+endif
 
 ifneq ($(skipsub),true)
 	for sub in $($(*)_sub); do					\

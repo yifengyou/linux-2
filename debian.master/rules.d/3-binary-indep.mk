@@ -3,6 +3,7 @@ build-indep:
 docpkg = $(doc_pkg_name)
 docdir = $(CURDIR)/debian/$(docpkg)/usr/share/doc/$(docpkg)
 install-doc:
+ifeq ($(do_doc_package),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(docpkg)
@@ -22,6 +23,7 @@ endif
 	cp -a Documentation/* $(docdir)
 	rm -rf $(docdir)/DocBook
 	find $(docdir) -name .gitignore | xargs rm -f
+endif
 
 indep_hdrpkg = $(hdrs_pkg_name)
 indep_hdrdir = $(CURDIR)/debian/$(indep_hdrpkg)/usr/src/$(indep_hdrpkg)
