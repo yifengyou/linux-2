@@ -177,6 +177,7 @@ chdir("$image_dest") or die "could not chdir to $image_dest:$!\n";
 
 # Paranoid check to make sure that the correct value is put in there
 if    (! $kimage)                 { $kimage = "vmlinuz"; } # Hmm. empty
+elsif ($kimage =~ m/^b?uImage$/o) { $kimage = "vmlinuz"; } # these produce vmlinuz
 elsif ($kimage =~ m/^b?zImage$/o) { $kimage = "vmlinuz"; } # these produce vmlinuz
 elsif ($kimage =~ m/^[iI]mage$/o) { my $nop = $kimage;   }
 elsif ($kimage =~ m/^vmlinux$/o)  { my $nop = $kimage;   }

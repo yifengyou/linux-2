@@ -97,6 +97,7 @@ exit 0 unless ($ARGV[0] && $ARGV[0] =~ /remove/) ;
 
 # Paranoid check to make sure that the correct value is put in there
 if (! $kimage)                    { $kimage = "vmlinuz";} # Hmm. empty
+elsif ($kimage =~ m/^b?uImage$/o) { $kimage = "vmlinuz";} # these produce vmlinuz
 elsif ($kimage =~ m/^b?zImage$/o) { $kimage = "vmlinuz";} # these produce vmlinuz
 elsif ($kimage =~ m/^[iI]mage$/o) { my $nop = $kimage;  }
 elsif ($kimage =~ m/^vmlinux$/o)  { my $nop = $kimage;  }
