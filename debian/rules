@@ -9,16 +9,11 @@
 
 JLOAD=$(shell expr `getconf _NPROCESSORS_ONLN` \* 1)
 
-ifeq ($(DEBIAN),)
-DEBIAN=debian.master
-endif
-
-DENV=debian/debian.env
+DEBIAN=$(shell awk -F= '($$1 == "DEBIAN") { print $$2 }' <debian/debian.env)
 
 printdebian:
 	@echo "$(DEBIAN)"
 
 # Debian Build System targets
 %:
-	@if [ ! -f $(DENV) ] ; then echo DEBIAN=$(DEBIAN) > $(DENV); chmod +x $(DENV); fi
 	@$(MAKE) -j$(JLOAD) --no-print-directory -f $(DEBIAN)/rules $@ DEBIAN=$(DEBIAN)
