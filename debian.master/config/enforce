@@ -7,6 +7,7 @@ value CONFIG_DEVKMEM n
 value CONFIG_LSM_MMAP_MIN_ADDR 0
 value CONFIG_SECURITY y
 value CONFIG_SECURITY_FILE_CAPABILITIES y
+value CONFIG_SECURITY_SELINUX y
 value CONFIG_SECURITY_SMACK y
 value CONFIG_SYN_COOKIES y
 # For architectures which support this option ensure it is enabled.
