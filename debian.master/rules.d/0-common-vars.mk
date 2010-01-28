@@ -103,6 +103,7 @@ doc_pkg_name=$(src_pkg_name)-doc
 # Similarly with the linux-source package, you need not build it as a developer. Its
 # somewhat I/O intensive and utterly useless.
 #
+do_source_package=true
 ifneq ($(wildcard /CurrentlyBuilding),)
 do_linux_source_content=true
 endif

@@ -50,6 +50,7 @@ install-headers:
 srcpkg = $(src_pkg_name)-source-$(release)
 srcdir = $(CURDIR)/debian/$(srcpkg)/usr/src/$(srcpkg)
 install-source:
+ifeq ($(do_source_package),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(srcpkg)
@@ -62,6 +63,7 @@ ifeq ($(do_linux_source_content),true)
 	(cd $(srcdir)/..; tar cf - $(srcpkg)) | bzip2 -9c > \
 		$(srcdir).tar.bz2
 	rm -rf $(srcdir)
+endif
 endif
 
 install-indep: install-headers install-doc install-source
