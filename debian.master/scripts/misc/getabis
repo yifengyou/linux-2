@@ -12,11 +12,6 @@ abi=$(echo $revision | awk -F. '{print $1}')
 verabi=$ver-$abi
 verfull=$ver-$revision
 
-repo="http://archive.ubuntu.com/ubuntu/pool/main/l"
-repo_ports="http://ports.ubuntu.com/ubuntu-ports/pool/main/l"
-repo_uni="http://archive.ubuntu.com/ubuntu/pool/universe/l"
-repo_ports_uni="http://ports.ubuntu.com/ubuntu-ports/pool/universe/l"
-
 WGET="wget --quiet -c"
 
 abidir="`pwd`/debian/abi/$verfull"
@@ -39,10 +34,10 @@ getall() {
 		echo -n "Fetching $sub..."
 		filename=linux-image-${verabi}-${sub}_${verfull}_${arch}.deb
 		cd $tmpdir
-		for r in $repo $repo_ports $repo_uni $repo_ports_uni
+		for r in "${repo_list[@]}"
 		do
 			if ! [ -f $filename ]; then
-				$WGET $r/linux/$filename
+				$WGET $r/$filename
 			fi
 		done
 		if [ "$?" = "0" ]; then
@@ -73,6 +68,13 @@ echo $abi > $abidir/abiname
 
 # NOTE: The flavours are hardcoded, because they may have changed from the
 # current build.
+
+repo_list=(
+	"http://archive.ubuntu.com/ubuntu/pool/main/l/linux"
+	"http://ports.ubuntu.com/ubuntu-ports/pool/main/l/linux"
+	"http://archive.ubuntu.com/ubuntu/pool/universe/l/linux"
+	"http://ports.ubuntu.com/ubuntu-ports/pool/universe/l/linux"
+)
 
 getall armel versatile
 getall amd64 generic server
