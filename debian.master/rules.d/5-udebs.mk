@@ -14,7 +14,7 @@ do-binary-udebs:
 
 	imagelist=$$(cat $(builddir)/kernel-versions | grep ^${arch} | awk '{print $$4}') && \
 	for i in $$imagelist; do \
-	  dpkg -x $$(ls ../$(bin_base_pkg_name)-$$i\_$(release)-$(revision)_${arch}.deb) \
+	  dpkg -x $$(ls ../linux-image-$$i\_$(release)-$(revision)_${arch}.deb) \
 		debian/d-i-${arch}; \
 	  /sbin/depmod -b debian/d-i-${arch} $$i; \
 	done
