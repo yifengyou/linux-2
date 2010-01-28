@@ -2,6 +2,13 @@
 .SECONDARY :
 
 # Prepare the out-of-tree build directory
+ifeq ($(do_full_source),true)
+build_cd = cd $(builddir)/build-$*; #
+build_O  =
+else
+build_cd =
+build_O  = O=$(builddir)/build-$*
+endif
 
 prepare-%: $(stampdir)/stamp-prepare-%
 	@# Empty for make to be happy
@@ -12,9 +19,11 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 	@echo "Preparing $*..."
 	install -d $(builddir)/build-$*
 	touch $(builddir)/build-$*/ubuntu-build
+	[ "$(do_full_source)" != 'true' ] && true || \
+		rsync -a --exclude debian --exclude debian.master --exclude $(DEBIAN) * $(builddir)/build-$*
 	cat $^ | sed -e 's/.*CONFIG_VERSION_SIGNATURE.*/CONFIG_VERSION_SIGNATURE="Ubuntu $(release)-$(revision)-$*"/' > $(builddir)/build-$*/.config
 	find $(builddir)/build-$* -name "*.ko" | xargs rm -f
-	$(kmake) O=$(builddir)/build-$* silentoldconfig prepare scripts
+	$(build_cd) $(kmake) $(build_O) silentoldconfig prepare scripts
 	touch $@
 
 
@@ -24,8 +33,8 @@ build-%: $(stampdir)/stamp-build-%
 $(stampdir)/stamp-build-%: target_flavour = $*
 $(stampdir)/stamp-build-%: prepare-%
 	@echo "Building $*..."
-	$(kmake) O=$(builddir)/build-$* $(conc_level) $(build_image)
-	$(kmake) O=$(builddir)/build-$* $(conc_level) modules
+	$(build_cd) $(kmake) $(build_O) $(conc_level) $(build_image)
+	$(build_cd) $(kmake) $(build_O) $(conc_level) modules
 	@touch $@
 
 # Install the finished build
@@ -66,7 +75,7 @@ ifeq ($(no_dumpfile),)
 		-x $(builddir)/build-$*/vmlinux
 endif
 
-	$(kmake) O=$(builddir)/build-$* modules_install \
+	$(build_cd) $(kmake) $(build_O) modules_install \
 		INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$(pkgdir)/ \
 		INSTALL_FW_PATH=$(pkgdir)/lib/firmware/$(abi_release)-$*
 
@@ -125,7 +134,7 @@ ifneq ($(skipdbg),true)
 	# Debug image is simple
 	install -m644 -D $(builddir)/build-$*/vmlinux \
 		$(dbgpkgdir)/usr/lib/debug/boot/vmlinux-$(abi_release)-$*
-	$(kmake) O=$(builddir)/build-$* modules_install \
+	$(build_cd) $(kmake) $(build_O) modules_install \
 		INSTALL_MOD_PATH=$(dbgpkgdir)/usr/lib/debug
 	rm -f $(dbgpkgdir)/usr/lib/debug/lib/modules/$(abi_release)-$*/build
 	rm -f $(dbgpkgdir)/usr/lib/debug/lib/modules/$(abi_release)-$*/source
