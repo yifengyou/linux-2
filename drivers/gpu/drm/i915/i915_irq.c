@@ -254,7 +254,7 @@ irqreturn_t igdng_irq_handler(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	int ret = IRQ_NONE;
-	u32 de_iir, gt_iir, de_ier;
+	u32 de_iir, gt_iir, de_ier, pch_iir;
 	struct drm_i915_master_private *master_priv;
 
 	/* disable master interrupt before clearing iir  */
@@ -264,8 +264,9 @@ irqreturn_t igdng_irq_handler(struct drm_device *dev)
 
 	de_iir = I915_READ(DEIIR);
 	gt_iir = I915_READ(GTIIR);
+	pch_iir = I915_READ(SDEIIR);
 
-	if (de_iir == 0 && gt_iir == 0)
+	if (de_iir == 0 && gt_iir == 0 && pch_iir == 0)
 		goto done;
 
 	ret = IRQ_HANDLED;
@@ -286,6 +287,13 @@ irqreturn_t igdng_irq_handler(struct drm_device *dev)
 		mod_timer(&dev_priv->hangcheck_timer, jiffies + DRM_I915_HANGCHECK_PERIOD);
 	}
 
+	/* check event from PCH */
+	if ((de_iir & DE_PCH_EVENT) &&
+	    (pch_iir & SDE_HOTPLUG_MASK)) {
+	  queue_work(dev_priv->wq, &dev_priv->hotplug_work);
+	}
+
+	I915_WRITE(SDEIIR, pch_iir);
 	I915_WRITE(GTIIR, gt_iir);
 	I915_WRITE(DEIIR, de_iir);
 
@@ -987,14 +995,21 @@ static void igdng_irq_preinstall(struct drm_device *dev)
 	I915_WRITE(GTIMR, 0xffffffff);
 	I915_WRITE(GTIER, 0x0);
 	(void) I915_READ(GTIER);
+
+	/* south display irq */
+	I915_WRITE(SDEIMR, 0xffffffff);
+	I915_WRITE(SDEIER, 0x0);
+	(void) I915_READ(SDEIER);
 }
 
 static int igdng_irq_postinstall(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	/* enable kind of interrupts always enabled */
-	u32 display_mask = DE_MASTER_IRQ_CONTROL /*| DE_PCH_EVENT */;
+	u32 display_mask = DE_MASTER_IRQ_CONTROL | DE_PCH_EVENT;
 	u32 render_mask = GT_USER_INTERRUPT;
+	u32 hotplug_mask = SDE_CRT_HOTPLUG | SDE_PORTB_HOTPLUG |
+			   SDE_PORTC_HOTPLUG | SDE_PORTD_HOTPLUG;
 
 	dev_priv->irq_mask_reg = ~display_mask;
 	dev_priv->de_irq_enable_reg = display_mask;
@@ -1013,6 +1028,14 @@ static int igdng_irq_postinstall(struct drm_device *dev)
 	I915_WRITE(GTIMR, dev_priv->gt_irq_mask_reg);
 	I915_WRITE(GTIER, dev_priv->gt_irq_enable_reg);
 	(void) I915_READ(GTIER);
+
+	dev_priv->pch_irq_mask_reg = ~hotplug_mask;
+	dev_priv->pch_irq_enable_reg = hotplug_mask;
+
+	I915_WRITE(SDEIIR, I915_READ(SDEIIR));
+	I915_WRITE(SDEIMR, dev_priv->pch_irq_mask_reg);
+	I915_WRITE(SDEIER, dev_priv->pch_irq_enable_reg);
+	(void) I915_READ(SDEIER);
 
 	return 0;
 }
