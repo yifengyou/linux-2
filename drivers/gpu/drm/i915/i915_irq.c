@@ -157,6 +157,20 @@ i915_disable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask)
 }
 
 /**
+ * intel_enable_asle - enable ASLE interrupt for OpRegion
+ */
+void intel_enable_asle (struct drm_device *dev)
+{
+	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
+
+	if (IS_IGDNG(dev))
+		igdng_enable_display_irq(dev_priv, DE_GSE);
+	else
+		i915_enable_pipestat(dev_priv, 1,
+				     I915_LEGACY_BLC_EVENT_ENABLE);
+}
+
+/**
  * i915_pipe_enabled - check if a pipe is enabled
  * @dev: DRM device
  * @pipe: pipe to check
@@ -287,10 +301,13 @@ irqreturn_t igdng_irq_handler(struct drm_device *dev)
 		mod_timer(&dev_priv->hangcheck_timer, jiffies + DRM_I915_HANGCHECK_PERIOD);
 	}
 
+	if (de_iir & DE_GSE)
+		ironlake_opregion_gse_intr(dev);
+
 	/* check event from PCH */
 	if ((de_iir & DE_PCH_EVENT) &&
 	    (pch_iir & SDE_HOTPLUG_MASK)) {
-	  queue_work(dev_priv->wq, &dev_priv->hotplug_work);
+		queue_work(dev_priv->wq, &dev_priv->hotplug_work);
 	}
 
 	I915_WRITE(SDEIIR, pch_iir);
@@ -1006,7 +1023,7 @@ static int igdng_irq_postinstall(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	/* enable kind of interrupts always enabled */
-	u32 display_mask = DE_MASTER_IRQ_CONTROL | DE_PCH_EVENT;
+	u32 display_mask = DE_MASTER_IRQ_CONTROL | DE_GSE | DE_PCH_EVENT;
 	u32 render_mask = GT_USER_INTERRUPT;
 	u32 hotplug_mask = SDE_CRT_HOTPLUG | SDE_PORTB_HOTPLUG |
 			   SDE_PORTC_HOTPLUG | SDE_PORTD_HOTPLUG;
