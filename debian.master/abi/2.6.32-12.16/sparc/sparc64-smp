@@ -2643,6 +2643,7 @@ EXPORT_SYMBOL vmlinux 0x27e5720d	atomic64_sub
 EXPORT_SYMBOL vmlinux 0x27fd586a	blkdev_get
 EXPORT_SYMBOL vmlinux 0x2822fd62	elv_abort_queue
 EXPORT_SYMBOL vmlinux 0x282a7af5	i2c_smbus_write_byte
+EXPORT_SYMBOL vmlinux 0x2835911a	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0x28483b24	ps2_sendbyte
 EXPORT_SYMBOL vmlinux 0x2854770f	__bio_clone
 EXPORT_SYMBOL vmlinux 0x285ac517	strict_strtoll
@@ -3315,6 +3316,7 @@ EXPORT_SYMBOL vmlinux 0x61a0cde3	blk_queue_bounce_limit
 EXPORT_SYMBOL vmlinux 0x61ac35ac	ida_destroy
 EXPORT_SYMBOL vmlinux 0x61b38b29	open_exec
 EXPORT_SYMBOL vmlinux 0x61b7b126	simple_strtoull
+EXPORT_SYMBOL vmlinux 0x61f3c814	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0x61fbb98e	ethtool_op_get_tso
 EXPORT_SYMBOL vmlinux 0x62229552	bioset_integrity_free
 EXPORT_SYMBOL vmlinux 0x62418309	blk_queue_make_request

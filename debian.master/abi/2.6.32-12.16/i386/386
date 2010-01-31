@@ -4301,6 +4301,7 @@ EXPORT_SYMBOL vmlinux 0x5b9acb02	do_splice_to
 EXPORT_SYMBOL vmlinux 0x5ba2e186	llc_sap_find
 EXPORT_SYMBOL vmlinux 0x5bd8a58a	kmalloc_caches
 EXPORT_SYMBOL vmlinux 0x5bdb6eb7	netif_device_detach
+EXPORT_SYMBOL vmlinux 0x5bf804be	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0x5c04841c	unregister_md_personality
 EXPORT_SYMBOL vmlinux 0x5c13f4fd	seq_path
 EXPORT_SYMBOL vmlinux 0x5c265cba	sg_init_one
@@ -4562,6 +4563,7 @@ EXPORT_SYMBOL vmlinux 0x6ed68cf7	release_sock
 EXPORT_SYMBOL vmlinux 0x6ef6e5bb	zero_fill_bio
 EXPORT_SYMBOL vmlinux 0x6ef6fa4c	vfs_get_dqinfo
 EXPORT_SYMBOL vmlinux 0x6f01caf3	inet_dgram_ops
+EXPORT_SYMBOL vmlinux 0x6f134f84	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0x6f307015	jbd2_journal_revoke
 EXPORT_SYMBOL vmlinux 0x6f3acbe1	generic_file_buffered_write
 EXPORT_SYMBOL vmlinux 0x6f556bdb	acpi_get_gpe_device
@@ -5158,6 +5160,7 @@ EXPORT_SYMBOL vmlinux 0x9f0a4021	request_firmware
 EXPORT_SYMBOL vmlinux 0x9f100139	jiffies_to_clock_t
 EXPORT_SYMBOL vmlinux 0x9f2bdaac	__bitmap_or
 EXPORT_SYMBOL vmlinux 0x9f2d613e	param_set_bool
+EXPORT_SYMBOL vmlinux 0x9f424093	free_user_ns
 EXPORT_SYMBOL vmlinux 0x9f526089	seq_release
 EXPORT_SYMBOL vmlinux 0x9f615232	tcp4_gro_complete
 EXPORT_SYMBOL vmlinux 0x9f78cb8f	clear_page_dirty_for_io
@@ -7042,13 +7045,13 @@ EXPORT_SYMBOL_GPL drivers/misc/cb710/cb710 0xc7ec999e	cb710_sg_dwiter_read_next_
 EXPORT_SYMBOL_GPL drivers/misc/cb710/cb710 0xcfa22780	cb710_pci_update_config_reg
 EXPORT_SYMBOL_GPL drivers/misc/eeprom/eeprom_93cx6 0x2df115d4	eeprom_93cx6_multiread
 EXPORT_SYMBOL_GPL drivers/misc/eeprom/eeprom_93cx6 0x63d14d2f	eeprom_93cx6_read
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x059f2e2c	enclosure_remove_device
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x20084744	enclosure_for_each_device
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x55663d9c	enclosure_find
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x71e0bf30	enclosure_add_device
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x9650a3db	enclosure_unregister
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x9815da88	enclosure_register
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xf68ec2bb	enclosure_component_register
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x37ba2c32	enclosure_component_register
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x82f72eae	enclosure_find
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xa6ac9afa	enclosure_add_device
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xcc1afc0d	enclosure_register
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xe217de0b	enclosure_unregister
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xf01665be	enclosure_for_each_device
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xf4cde7fb	enclosure_remove_device
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x0cf231d2	sdhci_alloc_host
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x319d3635	sdhci_remove_host
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x3e86679f	sdhci_add_host

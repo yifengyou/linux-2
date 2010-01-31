@@ -2544,6 +2544,7 @@ EXPORT_SYMBOL vmlinux 0x9f100139	jiffies_to_clock_t
 EXPORT_SYMBOL vmlinux 0x9f1ceb36	iput
 EXPORT_SYMBOL vmlinux 0x9f2bdaac	__bitmap_or
 EXPORT_SYMBOL vmlinux 0x9f2d613e	param_set_bool
+EXPORT_SYMBOL vmlinux 0x9f424093	free_user_ns
 EXPORT_SYMBOL vmlinux 0x9f4a6a1e	get_empty_filp
 EXPORT_SYMBOL vmlinux 0x9f72c2eb	init_timer_key
 EXPORT_SYMBOL vmlinux 0x9f7c1229	sync_blockdev
@@ -3069,6 +3070,7 @@ EXPORT_SYMBOL vmlinux 0xcfbed835	simple_fill_super
 EXPORT_SYMBOL vmlinux 0xcff53400	kref_put
 EXPORT_SYMBOL vmlinux 0xd00602c6	__xfrm_lookup
 EXPORT_SYMBOL vmlinux 0xd0181f4f	__bitmap_xor
+EXPORT_SYMBOL vmlinux 0xd0433757	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0xd04e731e	per_cpu__kstat
 EXPORT_SYMBOL vmlinux 0xd0925eaf	security_inode_notifysecctx
 EXPORT_SYMBOL vmlinux 0xd0ba417b	__scm_destroy
@@ -3719,13 +3721,13 @@ EXPORT_SYMBOL_GPL drivers/mfd/wm8400-core 0x6569d08e	wm8400_set_bits
 EXPORT_SYMBOL_GPL drivers/mfd/wm8400-core 0x8519a545	wm8400_reset_codec_reg_cache
 EXPORT_SYMBOL_GPL drivers/misc/eeprom/eeprom_93cx6 0x2df115d4	eeprom_93cx6_multiread
 EXPORT_SYMBOL_GPL drivers/misc/eeprom/eeprom_93cx6 0x63d14d2f	eeprom_93cx6_read
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x1ec97689	enclosure_remove_device
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x336c57bd	enclosure_for_each_device
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x3e9ce771	enclosure_unregister
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x40c868c9	enclosure_find
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x507a087d	enclosure_register
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xaab72a4a	enclosure_component_register
-EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xeb07021d	enclosure_add_device
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x04e295c2	enclosure_register
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x0862abf8	enclosure_component_register
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x2ee3f196	enclosure_unregister
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x8492f663	enclosure_remove_device
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0x97c13aef	enclosure_add_device
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xacd4a897	enclosure_find
+EXPORT_SYMBOL_GPL drivers/misc/enclosure 0xf647b5b1	enclosure_for_each_device
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x2e7d9fc2	sdhci_resume_host
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x363227c3	sdhci_free_host
 EXPORT_SYMBOL_GPL drivers/mmc/host/sdhci 0x6d89753b	sdhci_alloc_host

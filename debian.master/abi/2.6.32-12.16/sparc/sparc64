@@ -4130,6 +4130,7 @@ EXPORT_SYMBOL vmlinux 0xa220c52f	__tcf_em_tree_match
 EXPORT_SYMBOL vmlinux 0xa234a854	dev_get_by_flags
 EXPORT_SYMBOL vmlinux 0xa23db53f	skb_split
 EXPORT_SYMBOL vmlinux 0xa24aeaea	block_write_full_page
+EXPORT_SYMBOL vmlinux 0xa24d0be1	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0xa28e76e6	schedule_work
 EXPORT_SYMBOL vmlinux 0xa29b1708	tcp_memory_allocated
 EXPORT_SYMBOL vmlinux 0xa2a5fd77	inet_ehash_secret
@@ -4349,6 +4350,7 @@ EXPORT_SYMBOL vmlinux 0xb4bc49c5	drm_vblank_off
 EXPORT_SYMBOL vmlinux 0xb4c3f0f9	generic_file_aio_read
 EXPORT_SYMBOL vmlinux 0xb4c8b3b3	__blk_end_request_all
 EXPORT_SYMBOL vmlinux 0xb4d5fe94	tcp_hashinfo
+EXPORT_SYMBOL vmlinux 0xb4fc26e5	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0xb5044271	vsscanf
 EXPORT_SYMBOL vmlinux 0xb530410c	__nla_put_nohdr
 EXPORT_SYMBOL vmlinux 0xb54533f7	usecs_to_jiffies

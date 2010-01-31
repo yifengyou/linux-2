@@ -3062,6 +3062,7 @@ EXPORT_SYMBOL vmlinux 0x17c3c51b	__scsi_add_device
 EXPORT_SYMBOL vmlinux 0x17cbe1f1	sock_no_accept
 EXPORT_SYMBOL vmlinux 0x17df17bc	sysctl_tcp_ecn
 EXPORT_SYMBOL vmlinux 0x17f341a0	i8042_lock_chip
+EXPORT_SYMBOL vmlinux 0x17f67b13	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0x17fcc609	tcf_exts_validate
 EXPORT_SYMBOL vmlinux 0x181b6eda	ide_complete_rq
 EXPORT_SYMBOL vmlinux 0x182f30bd	should_remove_suid
@@ -3105,6 +3106,7 @@ EXPORT_SYMBOL vmlinux 0x1b7d8ff6	blk_start_request
 EXPORT_SYMBOL vmlinux 0x1b8b95ad	i8042_unlock_chip
 EXPORT_SYMBOL vmlinux 0x1b9981cc	set_irq_wake
 EXPORT_SYMBOL vmlinux 0x1b9e0ff1	scsilun_to_int
+EXPORT_SYMBOL vmlinux 0x1b9f00f9	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0x1bb1db40	dquot_alloc_inode
 EXPORT_SYMBOL vmlinux 0x1bbf3815	user_revoke
 EXPORT_SYMBOL vmlinux 0x1bc4ff03	tty_termios_hw_change

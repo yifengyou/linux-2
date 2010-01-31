@@ -3049,6 +3049,7 @@ EXPORT_SYMBOL vmlinux 0x1976bc16	__tracepoint_kmem_cache_free
 EXPORT_SYMBOL vmlinux 0x1985de1c	hippi_mac_addr
 EXPORT_SYMBOL vmlinux 0x198f58d2	qdisc_watchdog_init
 EXPORT_SYMBOL vmlinux 0x199ed0cd	net_disable_timestamp
+EXPORT_SYMBOL vmlinux 0x19a74ab3	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0x19b5b58d	do_munmap
 EXPORT_SYMBOL vmlinux 0x19b7abf6	ioctl_by_bdev
 EXPORT_SYMBOL vmlinux 0x1a0b571a	nobh_write_begin
@@ -4200,6 +4201,7 @@ EXPORT_SYMBOL vmlinux 0x77fa5d1f	ns_to_timespec
 EXPORT_SYMBOL vmlinux 0x7837d20c	__lock_buffer
 EXPORT_SYMBOL vmlinux 0x784c830c	ide_stall_queue
 EXPORT_SYMBOL vmlinux 0x7857cc0b	blk_limits_io_min
+EXPORT_SYMBOL vmlinux 0x7868af58	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0x788fe103	iomem_resource
 EXPORT_SYMBOL vmlinux 0x78c26271	generic_removexattr
 EXPORT_SYMBOL vmlinux 0x78df6bd7	no_pci_devices

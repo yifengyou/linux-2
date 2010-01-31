@@ -3262,6 +3262,7 @@ EXPORT_SYMBOL vmlinux 0x21e0ea22	acpi_get_id
 EXPORT_SYMBOL vmlinux 0x2228c24e	filemap_fdatawrite_range
 EXPORT_SYMBOL vmlinux 0x222e7ce2	sysfs_streq
 EXPORT_SYMBOL vmlinux 0x222ed777	vm_map_ram
+EXPORT_SYMBOL vmlinux 0x22358982	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0x2235bf4e	unlock_new_inode
 EXPORT_SYMBOL vmlinux 0x226e86a9	audit_log
 EXPORT_SYMBOL vmlinux 0x2288378f	system_state
@@ -3315,6 +3316,7 @@ EXPORT_SYMBOL vmlinux 0x25b4eb5e	_read_lock_irq
 EXPORT_SYMBOL vmlinux 0x25cf8049	matroxfb_PLL_calcclock
 EXPORT_SYMBOL vmlinux 0x25ef6c24	dquot_transfer
 EXPORT_SYMBOL vmlinux 0x25fb7090	jbd2_journal_release_buffer
+EXPORT_SYMBOL vmlinux 0x25fe60f8	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0x25ff73b3	elv_abort_queue
 EXPORT_SYMBOL vmlinux 0x262f3fb7	add_to_page_cache_locked
 EXPORT_SYMBOL vmlinux 0x26474e69	__invalidate_device

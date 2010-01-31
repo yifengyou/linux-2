@@ -4893,6 +4893,7 @@ EXPORT_SYMBOL vmlinux 0xa9e18d84	__rta_fill
 EXPORT_SYMBOL vmlinux 0xa9e2a481	compat_sock_common_setsockopt
 EXPORT_SYMBOL vmlinux 0xa9ea84bf	unbind_con_driver
 EXPORT_SYMBOL vmlinux 0xaa0edca8	pasemi_dma_alloc_fun
+EXPORT_SYMBOL vmlinux 0xaa2580fb	pci_fixup_cardbus
 EXPORT_SYMBOL vmlinux 0xaa604a4f	ethtool_op_set_tx_csum
 EXPORT_SYMBOL vmlinux 0xaa75aff3	sk_release_kernel
 EXPORT_SYMBOL vmlinux 0xaa9a61ef	simple_link
@@ -5670,6 +5671,7 @@ EXPORT_SYMBOL vmlinux 0xead58fb9	print_hex_dump
 EXPORT_SYMBOL vmlinux 0xeae82b06	udp_proc_unregister
 EXPORT_SYMBOL vmlinux 0xeaef1068	of_device_alloc
 EXPORT_SYMBOL vmlinux 0xeb809ab9	follow_up
+EXPORT_SYMBOL vmlinux 0xeb8c5d7c	bdev_stack_limits
 EXPORT_SYMBOL vmlinux 0xeb8f54b3	strstrip
 EXPORT_SYMBOL vmlinux 0xeb9333d5	hippi_neigh_setup_dev
 EXPORT_SYMBOL vmlinux 0xeba2a1f7	rtas_indicator_present
