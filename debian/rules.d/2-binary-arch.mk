@@ -98,7 +98,7 @@ endif
 	for script in postinst postrm preinst prerm; do				\
 	  sed -e 's/=V/$(abi_release)-$*/g' -e 's/=K/$(install_file)/g'		\
 	      -e 's/=L/$(loader)/g'         -e 's@=B@$(build_arch)@g'		\
-	       $(DEBIAN)/control-scripts/$$script > $(pkgdir)/DEBIAN/$$script;	\
+	       $(DROOT)/control-scripts/$$script > $(pkgdir)/DEBIAN/$$script;	\
 	  chmod 755 $(pkgdir)/DEBIAN/$$script;					\
 	done
 
@@ -113,7 +113,7 @@ endif
 ifneq ($(skipsub),true)
 	for sub in $($(*)_sub); do					\
 		if ! (TO=$$sub FROM=$* ABI_RELEASE=$(abi_release) $(SHELL)		\
-			$(DEBIAN)/scripts/sub-flavour); then exit 1; fi;		\
+			$(DROOT)/scripts/sub-flavour); then exit 1; fi;		\
 		/sbin/depmod -b debian/$(bin_pkg_name)-$$sub		\
 			-ea -F debian/$(bin_pkg_name)-$$sub/boot/System.map-$(abi_release)-$* \
 			$(abi_release)-$*;					\
@@ -123,7 +123,7 @@ ifneq ($(skipsub),true)
 			    -e 's/=K/$(install_file)/g'				\
 			    -e 's/=L/$(loader)/g'				\
 			    -e 's@=B@$(build_arch)@g'				\
-				$(DEBIAN)/control-scripts/$$script >		\
+				$(DROOT)/control-scripts/$$script >		\
 				debian/$(bin_pkg_name)-$$sub/DEBIAN/$$script;\
 			chmod 755  debian/$(bin_pkg_name)-$$sub/DEBIAN/$$script;\
 		done;								\
@@ -159,7 +159,7 @@ ifeq ($(arch),powerpc)
 	cp $(builddir)/build-$*/arch/powerpc/lib/*.o $(hdrdir)/arch/powerpc/lib
 endif
 	# Script to symlink everything up
-	$(SHELL) $(DEBIAN)/scripts/link-headers "$(hdrdir)" "$(basepkg)" "$*"
+	$(SHELL) $(DROOT)/scripts/link-headers "$(hdrdir)" "$(basepkg)" "$*"
 	# Setup the proper asm symlink
 	rm -f $(hdrdir)/include/asm
 	ln -s asm-$(asm_link) $(hdrdir)/include/asm
@@ -175,7 +175,7 @@ endif
 	install -d $(CURDIR)/debian/$(basepkg)-$*/DEBIAN
 	for script in postinst; do						\
 	  sed -e 's/=V/$(abi_release)-$*/g' -e 's/=K/$(install_file)/g'	\
-		$(DEBIAN)/control-scripts/headers-$$script > 			\
+		$(DROOT)/control-scripts/headers-$$script > 			\
 			$(CURDIR)/debian/$(basepkg)-$*/DEBIAN/$$script;		\
 	  chmod 755 $(CURDIR)/debian/$(basepkg)-$*/DEBIAN/$$script;		\
 	done
@@ -186,7 +186,7 @@ endif
 	 PREV_REVISION="$(prev_revision)" ABI_NUM="$(abinum)"		\
 	 PREV_ABI_NUM="$(prev_abinum)" BUILD_DIR="$(builddir)/build-$*"	\
 	 INSTALL_DIR="$(pkgdir)" SOURCE_DIR="$(CURDIR)"			\
-	 run-parts -v $(DEBIAN)/tests
+	 run-parts -v $(DROOT)/tests
 
 	#
 	# Remove files which are generated at installation by postinst,

@@ -38,32 +38,32 @@ help:
 
 updateconfigs:
 	dh_testdir;
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig oldconfig
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig oldconfig
 	rm -rf build
 
 editconfigs:
 	dh_testdir
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig editconfig
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig editconfig
 	rm -rf build
 
 genconfigs:
 	dh_testdir
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig genconfig
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig genconfig
 	rm -rf build
 
 updateportsconfigs:
 	dh_testdir;
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig oldconfig ports
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig oldconfig ports
 	rm -rf build
 
 editportsconfigs:
 	dh_testdir
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig editconfig ports
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig editconfig ports
 	rm -rf build
 
 genportsconfigs:
 	dh_testdir
-	$(SHELL) $(DEBIAN)/scripts/misc/kernelconfig genconfig ports
+	$(SHELL) $(DROOT)/scripts/misc/kernelconfig genconfig ports
 	rm -rf build
 
 printenv:
@@ -94,10 +94,10 @@ printchanges:
 	@baseCommit=$$(git log --pretty=format:'%H %s' | \
 		awk '/UBUNTU: '".*Ubuntu-$(release)-$(prev_revision)"'$$/ { print $$1; exit }'); \
 		git log "$$baseCommit"..HEAD | \
-		perl -w -f $(DEBIAN)/scripts/misc/git-ubuntu-log $(ubuntu_log_opts)
+		perl -w -f $(DROOT)/scripts/misc/git-ubuntu-log $(ubuntu_log_opts)
 
 insertchanges:
-	@perl -w -f $(DEBIAN)/scripts/misc/insert-changes.pl $(DEBIAN)
+	@perl -w -f $(DROOT)/scripts/misc/insert-changes.pl $(DEBIAN)
 
 diffupstream:
 	@git diff-tree -p refs/remotes/linux-2.6/master..HEAD $(shell ls | grep -vE '^(ubuntu|$(DEBIAN)|\.git.*)')

@@ -25,7 +25,7 @@ variant="$2"
 
 . $DEBIAN/etc/kernelconfig
 
-bindir="`pwd`/${DEBIAN}/scripts/misc"
+bindir="`pwd`/${DROOT}/scripts/misc"
 common_conf="$confdir/config.common.$family"
 tmpdir=`mktemp -d`
 mkdir "$tmpdir/CONFIGS"
