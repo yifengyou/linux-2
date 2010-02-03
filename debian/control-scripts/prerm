@@ -285,7 +285,7 @@ sub success () {
     modules.ieee1394map modules.pnpbiosmap
     modules.alias modules.ccwmap modules.inputmap
     modules.symbols modules.ofmap modules.seriomap
-    modules.alias.bin modules.dep.bin modules.symbols.bin
+    modules.alias.bin modules.builtin.bin modules.dep.bin modules.symbols.bin
   };
 
   foreach my $extra_file (@files_to_remove) {
