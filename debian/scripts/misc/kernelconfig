@@ -21,6 +21,7 @@ case "$mode" in
 esac
 kerneldir="`pwd`"
 confdir="$kerneldir/${DEBIAN}/config"
+enforceconf="$confdir/enforce"
 variant="$2"
 
 . $DEBIAN/etc/kernelconfig
@@ -138,7 +139,7 @@ for arch in $archs; do
 	for config in $flavourconfigs; do
 		if [ -f $archconfdir/$config ]; then
 			fullconf="$tmpdir/CONFIGS/$arch-$config"
-			"$bindir/../config-check" "$fullconf" "$arch" "$config" "$confdir" "0" || let "fail=$fail+1"
+			"$bindir/../config-check" "$fullconf" "$arch" "$config" "$enforceconf" "0" || let "fail=$fail+1"
 		fi
 	done
 done
