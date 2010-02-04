@@ -1,10 +1,12 @@
 #!/usr/bin/perl -w
 
 my $debian;
-$debian = $ARGV[0] if (defined $ARGV[0]);
+$droot = $ARGV[0] if (defined $ARGV[0]);
+$droot = 'debian' if (!defined $droot);
+$debian = $ARGV[1] if (defined $ARGV[1]);
 $debian = 'debian.master' if (!defined $debian);
 
-system("make -s -f $debian/rules printchanges > $debian/changes");
+system("make -s -f $droot/rules printchanges > $debian/changes");
 
 open(CHANGELOG, "< $debian/changelog") or die "Cannot open changelog";
 open(CHANGES, "< $debian/changes") or die "Cannot open new changes";
