@@ -28,7 +28,7 @@ checks-%: abi-check-% module-check-%
 # Check the config against the known options list.
 config-prepare-check-%: $(stampdir)/stamp-prepare-tree-%
 	@perl -f $(DROOT)/scripts/config-check \
-		$(builddir)/build-$*/.config "$(arch)" "$*" "$(commonconfdir)" "$(skipconfig)"
+		$(builddir)/build-$*/.config "$(arch)" "$*" "$(sharedconfdir)" "$(skipconfig)"
 
 prepare-checks-%: config-prepare-check-%
 	@# Will be calling more stuff later
