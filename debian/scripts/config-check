@@ -10,11 +10,12 @@ my $test = -1;
 if ($ARGV[0] eq '--test') {
 	$test = $ARGV[1] + 0;
 } elsif ($#ARGV != 4) {
-	die "Usage: $P <config> <arch> <flavour> <checks> <warn-only>\n";
+	die "Usage: $P <config> <arch> <flavour> <commonconfig> <warn-only>\n";
 }
 
-my ($config, $arch, $flavour, $checks, $warn_only) = @ARGV;
+my ($config, $arch, $flavour, $commonconfig, $warn_only) = @ARGV;
 
+my $checks = "$commonconfig/enforce";
 my %values = ();
 
 # If we are in overridden then still perform the checks and emit the messages
