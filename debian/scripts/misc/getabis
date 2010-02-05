@@ -16,7 +16,7 @@ verfull=$ver-$revision
 
 WGET="wget --quiet -c"
 
-abidir="`pwd`/debian/abi/$verfull"
+abidir="`pwd`/$DEBIAN/abi/$verfull"
 tmpdir="`pwd`/abi-tmp-$verfull"
 origdir="`pwd`"
 
