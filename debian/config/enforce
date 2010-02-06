@@ -25,3 +25,7 @@ value CONFIG_DEFAULT_SECURITY_APPARMOR y
 # CONFIG_USB_DEVICE_FS breaks udev USB firmware loading and is deprecated
 # ensure it is disabled.
 value CONFIG_USB_DEVICEFS n
+
+# upstart requires DEVTMPFS be enabled and mounted by default.
+value CONFIG_DEVTMPFS y
+value CONFIG_DEVTMPFS_MOUNT y
