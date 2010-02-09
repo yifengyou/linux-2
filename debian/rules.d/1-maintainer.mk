@@ -36,6 +36,9 @@ help:
 	@echo "                  : Use -jX for kernel compile"
 	@echo "  PRINTSHAS       : Include SHAs for commits in changelog"
 
+printdebian:
+	@echo "$(DEBIAN)"
+
 updateconfigs:
 	dh_testdir;
 	$(SHELL) $(DROOT)/scripts/misc/kernelconfig oldconfig
