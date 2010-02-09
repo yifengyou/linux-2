@@ -60,8 +60,7 @@ clean: debian/control
 distclean: clean
 	rm -rf debian.master/control debian.master/control.stub \
 		debian.master/d-i/kernel-versions debian/changelog \
-		debian/control debian/control.stub debian/copyright \
-		debian/debian.env
+		debian/control debian/control.stub debian/copyright
 
 # Builds the image, arch headers and debug packages
 include $(DROOT)/rules.d/2-binary-arch.mk
