@@ -6,7 +6,7 @@ repo_list=(
 )
 
 getall armel versatile
-getall amd64 generic server
+getall amd64 generic server preempt
 getall i386 generic generic-pae 386
 
 # Ports arches and flavours.
