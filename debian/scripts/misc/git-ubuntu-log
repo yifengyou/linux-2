@@ -168,6 +168,7 @@ sub changelog_input {
 		elsif ($pstate == 4) {
 			next unless /^\s*?(.*)/;
 			my $ignore = 0;
+			my $do_ignore = 0;
 			my $bug = undef;
 			my %bugz = ();
 			my $k;
@@ -180,38 +181,26 @@ sub changelog_input {
 			$desc = $1;
 
 			if ($desc =~ /^ *(Revert "|)UBUNTU:/) {
-				while (<STDIN>) {
-					$ignore  =  1 if /^ *Ignore: yes/i;
-					if    (/^ *Bug: *(#|)(.*)/i) {
-						foreach $k (split('(,|)*\s*#', $2)) {
-							$bugz{$k} = 1 if (($k ne '') and ($k =~ /[0-9]+/));
-						}
-					}
-					elsif (/^ *BugLink: *http.*:\/\/.*\/([0-9]+)/i) {
-						$bugz{$1} = 1;
-					}
-					elsif (/^ *(CVE-.*)/) {
-						$cve = $1
-					}
-					last if /^commit /;
-				}
+				$do_ignore = 1;
 			} else {
+				$do_ignore = 0;
 				$author = $kernel_auth;
 				$ignore = 1 if $desc =~ /Merge /;
-				while (<STDIN>) {
-					if    (/^ *Bug: *(#|)(.*)/i) {
-						foreach $k (split('(,|)*\s*#', $2)) {
-							$bugz{$k} = 1 if (($k ne '') and ($k =~ /[0-9]+/));
-						}
+			}
+			while (<STDIN>) {
+				$ignore  =  1 if ($do_ignore && /^ *Ignore: yes/i);
+				if    (/^ *Bug: *(#|)(.*)/i) {
+					foreach $k (split('(,|)*\s*#', $2)) {
+						$bugz{$k} = 1 if (($k ne '') and ($k =~ /[0-9]+/));
 					}
-					elsif (/^ *BugLink: *http.*:\/\/.*\/([0-9]+)/i) {
-						$bugz{$1} = 1;
-					}
-					elsif (/^ *(CVE-.*)/) {
-						$cve = $1
-					}
-					last if /^commit /;
 				}
+				elsif (/^ *BugLink: *http.*:\/\/.*\/([0-9]+)/i) {
+					$bugz{$1} = 1;
+				}
+				elsif (/^ *(CVE-.*)/) {
+					$cve = $1
+				}
+				last if /^commit /;
 			}
 
                         $bug = join(", #", keys(%bugz));
