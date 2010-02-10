@@ -189,8 +189,8 @@ sub changelog_input {
 			}
 			while (<STDIN>) {
 				$ignore  =  1 if ($do_ignore && /^ *Ignore: yes/i);
-				if    (/^ *Bug: *(#|)(.*)/i) {
-					foreach $k (split('(,|)*\s*#', $2)) {
+				if    (/^ *Bug: *(#|)([0-9#,\s]*)\s*$/i) {
+					foreach $k (split('(,|\s)\s*(#|)', $2)) {
 						$bugz{$k} = 1 if (($k ne '') and ($k =~ /[0-9]+/));
 					}
 				}
