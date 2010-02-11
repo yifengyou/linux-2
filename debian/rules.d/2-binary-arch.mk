@@ -191,15 +191,17 @@ endif
 	# Remove files which are generated at installation by postinst,
 	# except for modules.order and modules.builtin
 	#
+	mkdir $(pkgdir)/lib/modules/$(abi_release)-$*/_
 	mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.order \
-		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.order
-	mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin \
-		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin
+		$(pkgdir)/lib/modules/$(abi_release)-$*/_
+	if [ -f $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin ] ; then \
+	    mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin \
+		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin; \
+	fi
 	rm -f $(pkgdir)/lib/modules/$(abi_release)-$*/modules.*
-	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin \
-		$(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin
-	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_modules.order \
-		$(pkgdir)/lib/modules/$(abi_release)-$*/modules.order
+	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_/* \
+		$(pkgdir)/lib/modules/$(abi_release)-$*
+	rmdir $(pkgdir)/lib/modules/$(abi_release)-$*/_
 
 headers_tmp := $(CURDIR)/debian/tmp-headers
 headers_dir := $(CURDIR)/debian/linux-libc-dev
