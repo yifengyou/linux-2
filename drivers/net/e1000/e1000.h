@@ -331,8 +331,7 @@ struct e1000_adapter {
 enum e1000_state_t {
 	__E1000_TESTING,
 	__E1000_RESETTING,
-	__E1000_DOWN,
-	__E1000_DISCARDING
+	__E1000_DOWN
 };
 
 extern char e1000_driver_name[];
