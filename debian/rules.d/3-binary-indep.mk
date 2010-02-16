@@ -70,7 +70,7 @@ ifeq ($(do_doc_package),true)
 install-indep-deps += install-doc
 endif
 ifeq ($(do_source_package),true)
-install-indep-deps += install-doc
+install-indep-deps += install-source
 endif
 install-indep: $(install-indep-deps)
 
