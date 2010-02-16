@@ -4,6 +4,8 @@ menu "Device Drivers"
 
 source "drivers/base/Kconfig"
 
+source "drivers/base/power/Kconfig"
+
 source "drivers/connector/Kconfig"
 
 source "drivers/mtd/Kconfig"
