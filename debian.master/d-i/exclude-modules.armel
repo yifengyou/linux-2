@@ -8,3 +8,13 @@ nic-usb-modules
 scsi-modules
 storage-core-modules
 nfs-modules
+pcmcia-modules
+parport-modules
+serial-modules
+plip-modules
+pcmcia-storage-modules
+mouse-modules
+irda-modules
+floppy-modules
+char-modules
+virtio-modules

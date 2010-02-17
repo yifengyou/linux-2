@@ -1,6 +1,6 @@
 # PHY
 8390
-mii
+mii ?
 
 # CRC modules
 crc-ccitt
