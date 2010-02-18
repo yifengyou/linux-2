@@ -86,6 +86,7 @@ struct table_header {
 #define ACCEPT_TABLE2(DFA) ((u32 *)((DFA)->tables[YYTD_ID_ACCEPT2]->td_data))
 
 struct aa_dfa {
+	struct kref count;
 	u16 flags;
 	struct table_header *tables[YYTD_ID_TSIZE];
 };
@@ -107,11 +108,16 @@ static inline size_t table_size(size_t len, size_t el_size)
 	return ALIGN(sizeof(struct table_header) + len * el_size, 8);
 }
 
-void aa_dfa_free(struct aa_dfa *dfa);
 struct aa_dfa *aa_dfa_unpack(void *blob, size_t size, int flags);
 unsigned int aa_dfa_match_len(struct aa_dfa *dfa, unsigned int start,
 			      const char *str, int len);
 unsigned int aa_dfa_match(struct aa_dfa *dfa, unsigned int start,
 			  const char *str);
+void aa_dfa_free_kref(struct kref *kref);
+static inline void aa_put_dfa(struct aa_dfa *dfa)
+{
+	if (dfa)
+		kref_put(&dfa->count, aa_dfa_free_kref);
+}
 
 #endif /* __AA_MATCH_H */

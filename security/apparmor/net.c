@@ -72,7 +72,7 @@ static int aa_audit_net(struct aa_profile *profile, struct aa_audit_net *sa)
 
 	if (likely(!sa->base.error)) {
 		u16 audit_mask = profile->net.audit[sa->family];
-		if (likely((PROFILE_AUDIT_MODE(profile) != AUDIT_ALL) &&
+		if (likely((AUDIT_MODE(profile) != AUDIT_ALL) &&
 			   !(1 << sa->type & audit_mask)))
 			return 0;
 		type = AUDIT_APPARMOR_AUDIT;
@@ -85,9 +85,9 @@ static int aa_audit_net(struct aa_profile *profile, struct aa_audit_net *sa)
 			type = AUDIT_APPARMOR_KILL;
 
 		if ((denied & quiet_mask) &&
-		    PROFILE_AUDIT_MODE(profile) != AUDIT_NOQUIET &&
-		    PROFILE_AUDIT_MODE(profile) != AUDIT_ALL)
-			return PROFILE_COMPLAIN(profile) ? 0 : sa->base.error;
+		    AUDIT_MODE(profile) != AUDIT_NOQUIET &&
+		    AUDIT_MODE(profile) != AUDIT_ALL)
+			return COMPLAIN_MODE(profile) ? 0 : sa->base.error;
 	}
 
 	return aa_audit(type, profile, &sa->base, audit_cb);
@@ -136,7 +136,7 @@ int aa_revalidate_sk(struct sock *sk, char *operation)
 		return 0;
 
 	profile = __aa_current_profile();
-	if (profile)
+	if (!unconfined(profile))
 		error = aa_net_perm(profile, operation,
 				    sk->sk_family, sk->sk_type,
 				    sk->sk_protocol);

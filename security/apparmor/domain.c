@@ -61,13 +61,15 @@ static int aa_may_change_ptraced_domain(struct task_struct *task,
 
 	rcu_read_lock();
 	tracer = tracehook_tracer_task(task);
-	if (tracer)
+	if (tracer) {
 		/* released below */
-		cred = aa_get_task_cred(tracer, &tracerp);
+		cred = get_task_cred(tracer);
+		tracerp = aa_cred_profile(cred);
+	}
 	rcu_read_unlock();
 
 	/* not ptraced */
-	if (!tracer || !tracerp)
+	if (!tracer || unconfined(tracerp))
 		goto out;
 
 	error = aa_may_ptrace(tracer, tracerp, to_profile, PTRACE_MODE_ATTACH);
@@ -95,10 +97,9 @@ static struct file_perms change_profile_perms(struct aa_profile *profile,
 	struct path_cond cond = { };
 	unsigned int state;
 
-	if (!profile) {
-		/* unconfined */
+	if (unconfined(profile)) {
 		perms.allowed = AA_MAY_CHANGE_PROFILE;
-		perms.xindex = perms.dindex = 0;
+		perms.xindex = perms.xdelegate = perms.dindex = 0;
 		perms.audit = perms.quiet = perms.kill = 0;
 		if (rstate)
 			*rstate = 0;
@@ -107,14 +108,15 @@ static struct file_perms change_profile_perms(struct aa_profile *profile,
 		return nullperms;
 	} else if ((ns == profile->ns)) {
 		/* try matching against rules with out namespace prependend */
-		perms = aa_str_perms(profile->file.dfa, DFA_START, name, &cond,
-				     rstate);
+		perms = aa_str_perms(profile->file.dfa, profile->file.start,
+				     name, &cond, rstate);
 		if (COMBINED_PERM_MASK(perms) & AA_MAY_CHANGE_PROFILE)
 			return perms;
 	}
 
 	/* try matching with namespace name and then profile */
-	state = aa_dfa_match(profile->file.dfa, DFA_START, ns->base.name);
+	state = aa_dfa_match(profile->file.dfa, profile->file.start,
+			     ns->base.name);
 	state = aa_dfa_null_transition(profile->file.dfa, state, 0);
 	return aa_str_perms(profile->file.dfa, state, name, &cond, rstate);
 }
@@ -155,18 +157,20 @@ static struct aa_profile *__aa_attach_match(const char *name,
 }
 
 /**
- * aa_sys_find_attach - do attachment search for sys unconfined processes
- * @base: the base to search
- * name: the executable name to match against
+ * aa_find_attach - do attachment search for sys unconfined processes
+ * @ns: the current namespace
+ * @list: list to search
+ * @name: the executable name to match against
  */
-static struct aa_profile *aa_sys_find_attach(struct aa_policy_common *base,
-					     const char *name)
+static struct aa_profile *aa_find_attach(struct aa_namespace *ns,
+					 struct list_head *list,
+					 const char *name)
 {
 	struct aa_profile *profile;
 
-	read_lock(&base->lock);
-	profile = aa_get_profile(__aa_attach_match(name, &base->profiles));
-	read_unlock(&base->lock);
+	read_lock(&ns->lock);
+	profile = aa_get_profile(__aa_attach_match(name, list));
+	read_unlock(&ns->lock);
 
 	return profile;
 }
@@ -214,7 +218,6 @@ static const char *next_name(int xtype, const char *name)
 
 /**
  * x_to_profile - get target profile for a given xindex
- * @ns: namespace of profile
  * @profile: current profile
  * @name: to to lookup if specified
  * @xindex: index into x transition table
@@ -223,16 +226,13 @@ static const char *next_name(int xtype, const char *name)
  *
  * Returns: refcounted profile or NULL if not found available
  */
-static struct aa_profile *x_to_profile(struct aa_namespace *ns,
-				       struct aa_profile *profile,
+static struct aa_profile *x_to_profile(struct aa_profile *profile,
 				       const char *name, u16 xindex)
 {
 	struct aa_profile *new_profile = NULL;
+	struct aa_namespace *ns = profile->ns;
 	u16 xtype = xindex & AA_X_TYPE_MASK;
 	int index = xindex & AA_X_INDEX_MASK;
-
-	if (!profile)
-		profile = ns->unconfined;
 
 	switch (xtype) {
 	case AA_X_NONE:
@@ -241,10 +241,13 @@ static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 	case AA_X_NAME:
 		if (xindex & AA_X_CHILD)
 			/* released by caller */
-			new_profile = aa_sys_find_attach(&profile->base, name);
+			new_profile = aa_find_attach(ns,
+						     &profile->base.profiles,
+						     name);
 		else
 			/* released by caller */
-			new_profile = aa_sys_find_attach(&ns->base, name);
+			new_profile = aa_find_attach(ns, &ns->base.profiles,
+						     name);
 
 		goto out;
 	case AA_X_TABLE:
@@ -276,7 +279,7 @@ static struct aa_profile *x_to_profile(struct aa_namespace *ns,
 				;
 			}
 			/* released below */
-			new_ns = aa_find_namespace(ns_name);
+			new_ns = aa_find_namespace(ns, ns_name);
 			if (!new_ns)
 				continue;
 		} else if (*name == '@') {
@@ -304,11 +307,11 @@ out:
  */
 int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 {
-	struct aa_task_context *cxt;
+	struct aa_task_cxt *cxt;
 	struct aa_profile *profile, *new_profile = NULL;
 	struct aa_namespace *ns;
 	char *buffer = NULL;
-	unsigned int state = DFA_START;
+	unsigned int state;
 	struct path_cond cond = {
 		bprm->file->f_path.dentry->d_inode->i_uid,
 		bprm->file->f_path.dentry->d_inode->i_mode
@@ -330,49 +333,51 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	cxt = bprm->cred->security;
 	BUG_ON(!cxt);
 
-	profile = aa_profile_newest(cxt->sys.profile);
+	profile = aa_newest_version(cxt->profile);
 	/*
 	 * get the namespace from the replacement profile as replacement
 	 * can change the namespace
 	 */
 	ns = profile->ns;
-	/* filter after namespace assignment */
-	profile = aa_filter_profile(profile);
+	state = profile->file.start;
 
 	/* buffer freed below, name is pointer inside of buffer */
-	sa.base.error = aa_get_name(&bprm->file->f_path, 0, &buffer,
-				    (char **)&sa.name);
+	sa.base.error = aa_get_name(&bprm->file->f_path, profile->path_flags,
+				    &buffer, (char **)&sa.name);
 	if (sa.base.error) {
-		if (!profile || profile->flags & PFLAG_IX_ON_NAME_ERROR)
+		if (profile->flags &
+		    (PFLAG_IX_ON_NAME_ERROR | PFLAG_UNCONFINED))
 			sa.base.error = 0;
 		sa.base.info = "Exec failed name resolution";
 		sa.name = bprm->filename;
 		goto audit;
 	}
 
-	if (!profile) {
+	if (unconfined(profile)) {
 		/* unconfined task - attach profile if one matches */
-		new_profile = aa_sys_find_attach(&ns->base, sa.name);
+		new_profile = aa_find_attach(ns, &ns->base.profiles, sa.name);
 		if (!new_profile)
 			goto cleanup;
 		goto apply;
-	} else if (cxt->sys.onexec) {
+	} else if (cxt->onexec) {
 		/*
 		 * onexec permissions are stored in a pair, rewalk the
 		 * dfa to get start of the exec path match.
 		 */
-		sa.perms = change_profile_perms(profile, cxt->sys.onexec->ns,
+		sa.perms = change_profile_perms(profile, cxt->onexec->ns,
 						sa.name, &state);
 		state = aa_dfa_null_transition(profile->file.dfa, state, 0);
 	}
 	sa.perms = aa_str_perms(profile->file.dfa, state, sa.name, &cond, NULL);
-	if (cxt->sys.onexec && sa.perms.allowed & AA_MAY_ONEXEC) {
-		new_profile = cxt->sys.onexec;
-		cxt->sys.onexec = NULL;
+	if (cxt->onexec && sa.perms.allowed & AA_MAY_ONEXEC) {
+		/* transfer the onexec reference, this is allowed as the
+		 * cred is being prepared, and isn't committed yet.
+		 */
+		new_profile = cxt->onexec;
+		cxt->onexec = NULL;
 		sa.base.info = "change_profile onexec";
 	} else if (sa.perms.allowed & MAY_EXEC) {
-		new_profile = x_to_profile(ns, profile, sa.name,
-					   sa.perms.xindex);
+		new_profile = x_to_profile(profile, sa.name, sa.perms.xindex);
 		if (!new_profile) {
 			if (sa.perms.xindex & AA_X_INHERIT) {
 				/* (p|c|n)ix - don't change profile */
@@ -386,7 +391,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 				sa.base.info = "profile not found";
 			}
 		}
-	} else if (PROFILE_COMPLAIN(profile)) {
+	} else if (COMPLAIN_MODE(profile)) {
 		new_profile = aa_new_null_profile(profile, 0);
 		sa.base.error = -EACCES;
 		if (!new_profile) {
@@ -431,9 +436,11 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	 * bprm->unsafe is used to cache the AA_X_UNSAFE permission
 	 * to avoid having to recompute in secureexec
 	 */
-	if (!(sa.perms.xindex & AA_X_UNSAFE))
+	if (!(sa.perms.xindex & AA_X_UNSAFE)) {
+		AA_DEBUG("scubbing environment variables for %s profile=%s\n",
+			 sa.name, new_profile->base.hname);
 		bprm->unsafe |= AA_SECURE_X_NEEDED;
-
+	}
 apply:
 	sa.name2 = new_profile->base.hname;
 	/* When switching namespace ensure its part of audit message */
@@ -443,16 +450,16 @@ apply:
 	/* when transitioning profiles clear unsafe personality bits */
 	bprm->per_clear |= PER_CLEAR_ON_SETID;
 
-	aa_put_profile(cxt->sys.profile);
+	aa_put_profile(cxt->profile);
 	/* transfer new profile reference will be released when cxt is freed */
-	cxt->sys.profile = new_profile;
+	cxt->profile = new_profile;
 
 x_clear:
-	aa_put_profile(cxt->sys.previous);
-	aa_put_profile(cxt->sys.onexec);
-	cxt->sys.previous = NULL;
-	cxt->sys.onexec = NULL;
-	cxt->sys.token = 0;
+	aa_put_profile(cxt->previous);
+	aa_put_profile(cxt->onexec);
+	cxt->previous = NULL;
+	cxt->onexec = NULL;
+	cxt->token = 0;
 
 audit:
 	sa.base.error = aa_audit_file(profile, &sa);
@@ -479,17 +486,17 @@ int apparmor_bprm_secureexec(struct linux_binprm *bprm)
 void apparmor_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct aa_profile *profile = __aa_current_profile();
-	struct aa_task_context *new_cxt = bprm->cred->security;
+	struct aa_task_cxt *new_cxt = bprm->cred->security;
 
 	/* bail out if unconfined or not changing profile */
-	if ((new_cxt->sys.profile == profile) ||
-	    (!aa_confined(new_cxt->sys.profile)))
+	if ((new_cxt->profile == profile) ||
+	    (unconfined(new_cxt->profile)))
 		return;
 
 	current->pdeath_signal = 0;
 
 	/* reset soft limits and set hard limits for the new profile */
-	__aa_transition_rlimits(profile, new_cxt->sys.profile);
+	__aa_transition_rlimits(profile, new_cxt->profile);
 }
 
 void apparmor_bprm_committed_creds(struct linux_binprm *bprm)
@@ -512,20 +519,22 @@ static char *new_compound_name(const char *n1, const char *n2)
 
 /**
  * aa_change_hat - change hat to/from subprofile
- * @hat_name: hat to change to
+ * @hats: vector of hat names to try changing into (unused if @count == 0)
+ * @count: number of hat names in @hats
  * @token: magic value to validate the hat change
  * @permtest: true if this is just a permission test
  *
- * Change to new @hat_name, and store the @hat_magic in the current task
- * context.  If the new @hat_name is %NULL and the @token matches that
- * stored in the current task context and is not 0, return to the top level
- * profile.
+ * Change to the first profile specified in @hats that exists, and store
+ * the @hat_magic in the current task context.  If the count == 0 and the
+ * @token matches that stored in the current task context, return to the
+ * top level profile.
+ *
  * Returns %0 on success, error otherwise.
  */
-int aa_change_hat(const char *hat_name, u64 token, int permtest)
+int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 {
 	const struct cred *cred;
-	struct aa_task_context *cxt;
+	struct aa_task_cxt *cxt;
 	struct aa_profile *profile, *previous_profile, *hat = NULL;
 	struct aa_audit_file sa = {
 		.base.gfp_mask = GFP_KERNEL,
@@ -533,41 +542,42 @@ int aa_change_hat(const char *hat_name, u64 token, int permtest)
 		.request = AA_MAY_CHANGEHAT,
 	};
 	char *name = NULL;
+	int i;
 
 	/* released below */
-	cred = aa_get_task_cred(current, &profile);
+	cred = get_current_cred();
 	cxt = cred->security;
-	previous_profile = cxt->sys.previous;
+	profile = aa_cred_profile(cred);
+	previous_profile = cxt->previous;
 
-	if (!profile) {
+	if (unconfined(profile)) {
 		sa.base.info = "unconfined";
 		sa.base.error = -EPERM;
 		goto audit;
 	}
 
-	if (hat_name) {
+	if (count) {
 		/* attempting to change into a new hat or switch to a sibling */
 		struct aa_profile *root;
 		root = PROFILE_IS_HAT(profile) ? profile->parent : profile;
 		sa.name2 = profile->ns->base.hname;
 
-		/* released below */
-		hat = aa_find_child(root, hat_name);
+		/* find first matching hat */
+		for (i = 0; i < count && !hat; i++)
+			/* released below */
+			hat = aa_find_child(root, hats[i]);
 		if (!hat) {
-			if (list_empty(&root->base.profiles) ||
-			    PROFILE_COMPLAIN(root))
-				sa.base.error = -ENOENT;
-			if (permtest || !PROFILE_COMPLAIN(root))
-				/* probing is an expected unfortunate behavior
-				 * of the change_hat api is traditionally quiet
-				 */
+			if (!COMPLAIN_MODE(root) || permtest) {
+				sa.base.info = "hat not found";
+				if (list_empty(&root->base.profiles))
+					sa.base.error = -ECHILD;
+				else
+					sa.base.error = -ENOENT;
 				goto out;
-
+			}
 			/* freed below */
-			name = new_compound_name(root->base.hname, hat_name);
-
+			name = new_compound_name(root->base.hname, hats[0]);
 			sa.name = name;
-			sa.base.info = "hat not found";
 			/* released below */
 			hat = aa_new_null_profile(profile, 1);
 			if (!hat) {
@@ -637,10 +647,10 @@ out:
  * Returns %0 on success, error otherwise.
  */
 int aa_change_profile(const char *ns_name, const char *hname, int onexec,
-		      int permtest)
+		      bool permtest)
 {
 	const struct cred *cred;
-	struct aa_task_context *cxt;
+	struct aa_task_cxt *cxt;
 	struct aa_profile *profile, *target = NULL;
 	struct aa_namespace *ns = NULL;
 	struct aa_audit_file sa = {
@@ -656,12 +666,13 @@ int aa_change_profile(const char *ns_name, const char *hname, int onexec,
 	else
 		sa.base.operation = "change_profile";
 
-	cred = aa_get_task_cred(current, &profile);
+	cred = get_current_cred();
 	cxt = cred->security;
+	profile = aa_cred_profile(cred);
 
 	if (ns_name) {
 		/* released below */
-		ns = aa_find_namespace(ns_name);
+		ns = aa_find_namespace(profile->ns, ns_name);
 		if (!ns) {
 			/* we don't create new namespace in complain mode */
 			sa.name2 = ns_name;
@@ -672,13 +683,13 @@ int aa_change_profile(const char *ns_name, const char *hname, int onexec,
 		sa.name2 = ns->base.hname;
 	} else {
 		/* released below */
-		ns = aa_get_namespace(cxt->sys.profile->ns);
+		ns = aa_get_namespace(profile->ns);
 		sa.name2 = ns->base.hname;
 	}
 
 	/* if the name was not specified, use the name of the current profile */
 	if (!hname) {
-		if (!profile)
+		if (unconfined(profile))
 			hname = ns->unconfined->base.hname;
 		else
 			hname = profile->base.hname;
@@ -696,7 +707,7 @@ int aa_change_profile(const char *ns_name, const char *hname, int onexec,
 	if (!target) {
 		sa.base.info = "profile not found";
 		sa.base.error = -ENOENT;
-		if (permtest || !PROFILE_COMPLAIN(profile))
+		if (permtest || !COMPLAIN_MODE(profile))
 			goto audit;
 		/* release below */
 		target = aa_new_null_profile(profile, 0);

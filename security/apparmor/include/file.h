@@ -32,20 +32,19 @@ struct aa_profile;
 #define AA_EXEC_MMAP			0x0040
 
 #define AA_MAY_CREATE			0x0080
-#define AA_LINK_SUBSET			0x0100
-#define AA_MAY_DELEGATE			0x0200
-#define AA_EXEC_DELEGATE		0x0400	/*exec allows delegate */
-#define AA_MAY_CHMOD			0x0800
-#define AA_MAY_CHOWN			0x1000
+#define AA_MAY_DELETE			0x0100
+#define AA_MAY_CHMOD			0x0200
+#define AA_MAY_CHOWN			0x0400
 
-#define AA_LINK_SINGLE			0x2000	/* overlap with CHANGEHAT */
+#define AA_LINK_SUBSET			0x0800
 #define AA_MAY_CHANGEHAT		0x2000	/* ctrl auditing only */
 #define AA_MAY_ONEXEC			0x4000	/* exec allows onexec */
 #define AA_MAY_CHANGE_PROFILE		0x8000
 
 #define AA_AUDIT_FILE_MASK	(MAY_READ | MAY_WRITE | MAY_EXEC | MAY_APPEND |\
 				 AA_MAY_LINK | AA_MAY_LOCK | AA_EXEC_MMAP | \
-				 AA_MAY_CREATE)
+				 AA_MAY_CREATE | AA_MAY_DELETE | AA_MAY_CHMOD |\
+				 AA_MAY_CHOWN)
 
 /*
  * The xindex is broken into 3 parts
@@ -81,7 +80,8 @@ struct path_cond {
  * @quiet: mask of permissions to quiet audit messages for
  * @kill: mask of permissions that when matched will kill the task
  * @xindex: exec transition index if @allowed contains MAY_EXEC
- * @dindex: delegate table index if @allowed contain AA_MAY_DELEGATE
+ * @xdelegate: used by exec to determine set of delegates allowed
+ * @dindex: delegate table index, 0 if no delegation allowed
  *
  * The @audit and @queit mask should be mutually exclusive.
  */
@@ -91,6 +91,7 @@ struct file_perms {
 	u16 quiet;
 	u16 kill;
 	u16 xindex;
+	u16 xdelegate;
 	u16 dindex;
 };
 
@@ -168,6 +169,7 @@ int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa);
  * looked up in the transition table.
  */
 struct aa_file_rules {
+	unsigned int start;
 	struct aa_dfa *dfa;
 	/* struct perms perms; */
 	struct aa_domain trans;
@@ -192,14 +194,13 @@ int aa_file_perm(struct aa_profile *profile, const char *operation,
 
 static inline void aa_free_file_rules(struct aa_file_rules *rules)
 {
-	aa_dfa_free(rules->dfa);
+	aa_put_dfa(rules->dfa);
 	aa_free_domain_entries(&rules->trans);
 }
 
 #define ACC_FMODE(x) (("\000\004\002\006"[(x)&O_ACCMODE]) | (((x) << 1) & 0x40))
 
 /* from namei.c */
-#define ACC_MODE(x) ("\000\004\002\006"[(x)&O_ACCMODE])
 #define MAP_OPEN_FLAGS(x) ((((x) + 1) & O_ACCMODE) ? (x) + 1 : (x))
 /*
  * map file flags to AppArmor permissions

@@ -38,7 +38,7 @@ int aa_getprocattr(struct aa_profile *profile, char **string)
 
 	mode_len = strlen(mode_str) + 3;	/* + 3 for _() */
 	name_len = strlen(profile->base.hname);
-	if (ns != default_namespace)
+	if (ns != root_ns)
 		ns_len = strlen(ns->base.name) + 3; /*+ 3 for :// */
 	len = mode_len + ns_len + name_len + 1;	    /*+ 1 for \n */
 	s = str = kmalloc(len + 1, GFP_ATOMIC);	    /* + 1 \0 */
@@ -49,7 +49,10 @@ int aa_getprocattr(struct aa_profile *profile, char **string)
 		sprintf(s, "%s://", ns->base.name);
 		s += ns_len;
 	}
-	sprintf(s, "%s (%s)\n",profile->base.hname, mode_str);
+	if (profile->flags & PFLAG_UNCONFINED)
+		sprintf(s, "%s\n", profile->base.hname);
+	else
+		sprintf(s, "%s (%s)\n", profile->base.hname, mode_str);
 	*string = str;
 
 	/* NOTE: len does not include \0 of string, not saved as part of file */
@@ -72,10 +75,12 @@ static char *split_token_from_name(const char *op, char *args, u64 * token)
 	return name;
 }
 
-int aa_setprocattr_changehat(char *args, int test)
+int aa_setprocattr_changehat(char *args, size_t size, int test)
 {
 	char *hat;
 	u64 token;
+	const char *hats[16];		/* current hard limit on # of names */
+	int count = 0;
 
 	hat = split_token_from_name("change_hat", args, &token);
 	if (IS_ERR(hat))
@@ -86,10 +91,22 @@ int aa_setprocattr_changehat(char *args, int test)
 		return -EINVAL;
 	}
 
+	if (hat) {
+		/* set up hat name vector, args guarenteed null terminated
+		 * at args[size]
+		 */
+		char *end = args + size;
+		for (count = 0; (hat < end) && count < 16; ++count) {
+			char *next = hat + strlen(hat) + 1;
+			hats[count] = hat;
+			hat = next;
+		}
+	}
+
 	AA_DEBUG("%s: Magic 0x%llx Hat '%s'\n",
 		 __func__, token, hat ? hat : NULL);
 
-	return aa_change_hat(hat, token, test);
+	return aa_change_hat(hats, count, token, test);
 }
 
 int aa_setprocattr_changeprofile(char *fqname, int onexec, int test)

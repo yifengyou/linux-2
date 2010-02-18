@@ -29,7 +29,8 @@ static void aa_audit_file_sub_mask(char *buffer, u16 mask, u16 xindex)
 		*m++ = 'm';
 	if (mask & MAY_READ)
 		*m++ = 'r';
-	if (mask & (MAY_WRITE | AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN))
+	if (mask & (MAY_WRITE | AA_MAY_CREATE | AA_MAY_DELETE | AA_MAY_CHMOD |
+		    AA_MAY_CHOWN))
 		*m++ = 'w';
 	else if (mask & MAY_APPEND)
 		*m++ = 'a';
@@ -113,7 +114,7 @@ int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa)
 	if (likely(!sa->base.error)) {
 		u16 mask = sa->perms.audit;
 
-		if (unlikely(PROFILE_AUDIT_MODE(profile) == AUDIT_ALL))
+		if (unlikely(AUDIT_MODE(profile) == AUDIT_ALL))
 			mask = 0xffff;
 
 		/* mask off perms that are not being force audited */
@@ -131,12 +132,12 @@ int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa)
 
 		/* quiet known rejects, assumes quiet and kill do not overlap */
 		if ((sa->request & sa->perms.quiet) &&
-		    PROFILE_AUDIT_MODE(profile) != AUDIT_NOQUIET &&
-		    PROFILE_AUDIT_MODE(profile) != AUDIT_ALL)
+		    AUDIT_MODE(profile) != AUDIT_NOQUIET &&
+		    AUDIT_MODE(profile) != AUDIT_ALL)
 			sa->request &= ~sa->perms.quiet;
 
 		if (!sa->request)
-			return PROFILE_COMPLAIN(profile) ? 0 : sa->base.error;
+			return COMPLAIN_MODE(profile) ? 0 : sa->base.error;
 	}
 	return aa_audit(type, profile, &sa->base, file_audit_cb);
 }
@@ -170,11 +171,14 @@ static struct file_perms aa_compute_perms(struct aa_dfa *dfa,
 	/* in the old mapping MAY_WRITE implies
 	 * AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN */
 	if (perms.allowed & MAY_WRITE)
-		perms.allowed |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN;
+		perms.allowed |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN |
+			AA_MAY_DELETE;
 	if (perms.audit & MAY_WRITE)
-		perms.audit |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN;
+		perms.audit |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN |
+			AA_MAY_DELETE;
 	if (perms.quiet & MAY_WRITE)
-		perms.quiet |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN;
+		perms.quiet |= AA_MAY_CREATE | AA_MAY_CHMOD | AA_MAY_CHOWN |
+			AA_MAY_DELETE;
 
 	/* in the old mapping AA_MAY_LOCK and link subset are overlayed
 	 * and only determined by which part of a pair they are  in
@@ -218,7 +222,8 @@ int aa_pathstr_perm(struct aa_profile *profile, const char *op,
 		.cond = cond,
 	};
 
-	sa.perms = aa_str_perms(profile->file.dfa, DFA_START, sa.name, cond,
+	sa.perms = aa_str_perms(profile->file.dfa, profile->file.start, sa.name,
+				cond,
 				NULL);
 	if (request & ~sa.perms.allowed)
 		sa.base.error = -EACCES;
@@ -235,9 +240,10 @@ int aa_path_perm(struct aa_profile *profile, const char *operation,
 		.request = request,
 		.cond = cond,
 	};
-
+	int flags = profile->path_flags |
+		(S_ISDIR(cond->mode) ? PATH_IS_DIR : 0);
 	/* buffer freed below - name is pointer inside buffer */
-	sa.base.error = aa_get_name(path, S_ISDIR(cond->mode), &buffer, &name);
+	sa.base.error = aa_get_name(path, flags, &buffer, &name);
 	sa.name = name;
 	if (sa.base.error) {
 		sa.perms = nullperms;
@@ -250,8 +256,8 @@ int aa_path_perm(struct aa_profile *profile, const char *operation,
 		else
 			sa.base.info = "Failed name lookup";
 	} else {
-		sa.perms = aa_str_perms(profile->file.dfa, DFA_START, sa.name,
-					cond, NULL);
+		sa.perms = aa_str_perms(profile->file.dfa, profile->file.start,
+					sa.name, cond, NULL);
 		if (request & ~sa.perms.allowed)
 			sa.base.error = -EACCES;
 	}
@@ -309,13 +315,15 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 		.perms = nullperms,
 	};
 	/* buffer freed below, lname is pointer in buffer */
-	sa.base.error = aa_get_name(&link, 0, &buffer, &lname);
+	sa.base.error = aa_get_name(&link, profile->path_flags, &buffer,
+				    &lname);
 	sa.name = lname;
 	if (sa.base.error)
 		goto audit;
 
 	/* buffer2 freed below, tname is pointer in buffer2 */
-	sa.base.error = aa_get_name(&target, 0, &buffer2, &tname);
+	sa.base.error = aa_get_name(&target, profile->path_flags, &buffer2,
+				    &tname);
 	sa.name2 = tname;
 	if (sa.base.error)
 		goto audit;
@@ -323,29 +331,12 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 	sa.base.error = -EACCES;
 
 	/* aa_str_perms - handles the case of the dfa being NULL */
-	sa.perms = aa_str_perms(profile->file.dfa, DFA_START, lname, &cond,
-				&state);
+	sa.perms = aa_str_perms(profile->file.dfa, profile->file.start, lname,
+				&cond, &state);
 	sa.perms.audit &= AA_MAY_LINK;
 	sa.perms.quiet &= AA_MAY_LINK;
 	sa.perms.kill &= AA_MAY_LINK;
 
-	/* Test for single entry link file perm, the link target is implied.
-	 * This is equivalent to a link pair rule of
-	 * link subset /link/name -> / **
-	 */
-	if (sa.perms.allowed & AA_LINK_SINGLE) {
-		/* map AA_LINK_SUBSET to AA_MAY_LINK perm for common code */
-		sa.perms.allowed |= AA_MAY_LINK;
-		sa.perms.audit &= ~AA_MAY_LINK;
-		sa.perms.quiet &= ~AA_MAY_LINK;
-		sa.perms.kill &= ~AA_MAY_LINK;
-		sa.perms.audit |= (sa.perms.audit & AA_LINK_SUBSET) >> 4;
-		sa.perms.quiet |= (sa.perms.quiet & AA_LINK_SUBSET) >> 4;
-		sa.perms.kill |= (sa.perms.kill & AA_LINK_SUBSET) >> 4;
-		goto subset_test;
-	}
-
-	/* Do link pair permission check  (link file -> target file) */
 	if (!(sa.perms.allowed & AA_MAY_LINK))
 		goto audit;
 
@@ -362,12 +353,11 @@ int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 	if (!(perms.allowed & AA_LINK_SUBSET))
 		goto done_tests;
 
-subset_test:
 	/* Do link perm subset test requiring allowed permission on link are a
 	 * subset of the allowed permissions on target.
 	 */
-	perms = aa_str_perms(profile->file.dfa, DFA_START, tname, &cond,
-			     NULL);
+	perms = aa_str_perms(profile->file.dfa, profile->file.start, tname,
+			     &cond, NULL);
 
 	/* AA_MAY_LINK is not considered in the subset test */
 	sa.request = sa.perms.allowed & ~AA_MAY_LINK;
@@ -437,8 +427,8 @@ static int aa_file_common_perm(struct aa_profile *profile,
 		else
 			sa.base.info = "Failed name lookup";
 	} else {
-		sa.perms = aa_str_perms(profile->file.dfa, DFA_START, sa.name,
-					&cond, NULL);
+		sa.perms = aa_str_perms(profile->file.dfa, profile->file.start,
+					sa.name, &cond, NULL);
 		if (request & ~sa.perms.allowed)
 			sa.base.error = -EACCES;
 	}
@@ -453,7 +443,8 @@ int aa_file_perm(struct aa_profile *profile, const char *operation,
 	char *buffer, *name;
 	umode_t mode = file->f_path.dentry->d_inode->i_mode;
 	/* buffer freed below, name is a pointer inside of buffer */
-	int error = aa_get_name(&file->f_path, S_ISDIR(mode), &buffer, &name);
+	int flags = profile->path_flags | (S_ISDIR(mode) ? PATH_IS_DIR : 0);
+	int error = aa_get_name(&file->f_path, flags, &buffer, &name);
 
 	error = aa_file_common_perm(profile, operation, file, request, name,
 				    error);

@@ -33,11 +33,11 @@
 extern const char *profile_mode_names[];
 #define APPARMOR_NAMES_MAX_INDEX 3
 
-#define PROFILE_COMPLAIN(_profile)				\
+#define COMPLAIN_MODE(_profile)				\
 	((aa_g_profile_mode == APPARMOR_COMPLAIN) || ((_profile) &&	\
 					(_profile)->mode == APPARMOR_COMPLAIN))
 
-#define PROFILE_KILL(_profile)					\
+#define DO_KILL(_profile)					\
 	((aa_g_profile_mode == APPARMOR_KILL) || ((_profile) &&	\
 					(_profile)->mode == APPARMOR_KILL))
 
@@ -65,28 +65,27 @@ enum profile_flags {
 	PFLAG_USER_DEFINED = 0x20,	/* user based profile */
 	PFLAG_NO_LIST_REF = 0x40,	/* list doesn't keep profile ref */
 	PFLAG_MMAP_MIN_ADDR = 0x80,	/* profile controls mmap_min_addr */
-	PFLAG_DELETED_NAMES = 0x100,	/* mediate deleted paths */
-	PFLAG_CONNECT_PATH = 0x200,	/* connect disconnected paths to / */
-	PFLAG_OLD_NULL_TRANS = 0x400,	/* use // as the null transition */
+	PFLAG_OLD_NULL_TRANS = 0x100,	/* use // as the null transition */
+
+	/* These flags must coorespond with PATH_flags */
+	PFLAG_MEDIATE_DELETED = 0x10000, /* mediate instead delegate deleted */
 };
 
 #define AA_NEW_SID 0
 
 struct aa_profile;
 
-/* struct aa_policy_common - common part of both namespaces and profiles
+/* struct aa_policy - common part of both namespaces and profiles
  * @name: name of the object
  * @hname - The hierarchical name
  * @count: reference count of the obj
- * lock: lock for modifying the object
- * @list: list object is on
+ * @list: list policy object is on
  * @profiles: head of the profiles list contained in the object
  */
-struct aa_policy_common {
+struct aa_policy {
 	char *name;
 	char *hname;
 	struct kref count;
-	rwlock_t lock;
 	struct list_head list;
 	struct list_head profiles;
 };
@@ -105,15 +104,12 @@ struct aa_ns_acct {
 };
 
 /* struct aa_namespace - namespace for a set of profiles
- * @name: the name of the namespace
- * @list: list the namespace is on
- * @profiles: list of profile in the namespace
+ * @base: common policy
+ * @parent: parent of namespace
+ * @lock: lock for modifying the object
  * @acct: accounting for the namespace
- * @profile_count: count of profiles on @profiles list
- * @size: accounting of how much memory is consumed by the contained profiles
  * @unconfined: special unconfined profile for the namespace
- * @count: reference count on the namespace
- * @lock: lock for adding/removing profile to the namespace
+ * @sub_ns: list of namespaces under the current namespace.
  *
  * An aa_namespace defines the set profiles that are searched to determine
  * which profile to attach to a task.  Profiles can not be shared between
@@ -121,28 +117,34 @@ struct aa_ns_acct {
  * unique.  When profiles in seperate namespaces have the same name they
  * are NOT considered to be equivalent.
  *
+ * Namespaces are hierarchical and only namespaces and profiles below the
+ * current namespace are visible.
+ *
  * Namespace names must be unique and can not contain the characters :/\0
  *
- * FIXME TODO: add vserver support so a vserer gets a default namespace
+ * FIXME TODO: add vserver support so a vserer (can it all be done in userspace)
  */
 struct aa_namespace {
-	struct aa_policy_common base;
+	struct aa_policy base;
+	struct aa_namespace *parent;
+	rwlock_t lock;
 	struct aa_ns_acct acct;
-	int is_stale;
 	struct aa_profile *unconfined;
+	struct list_head sub_ns;
 };
 
 /* struct aa_profile - basic confinement data
  * @base - base componets of the profile (name, refcount, lists, lock ...)
+ * @parent: parent of profile
  * @ns: namespace the profile is in
- * @parent: parent profile of this profile, if one exists
  * @replacedby: is set profile that replaced this profile
  * @xmatch: optional extended matching for unconfined executables names
- * @xmatch_plen: xmatch prefix len, used to determine xmatch priority
+ * @xmatch_len: xmatch prefix len, used to determine xmatch priority
  * @sid: the unique security id number of this profile
  * @audit: the auditing mode of the profile
  * @mode: the enforcement mode of the profile
  * @flags: flags controlling profile behavior
+ * @path_flags: flags controlling path generation behavior
  * @size: the memory consumed by this profiles rules
  * @file: The set of rules governing basic file access and domain transitions
  * @caps: capabilities for the profile
@@ -165,10 +167,10 @@ struct aa_namespace {
  * determining profile attachment on "unconfined" tasks.
  */
 struct aa_profile {
-	struct aa_policy_common base;
+	struct aa_policy base;
+	struct aa_profile *parent;
 
 	struct aa_namespace *ns;
-	struct aa_profile *parent;
 	union {
 		struct aa_profile *replacedby;
 		const char *rename;
@@ -179,6 +181,7 @@ struct aa_profile {
 	enum audit_mode audit;
 	enum profile_mode mode;
 	u32 flags;
+	u32 path_flags;
 	int size;
 
 	unsigned long mmap_min_addr;
@@ -189,23 +192,19 @@ struct aa_profile {
 	struct aa_rlimit rlimits;
 };
 
-extern struct list_head ns_list;
-extern rwlock_t ns_list_lock;
-
-extern struct aa_namespace *default_namespace;
+extern struct aa_namespace *root_ns;
 extern enum profile_mode aa_g_profile_mode;
 
-void aa_add_profile(struct aa_policy_common *common,
-		    struct aa_profile *profile);
+void aa_add_profile(struct aa_policy *common, struct aa_profile *profile);
 
-int aa_alloc_default_namespace(void);
-void aa_free_default_namespace(void);
+int aa_alloc_root_ns(void);
+void aa_free_root_ns(void);
 void aa_free_namespace_kref(struct kref *kref);
 
-struct aa_namespace *aa_find_namespace(const char *name);
-void aa_profile_ns_list_release(void);
+struct aa_namespace *aa_find_namespace(struct aa_namespace *root,
+				       const char *name);
 
-static inline struct aa_policy_common *aa_get_common(struct aa_policy_common *c)
+static inline struct aa_policy *aa_get_common(struct aa_policy *c)
 {
 	if (c)
 		kref_get(&c->count);
@@ -237,34 +236,10 @@ struct aa_profile *aa_match_profile(struct aa_namespace *ns, const char *name);
 ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only);
 ssize_t aa_interface_remove_profiles(char *name, size_t size);
 
-/**
- * aa_confined - test whether @profile is confining
- * @profile: profile to test if is confining
- *
- * Returns: true if profile will confine a task
- */
-static inline bool aa_confined(struct aa_profile *profile)
-{
-	return !(profile->flags & PFLAG_UNCONFINED);
-}
+#define unconfined(X) ((X)->flags & PFLAG_UNCONFINED)
 
 /**
- * aa_filter_profile - filter out profiles that shouldn't be used to mediate
- * @profile: profile to filter
- *
- * does not change refcounts
- *
- * Return: @profile or NULL if it is filtered
- */
-static inline struct aa_profile *aa_filter_profile(struct aa_profile *profile)
-{
-	if (!aa_confined(profile))
-		return NULL;
-	return profile;
-}
-
-/**
- * aa_profile_newest - find the newest version of @profile
+ * aa_newest_version - find the newest version of @profile
  * @profile: the profile to check for newer versions of
  *
  * Find the newest version of @profile, if @profile is the newest version
@@ -274,25 +249,12 @@ static inline struct aa_profile *aa_filter_profile(struct aa_profile *profile)
  * must be held until the caller decides what to do with the returned newest
  * version.
  */
-static inline struct aa_profile *aa_profile_newest(struct aa_profile *profile)
+static inline struct aa_profile *aa_newest_version(struct aa_profile *profile)
 {
 	if (unlikely(profile && profile->replacedby))
 		for (; profile->replacedby; profile = profile->replacedby) ;
 
 	return profile;
-}
-
-/**
- * aa_confining_profile - find the newest confining profile version
- * @p - profile to check if newest version
- *
- * NOTE: the profile returned is not refcounted, The refcount on @p
- * must be held until the caller decides what to do with the returned newest
- * version.
- */
-static inline struct aa_profile *aa_confining_profile(struct aa_profile *p)
-{
-	return aa_filter_profile(aa_profile_newest(p));
 }
 
 /**
@@ -317,7 +279,7 @@ static inline void aa_put_profile(struct aa_profile *p)
 		kref_put(&p->base.count, aa_free_profile_kref);
 }
 
-static inline int PROFILE_AUDIT_MODE(struct aa_profile *profile)
+static inline int AUDIT_MODE(struct aa_profile *profile)
 {
 	if (aa_g_audit != AUDIT_NORMAL)
 		return aa_g_audit;

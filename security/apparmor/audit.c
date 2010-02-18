@@ -46,6 +46,10 @@ static char *aa_audit_type[] = {
  * system control of whether user audit messages go to system log
  */
 
+/**
+ *
+ * NOTE: profile can be NULL if audit is a none profile based message
+ */
 static int aa_audit_base(int type, struct aa_profile *profile,
 			 struct aa_audit *sa, struct audit_context *audit_cxt,
 			 void (*cb) (struct audit_buffer *, struct aa_audit *))
@@ -53,7 +57,7 @@ static int aa_audit_base(int type, struct aa_profile *profile,
 	struct audit_buffer *ab = NULL;
 	struct task_struct *task = sa->task ? sa->task : current;
 
-	if (profile && PROFILE_KILL(profile) && type == AUDIT_APPARMOR_DENIED)
+	if (profile && DO_KILL(profile) && type == AUDIT_APPARMOR_DENIED)
 		type = AUDIT_APPARMOR_KILL;
 
 	/* ab freed below in audit_log_end */
@@ -85,13 +89,13 @@ static int aa_audit_base(int type, struct aa_profile *profile,
 
 	audit_log_format(ab, " pid=%d", task->pid);
 
-	if (profile) {
+	if (profile && !unconfined(profile)) {
 		pid_t pid = task->real_parent->pid;
 		audit_log_format(ab, " parent=%d", pid);
 		audit_log_format(ab, " profile=");
 		audit_log_untrustedstring(ab, profile->base.hname);
 
-		if (profile->ns != default_namespace) {
+		if (profile->ns != root_ns) {
 			audit_log_format(ab, " namespace=");
 			audit_log_untrustedstring(ab, profile->ns->base.hname);
 		}
@@ -128,17 +132,17 @@ int aa_audit(int type, struct aa_profile *profile, struct aa_audit *sa,
 
 	if (type == AUDIT_APPARMOR_AUTO) {
 		if (likely(!sa->error)) {
-			if (PROFILE_AUDIT_MODE(profile) != AUDIT_ALL)
+			if (AUDIT_MODE(profile) != AUDIT_ALL)
 				return 0;
 			type = AUDIT_APPARMOR_AUDIT;
-		} else if (PROFILE_COMPLAIN(profile))
+		} else if (COMPLAIN_MODE(profile))
 			type = AUDIT_APPARMOR_ALLOWED;
 		else
 			type = AUDIT_APPARMOR_DENIED;
 	}
-	if (PROFILE_AUDIT_MODE(profile) == AUDIT_QUIET ||
+	if (AUDIT_MODE(profile) == AUDIT_QUIET ||
 	    (type == AUDIT_APPARMOR_DENIED &&
-	     PROFILE_AUDIT_MODE(profile) == AUDIT_QUIET))
+	     AUDIT_MODE(profile) == AUDIT_QUIET))
 		return sa->error;
 
 	return aa_audit_base(type, profile, sa, audit_cxt, cb);

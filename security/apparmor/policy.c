@@ -35,7 +35,6 @@
  *
  * Namespace names may not start with / or @ and may not contain \0 or :
  * Reserved namespace namespace
- *	default - the default namespace setup by AppArmor
  *	user-XXXX - user defined profiles
  *
  * a // in a profile or namespace name indicates a hierarcical name with the
@@ -69,10 +68,9 @@
  *   eg. :ns:/bin/bash//bin/ls
  *
  * NOTES:
- *   - hierarchical namespaces are not currently implemented.  Currently
- *     there is only a flat set of namespaces.
  *   - locking of profile lists is currently fairly coarse.  All profile
  *     lists within a namespace use the namespace lock.
+ * FIXME: move profile lists to using rcu_lists
  */
 
 #include <linux/slab.h>
@@ -81,19 +79,19 @@
 
 #include "include/apparmor.h"
 #include "include/capability.h"
+#include "include/context.h"
 #include "include/file.h"
 #include "include/ipc.h"
 #include "include/match.h"
+#include "include/path.h"
 #include "include/policy.h"
 #include "include/policy_unpack.h"
 #include "include/resource.h"
 #include "include/sid.h"
 
-/* list of profile namespaces and lock */
-LIST_HEAD(ns_list);
-DEFINE_RWLOCK(ns_list_lock);
 
-struct aa_namespace *default_namespace;
+/* root profile namespace */
+struct aa_namespace *root_ns;
 
 const char *profile_mode_names[] = {
 	"enforce",
@@ -118,62 +116,91 @@ static const char *hname_tail(const char *hname)
 	return hname;
 }
 
-static bool common_init(struct aa_policy_common *common, const char *name)
+/**
+ * policy_init - initialize a policy structure
+ * @policy: policy to initialize
+ * @name: name of the policy, init will make a copy of it
+ */
+static bool policy_init(struct aa_policy *policy, const char *name)
 {
-	/* freed by common_free */
-	common->hname = kstrdup(name, GFP_KERNEL);
-	if (!common->hname)
+	/* freed by policy_free */
+	policy->hname = kstrdup(name, GFP_KERNEL);
+	if (!policy->hname)
 		return 0;
 	/* base.name is a substring of fqname */
-	common->name = (char *)hname_tail(common->hname);
+	policy->name = (char *)hname_tail(policy->hname);
 
-	INIT_LIST_HEAD(&common->list);
-	INIT_LIST_HEAD(&common->profiles);
-	kref_init(&common->count);
-	rwlock_init(&common->lock);
+	INIT_LIST_HEAD(&policy->list);
+	INIT_LIST_HEAD(&policy->profiles);
+	kref_init(&policy->count);
 
 	return 1;
 }
 
-static void common_free(struct aa_policy_common *common)
+/**
+ * policy_destroy - free the elements referenced by @policy
+ * @policy: policy that is to have its elements freed
+ */
+static void policy_destroy(struct aa_policy *policy)
 {
 	/* still contains profiles -- invalid */
-	if (!list_empty(&common->profiles)) {
+	if (!list_empty(&policy->profiles)) {
 		AA_ERROR("%s: internal error, "
 			 "policy '%s' still contains profiles\n",
-			 __func__, common->name);
+			 __func__, policy->name);
 		BUG();
 	}
-	if (!list_empty(&common->list)) {
+	if (!list_empty(&policy->list)) {
 		AA_ERROR("%s: internal error, policy '%s' still on list\n",
-			 __func__, common->name);
+			 __func__, policy->name);
 		BUG();
 	}
 
 	/* don't free name as its a subset of hname */
-	kzfree(common->hname);
+	kzfree(policy->hname);
 }
 
-static struct aa_policy_common *__common_find(struct list_head *head,
-					      const char *name)
+/**
+ * __policy_find - find a policy by @name on a policy list
+ * @head: list to search
+ * @name: name to search for
+ *
+ * Requires: correct locks for the @head list be held
+ *
+ * Returns: policy that match @name or NULL if not found
+ */
+static struct aa_policy *__policy_find(struct list_head *head, const char *name)
 {
-	struct aa_policy_common *common;
+	struct aa_policy *policy;
 
-	list_for_each_entry(common, head, list) {
-		if (!strcmp(common->name, name))
-			return common;
+	list_for_each_entry(policy, head, list) {
+		if (!strcmp(policy->name, name))
+			return policy;
 	}
 	return NULL;
 }
 
-static struct aa_policy_common *__common_strn_find(struct list_head *head,
-						   const char *str, int len)
+/**
+ * __policy_strn_find - find a policy thats name matches @len chars of @str
+ * @head: list to search
+ * @str: string to search for
+ * @len: length of match required
+ *
+ * Requires: correct locks for the @head list be held
+ *
+ * Returns: policy that match @str or NULL if not found
+ *
+ * if @len == strlen(@strlen) then this is equiv to __policy_find
+ * other wise it allows searching for policy by a partial match of name
+ */
+static struct aa_policy *__policy_strn_find(struct list_head *head,
+					    const char *str, int len)
 {
-	struct aa_policy_common *common;
+	struct aa_policy *policy;
 
-	list_for_each_entry(common, head, list) {
-		if (aa_strneq(common->name, str, len))
-			return common;
+	list_for_each_entry(policy, head, list) {
+		if (aa_strneq(policy->name, str, len))
+			return policy;
 	}
 
 	return NULL;
@@ -197,8 +224,10 @@ static struct aa_namespace *aa_alloc_namespace(const char *name)
 	if (!ns)
 		return NULL;
 
-	if (!common_init(&ns->base, name))
+	if (!policy_init(&ns->base, name))
 		goto fail_ns;
+	INIT_LIST_HEAD(&ns->sub_ns);
+	rwlock_init(&ns->lock);
 
 	/*
 	 * null profile is not added to the profile list,
@@ -214,8 +243,8 @@ static struct aa_namespace *aa_alloc_namespace(const char *name)
 
 	/*
 	 * released by aa_free_namespace, however aa_remove_namespace breaks
-	 * the cyclic references (ns->unconfined, and unconfinged->ns) and
-	 * replaces with refs to default namespace unconfined
+	 * the cyclic references (ns->unconfined, and unconfined->ns) and
+	 * replaces with refs to parent namespace unconfined
 	 */
 	ns->unconfined->ns = aa_get_namespace(ns);
 
@@ -240,7 +269,8 @@ static void aa_free_namespace(struct aa_namespace *ns)
 	if (!ns)
 		return;
 
-	common_free(&ns->base);
+	policy_destroy(&ns->base);
+	aa_put_namespace(ns->parent);
 
 	if (ns->unconfined && ns->unconfined->ns == ns)
 		ns->unconfined->ns = NULL;
@@ -259,55 +289,22 @@ void aa_free_namespace_kref(struct kref *kref)
 }
 
 /**
- * aa_alloc_default_namespace - allocate the base default namespace
- *
- * Returns 0 on success else error
- *
- */
-int __init aa_alloc_default_namespace(void)
-{
-	struct aa_namespace *ns;
-	/* released by aa_free_default_namespace - used as list ref*/
-	ns = aa_alloc_namespace("default");
-	if (!ns)
-		return -ENOMEM;
-
-	/* released by aa_free_default_namespace - global var ref*/
-	default_namespace = aa_get_namespace(ns);
-	write_lock(&ns_list_lock);
-	list_add(&ns->base.list, &ns_list);
-	write_unlock(&ns_list_lock);
-
-	return 0;
-}
-
-void aa_free_default_namespace(void)
-{
-	write_lock(&ns_list_lock);
-	list_del_init(&default_namespace->base.list);
-	write_unlock(&ns_list_lock);
-	/* drop the list ref and the global default_namespace ref */
-	aa_put_namespace(default_namespace);
-	aa_put_namespace(default_namespace);
-	default_namespace = NULL;
-}
-
-/**
  * __aa_find_namespace - find a namespace on a list by @name
  * @name - name of namespace to look for
  *
  * Return: unrefcounted namespace
  *
- * Requires: ns_list_lock be held
+ * Requires: ns lock be held
  */
 static struct aa_namespace *__aa_find_namespace(struct list_head *head,
 						const char *name)
 {
-	return (struct aa_namespace *)__common_find(head, name);
+	return (struct aa_namespace *)__policy_find(head, name);
 }
 
 /**
  * aa_find_namespace  -  look up a profile namespace on the namespace list
+ * @root: namespace to search in
  * @name: name of namespace to find
  *
  * Return: a pointer to the namespace on the list, or NULL if no namespace
@@ -315,13 +312,14 @@ static struct aa_namespace *__aa_find_namespace(struct list_head *head,
  *
  * refcount released by caller
  */
-struct aa_namespace *aa_find_namespace(const char *name)
+struct aa_namespace *aa_find_namespace(struct aa_namespace *root,
+				       const char *name)
 {
 	struct aa_namespace *ns = NULL;
 
-	read_lock(&ns_list_lock);
-	ns = aa_get_namespace(__aa_find_namespace(&ns_list, name));
-	read_unlock(&ns_list_lock);
+	read_lock(&root->lock);
+	ns = aa_get_namespace(__aa_find_namespace(&root->sub_ns, name));
+	read_unlock(&root->lock);
 
 	return ns;
 }
@@ -334,27 +332,32 @@ struct aa_namespace *aa_find_namespace(const char *name)
  */
 static struct aa_namespace *aa_prepare_namespace(const char *name)
 {
-	struct aa_namespace *ns;
+	struct aa_namespace *ns, *root;
 
-	write_lock(&ns_list_lock);
+	root = aa_current_profile()->ns;
+
+	write_lock(&root->lock);
 	if (name)
 		/* released by caller */
-		ns = aa_get_namespace(__aa_find_namespace(&ns_list, name));
+		ns = aa_get_namespace(__aa_find_namespace(&root->sub_ns, name));
 	else
 		/* released by caller */
-		ns = aa_get_namespace(default_namespace);
+		ns = aa_get_namespace(root);
 	if (!ns) {
 		/* name && namespace not found */
 		struct aa_namespace *new_ns;
-		write_unlock(&ns_list_lock);
+		write_unlock(&root->lock);
 		new_ns = aa_alloc_namespace(name);
 		if (!new_ns)
 			return NULL;
-		write_lock(&ns_list_lock);
+		write_lock(&root->lock);
 		/* test for race when new_ns was allocated */
-		ns = __aa_find_namespace(&ns_list, name);
+		ns = __aa_find_namespace(&root->sub_ns, name);
 		if (!ns) {
-			list_add(&new_ns->base.list, &ns_list);
+			/* add parent ref */
+			new_ns->parent = aa_get_namespace(root);
+
+			list_add(&new_ns->base.list, &root->sub_ns);
 			/* add list ref */
 			ns = aa_get_namespace(new_ns);
 		} else {
@@ -364,7 +367,7 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 			aa_get_namespace(ns);
 		}
 	}
-	write_unlock(&ns_list_lock);
+	write_unlock(&root->lock);
 
 	/* return ref */
 	return ns;
@@ -372,20 +375,19 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 
 /**
  * __aa_add_profile - add a profile to a list
- * @common: the namespace or profile list to add it to
+ * @list: list to add it to
  * @profile: the profile to add
  *
  * refcount @profile, should be put by __aa_remove_profile
  *
- * Requires: namespace list lock be held, or list not be shared
+ * Requires: namespace lock be held, or list not be shared
  */
-static void __aa_add_profile(struct aa_policy_common *common,
+static void __aa_add_profile(struct list_head *list,
 			     struct aa_profile *profile)
 {
-	list_add(&profile->base.list, &common->profiles);
-	if (!(profile->flags & PFLAG_NO_LIST_REF))
-		/* get list reference */
-		aa_get_profile(profile);
+	list_add(&profile->base.list, list);
+	/* get list reference */
+	aa_get_profile(profile);
 }
 
 /**
@@ -396,9 +398,9 @@ static void __aa_add_profile(struct aa_policy_common *common,
  * be done with __aa_replace_profile as most profile removals are
  * replacements to the unconfined profile.
  *
- * put @profile refcount
+ * put @profile list refcount
  *
- * Requires: namespace list lock be held, or list not be shared
+ * Requires: namespace lock be held, or list not have been live
  */
 static void __aa_remove_profile(struct aa_profile *profile)
 {
@@ -424,20 +426,20 @@ static void __aa_remove_profile(struct aa_profile *profile)
 static void __aa_replace_profile(struct aa_profile *old,
 				 struct aa_profile *new)
 {
-	struct aa_policy_common *common;
+	struct aa_policy *policy;
 	struct aa_profile *child, *tmp;
 
 	if (old->parent)
-		common = &old->parent->base;
+		policy = &old->parent->base;
 	else
-		common = &old->ns->base;
+		policy = &old->ns->base;
 
 	if (new) {
 		/* released when @new is freed */
 		new->parent = aa_get_profile(old->parent);
 		new->ns = aa_get_namespace(old->ns);
 		new->sid = old->sid;
-		__aa_add_profile(common, new);
+		__aa_add_profile(&policy->profiles, new);
 	} else {
 		/* refcount not taken, held via @old refcount */
 		new = old->ns->unconfined;
@@ -472,48 +474,97 @@ static void __aa_profile_list_release(struct list_head *head)
 	}
 }
 
+static void __aa_remove_namespace(struct aa_namespace *ns);
+
+/**
+ * __aa_ns_list_release - remove all profile namespaces on the list put refs
+ * @head: list of profile namespaces
+ *
+ * Requires: namespace lock be held
+ */
+static void __aa_ns_list_release(struct list_head *head)
+{
+	struct aa_namespace *ns, *tmp;
+	list_for_each_entry_safe(ns, tmp, head, base.list)
+		__aa_remove_namespace(ns);
+
+}
+
+/**
+ * aa_destroy_namespace - remove everything contained by @ns
+ * @ns: namespace to have it contents removed
+ */
+static void aa_destroy_namespace(struct aa_namespace *ns)
+{
+	if (!ns)
+		return;
+
+	write_lock(&ns->lock);
+	/* release all profiles in this namespace */
+	__aa_profile_list_release(&ns->base.profiles);
+
+	/* release all sub namespaces */
+	__aa_ns_list_release(&ns->sub_ns);
+
+	write_unlock(&ns->lock);
+}
+
 /**
  * __aa_remove_namespace - remove a namespace and all its children
  * @ns: namespace to be removed
  * 
- * Requires: ns_list_lock && ns->base.lock be held
+ * Requires: ns->parent->lock be held and ns removed from parent.
  */
 static void __aa_remove_namespace(struct aa_namespace *ns)
 {
 	struct aa_profile *unconfined = ns->unconfined;
+
 	/* remove ns from namespace list */
 	list_del_init(&ns->base.list);
 
 	/*
 	 * break the ns, unconfined profile cyclic reference and forward
-	 * all new unconfined profiles requests to the default namespace
+	 * all new unconfined profiles requests to the parent namespace
 	 * This will result in all confined tasks that have a profile
-	 * being removed inheriting the default->unconfined profile.
+	 * being removed, inheriting the parent->unconfined profile.
 	 */
-	ns->unconfined = aa_get_profile(default_namespace->unconfined);
-	__aa_profile_list_release(&ns->base.profiles);
+	if (ns->parent)
+		ns->unconfined = aa_get_profile(ns->parent->unconfined);
+
+	aa_destroy_namespace(ns);
+
 	/* release original ns->unconfined ref */
 	aa_put_profile(unconfined);
 	/* release ns->base.list ref, from removal above */
 	aa_put_namespace(ns);
 }
 
-
 /**
- * aa_profilelist_release - remove all namespaces and all associated profiles
+ * aa_alloc_root_ns - allocate the root profile namespace
+ *
+ * Returns 0 on success else error
+ *
  */
-void aa_profile_ns_list_release(void)
+int __init aa_alloc_root_ns(void)
 {
-	struct aa_namespace *ns, *tmp;
+	/* released by aa_free_root_ns - used as list ref*/
+	root_ns = aa_alloc_namespace("root");
+	if (!root_ns)
+		return -ENOMEM;
 
-	/* Remove and release all the profiles on namespace profile lists. */
-	write_lock(&ns_list_lock);
-	list_for_each_entry_safe(ns, tmp, &ns_list, base.list) {
-		write_lock(&ns->base.lock);
-		__aa_remove_namespace(ns);
-		write_unlock(&ns->base.lock);
-	}
-	write_unlock(&ns_list_lock);
+	return 0;
+}
+
+ /**
+  * aa_free_root_ns - free the root profile namespace
+  */
+void aa_free_root_ns(void)
+ {
+	 struct aa_namespace *ns = root_ns;
+	 root_ns = NULL;
+ 
+	 aa_destroy_namespace(ns);
+	 aa_put_namespace(ns);
 }
 
 /**
@@ -531,7 +582,7 @@ struct aa_profile *aa_alloc_profile(const char *hname)
 	if (!profile)
 		return NULL;
 
-	if (!common_init(&profile->base, hname)) {
+	if (!policy_init(&profile->base, hname)) {
 		kzfree(profile);
 		return NULL;
 	}
@@ -579,9 +630,9 @@ struct aa_profile *aa_new_null_profile(struct aa_profile *parent, int hat)
 	profile->parent = aa_get_profile(parent);
 	profile->ns = aa_get_namespace(parent->ns);
 
-	write_lock(&profile->ns->base.lock);
-	__aa_add_profile(&parent->base, profile);
-	write_unlock(&profile->ns->base.lock);
+	write_lock(&profile->ns->lock);
+	__aa_add_profile(&parent->base.profiles, profile);
+	write_unlock(&profile->ns->lock);
 
 	return profile;
 
@@ -607,30 +658,18 @@ static void aa_free_profile(struct aa_profile *profile)
 	if (!profile)
 		return;
 
-	/*
-	 * profile can still be on the list if the list doesn't hold a
-	 * reference.  There is no race as NULL profiles can't be attached
-	 */
 	if (!list_empty(&profile->base.list)) {
-		if ((profile->flags & PFLAG_NULL) && profile->ns) {
-			write_lock(&profile->ns->base.lock);
-			list_del_init(&profile->base.list);
-			write_unlock(&profile->ns->base.lock);
-		} else {
-			AA_ERROR("%s: internal error, "
-				 "profile '%s' still on ns list\n",
-				 __func__, profile->base.name);
-			BUG();
-		}
+		AA_ERROR("%s: internal error, "
+			 "profile '%s' still on ns list\n",
+			 __func__, profile->base.name);
+		BUG();
 	}
 
 	/* free children profiles */
-	common_free(&profile->base);
-
-	BUG_ON(!list_empty(&profile->base.profiles));
+	policy_destroy(&profile->base);
+	aa_put_profile(profile->parent);
 
 	aa_put_namespace(profile->ns);
-	aa_put_profile(profile->parent);
 
 	aa_free_file_rules(&profile->file);
 	aa_free_cap_rules(&profile->caps);
@@ -638,7 +677,7 @@ static void aa_free_profile(struct aa_profile *profile)
 	aa_free_rlimit_rules(&profile->rlimits);
 
 	aa_free_sid(profile->sid);
-	aa_dfa_free(profile->xmatch);
+	aa_put_dfa(profile->xmatch);
 
 	if (profile->replacedby)
 		aa_put_profile(profile->replacedby);
@@ -672,7 +711,7 @@ void aa_free_profile_kref(struct kref *kref)
 static struct aa_profile *__aa_find_child(struct list_head *head,
 					  const char *name)
 {
-	return (struct aa_profile *)__common_find(head, name);
+	return (struct aa_profile *)__policy_find(head, name);
 }
 
 /**
@@ -688,7 +727,7 @@ static struct aa_profile *__aa_find_child(struct list_head *head,
 static struct aa_profile *__aa_strn_find_child(struct list_head *head,
 					       const char *name, int len)
 {
-	return (struct aa_profile *)__common_strn_find(head, name, len);
+	return (struct aa_profile *)__policy_strn_find(head, name, len);
 }
 
 /**
@@ -702,9 +741,9 @@ struct aa_profile *aa_find_child(struct aa_profile *parent, const char *name)
 {
 	struct aa_profile *profile;
 
-	read_lock(&parent->ns->base.lock);
+	read_lock(&parent->ns->lock);
 	profile = aa_get_profile(__aa_find_child(&parent->base.profiles, name));
-	read_unlock(&parent->ns->base.lock);
+	read_unlock(&parent->ns->lock);
 
 	return profile;
 }
@@ -718,25 +757,25 @@ struct aa_profile *aa_find_child(struct aa_profile *parent, const char *name)
  * that matches hname does not need to exist, in general this
  * is used to load a new profile.
  *
- * Requires: ns->base.lock be held
+ * Requires: ns->lock be held
  *
- * Returns: unrefcounted common or NULL if not found
+ * Returns: unrefcounted policy or NULL if not found
  */
-static struct aa_policy_common *__aa_find_parent(struct aa_namespace *ns,
-						 const char *hname)
+static struct aa_policy *__aa_find_parent(struct aa_namespace *ns,
+					  const char *hname)
 {
-	struct aa_policy_common *common;
+	struct aa_policy *policy;
 	struct aa_profile *profile = NULL;
 	char *split;
 
-	common = &ns->base;
+	policy = &ns->base;
 
 	for (split = strstr(hname, "//"); split;) {
-		profile = __aa_strn_find_child(&common->profiles, hname,
+		profile = __aa_strn_find_child(&policy->profiles, hname,
 					       split - hname);
 		if (!profile)
 			return NULL;
-		common = &profile->base;
+		policy = &profile->base;
 		hname = split + 2;
 		split = strstr(hname, "//");
 	}
@@ -750,13 +789,13 @@ static struct aa_policy_common *__aa_find_parent(struct aa_namespace *ns,
  * @base: base list to start looking up profile name from
  * @hname: hierarchical profile name
  *
- * Requires: ns->base.lock be held
+ * Requires: ns->lock be held
  *
  * Returns: unrefcounted profile pointer or NULL if not found
  *
  * Do a relative name lookup, recursing through profile tree.
  */
-static struct aa_profile *__aa_find_profile(struct aa_policy_common *base,
+static struct aa_profile *__aa_find_profile(struct aa_policy *base,
 					    const char *hname)
 {
 	struct aa_profile *profile = NULL;
@@ -789,9 +828,9 @@ struct aa_profile *aa_find_profile(struct aa_namespace *ns, const char *hname)
 {
 	struct aa_profile *profile;
 
-	read_lock(&ns->base.lock);
+	read_lock(&ns->lock);
 	profile = aa_get_profile(__aa_find_profile(&ns->base, hname));
-	read_unlock(&ns->base.lock);
+	read_unlock(&ns->lock);
 	return profile;
 }
 
@@ -819,19 +858,19 @@ static bool replacement_allowed(struct aa_profile *profile,
 /**
  * __add_new_profile - simple wrapper around __aa_add_profile
  * @ns: namespace that profile is being added to
- * @common: the policy container to add the profile to
+ * @policy: the policy container to add the profile to
  * @profile: profile to add
  *
  * add a profile to a list and do other required basic allocations
  */
 static void __add_new_profile(struct aa_namespace *ns,
-			      struct aa_policy_common *common,
+			      struct aa_policy *policy,
 			      struct aa_profile *profile)
 {
-	if (common != &ns->base)
+	if (policy != &ns->base)
 		/* released on profile replacement or aa_free_profile */
-		profile->parent = aa_get_profile((struct aa_profile *) common);
-	__aa_add_profile(common, profile);
+		profile->parent = aa_get_profile((struct aa_profile *) policy);
+	__aa_add_profile(&policy->profiles, profile);
 	/* released on aa_free_profile */
 	profile->sid = aa_alloc_sid(AA_ALLOC_SYS_SID);
 	profile->ns = aa_get_namespace(ns);
@@ -844,12 +883,12 @@ static void __add_new_profile(struct aa_namespace *ns,
  * @add_only: true if only doing addition, no replacement allowed
  *
  * unpack and replace a profile on the profile list and uses of that profile
- * by any aa_task_context.  If the profile does not exist on the profile list
+ * by any aa_task_cxt.  If the profile does not exist on the profile list
  * it is added.  Return %0 or error.
  */
 ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 {
-	struct aa_policy_common *common;
+	struct aa_policy *policy;
 	struct aa_profile *old_profile = NULL, *new_profile = NULL;
 	struct aa_profile *rename_profile = NULL;
 	struct aa_namespace *ns;
@@ -883,17 +922,17 @@ ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 
 	sa.name = new_profile->base.hname;
 
-	write_lock(&ns->base.lock);
-	/* no ref on common only use inside lock */
-	common = __aa_find_parent(ns, new_profile->base.hname);
+	write_lock(&ns->lock);
+	/* no ref on policy only use inside lock */
+	policy = __aa_find_parent(ns, new_profile->base.hname);
 
-	if (!common) {
+	if (!policy) {
 		sa.base.info = "parent does not exist";
 		sa.base.error = -ENOENT;
 		goto audit;
 	}
 
-	old_profile = __aa_find_child(&common->profiles,
+	old_profile = __aa_find_child(&policy->profiles,
 				      new_profile->base.name);
 	/* released below */
 	aa_get_profile(old_profile);
@@ -933,9 +972,9 @@ audit:
 		if (rename_profile)
 			__aa_replace_profile(rename_profile, new_profile);
 		if (!(old_profile || rename_profile))
-			__add_new_profile(ns, common, new_profile);
+			__add_new_profile(ns, policy, new_profile);
 	}
-	write_unlock(&ns->base.lock);
+	write_unlock(&ns->lock);
 
 out:
 	aa_put_namespace(ns);
@@ -953,16 +992,17 @@ fail:
 
 /**
  * aa_interface_remove_profiles - remove profile(s) from the system
- * @fqname: name of the profile to remove
+ * @fqname: name of the profile or namespace to remove
  * @size: size of the name
  *
- * remove a profile from the profile list and all aa_task_context references
- * to said profile.
+ * Remove a profile or sub namespace from the current namespace, so that
+ * they can not be found anymore and mark them as replaced by unconfined
+ *
  * NOTE: removing confinement does not restore rlimits to preconfinemnet values
  */
 ssize_t aa_interface_remove_profiles(char *fqname, size_t size)
 {
-	struct aa_namespace *ns = NULL;
+	struct aa_namespace *root, *ns = NULL;
 	struct aa_profile *profile = NULL;
 	struct aa_audit_iface sa = {
 		.base.operation = "profile_remove",
@@ -978,48 +1018,50 @@ ssize_t aa_interface_remove_profiles(char *fqname, size_t size)
 		goto fail;
 	}
 
-	write_lock(&ns_list_lock);
+	if (*fqname == 0) {
+		sa.base.info = "no profile specified";
+		sa.base.error = -ENOENT;
+		goto fail;
+	}
+
+	/* ref count held by cred */
+	root = aa_current_profile()->ns;
+
 	if (fqname[0] == ':') {
 		char *ns_name;
 		name = aa_split_fqname(fqname, &ns_name);
-		if (fqname)
+		if (ns_name)
 			/* released below */
-			ns = aa_get_namespace(__aa_find_namespace(&ns_list,
-								  ns_name));
-	} else {
+			ns = aa_find_namespace(root, ns_name);
+	} else
 		/* released below */
-		ns = aa_get_namespace(default_namespace);
-	}
+		ns = aa_get_namespace(root);
 
 	if (!ns) {
-		sa.base.info = "failed: namespace does not exist";
+		sa.base.info = "namespace does not exist";
 		sa.base.error = -ENOENT;
-		goto fail_ns_list_lock;
+		goto fail;
 	}
 
 	sa.name2 = ns->base.name;
-	write_lock(&ns->base.lock);
+	write_lock(&ns->lock);
 	if (!name) {
-		/* remove namespace */
-		if (ns == default_namespace)
-			__aa_profile_list_release(&ns->base.profiles);
-		else
-			__aa_remove_namespace(ns);
+		/* remove namespace - can only happen if fqname[0] == ':' */
+		__aa_remove_namespace(ns);
 	} else {
 		/* remove profile */
 		profile = aa_get_profile(__aa_find_profile(&ns->base, name));
 		if (!profile) {
 			sa.name = name;
 			sa.base.error = -ENOENT;
-			sa.base.info = "failed: profile does not exist";
+			sa.base.info = "profile does not exist";
 			goto fail_ns_lock;
 		}
 		sa.name = profile->base.hname;
 		__aa_profile_list_release(&profile->base.profiles);
 		__aa_replace_profile(profile, NULL);
 	}
-	write_unlock(&ns->base.lock);
-	write_unlock(&ns_list_lock);
+	write_unlock(&ns->lock);
 
 	/* don't fail removal if audit fails */
 	(void) aa_audit_iface(&sa);
@@ -1028,10 +1070,8 @@ ssize_t aa_interface_remove_profiles(char *fqname, size_t size)
 	return size;
 
 fail_ns_lock:
-	write_unlock(&ns->base.lock);
-
-fail_ns_list_lock:
-	write_unlock(&ns_list_lock);
+	write_unlock(&ns->lock);
+	aa_put_namespace(ns);
 
 fail:
 	error = aa_audit_iface(&sa);

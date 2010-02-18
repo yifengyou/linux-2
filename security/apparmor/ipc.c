@@ -70,10 +70,11 @@ int aa_ptrace(struct task_struct *tracer, struct task_struct *tracee,
 
 	struct aa_profile *tracer_p;
 	/* cred released below */
-	const struct cred *cred = aa_get_task_cred(tracer, &tracer_p);
+	const struct cred *cred = get_task_cred(tracer);
 	int error = 0;
+	tracer_p = aa_cred_profile(cred);
 
-	if (tracer_p) {
+	if (!unconfined(tracer_p)) {
 		struct aa_audit_ptrace sa = {
 			.base.operation = "ptrace",
 			.base.gfp_mask = GFP_ATOMIC,
@@ -83,23 +84,15 @@ int aa_ptrace(struct task_struct *tracer, struct task_struct *tracee,
 		/* FIXME: different namespace restriction can be lifted
 		 * if, namespace are matched to AppArmor namespaces
 		 */
-		if (tracer->nsproxy != tracee->nsproxy) {
-			sa.base.info = "different namespaces";
-			sa.base.error = -EPERM;
-			aa_audit(AUDIT_APPARMOR_DENIED, tracer_p, &sa.base,
-				 audit_cb);
-		} else {
-			struct aa_profile *tracee_p;
-			/* lcred released below */
-			struct cred *lcred = aa_get_task_cred(tracee,
-								&tracee_p);
+		struct aa_profile *tracee_p;
+		/* lcred released below */
+		struct cred *lcred = get_task_cred(tracee);
+		tracee_p = aa_cred_profile(lcred);
 
-			sa.base.error = aa_may_ptrace(tracer, tracer_p,
-						      tracee_p, mode);
-			sa.base.error = aa_audit_ptrace(tracer_p, &sa);
+		sa.base.error = aa_may_ptrace(tracer, tracer_p, tracee_p, mode);
+		sa.base.error = aa_audit_ptrace(tracer_p, &sa);
 
-			put_cred(lcred);
-		}
+		put_cred(lcred);
 		error = sa.base.error;
 	}
 	put_cred(cred);

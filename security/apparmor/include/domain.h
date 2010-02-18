@@ -29,8 +29,8 @@ void apparmor_bprm_committing_creds(struct linux_binprm *bprm);
 void apparmor_bprm_committed_creds(struct linux_binprm *bprm);
 
 void aa_free_domain_entries(struct aa_domain *domain);
-int aa_change_hat(const char *hat_name, u64 token, int permtest);
+int aa_change_hat(const char *hats[], int count, u64 token, bool permtest);
 int aa_change_profile(const char *ns_name, const char *name, int onexec,
-		      int permtest);
+		      bool permtest);
 
 #endif /* __AA_DOMAIN_H */

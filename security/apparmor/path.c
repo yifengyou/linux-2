@@ -38,14 +38,15 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 {
 	struct path root, tmp, ns_root = { };
 	char *res;
-	int deleted;
+	int deleted, connected;
 	int error = 0;
 
 	read_lock(&current->fs->lock);
 	root = current->fs->root;
 	/* released below */
-	path_get(&current->fs->root);
+	path_get(&root);
 	read_unlock(&current->fs->lock);
+
 	spin_lock(&vfsmount_lock);
 	if (root.mnt && root.mnt->mnt_ns)
 		/* released below */
@@ -54,8 +55,8 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 		/* released below */
 		ns_root.dentry = dget(ns_root.mnt->mnt_root);
 	spin_unlock(&vfsmount_lock);
-	spin_lock(&dcache_lock);
 
+	spin_lock(&dcache_lock);
 	/* There is a race window between path lookup here and the
 	 * need to strip the " (deleted) string that __d_path applies
 	 * Detect the race and relookup the path
@@ -64,11 +65,15 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 	 * with an updated __d_path
 	 */
 	do {
-		tmp = ns_root;
+		if (flags & PATH_CHROOT_REL)
+			tmp = root;
+		else
+			tmp = ns_root;
 		deleted = d_unlinked(path->dentry);
 		res = __d_path(path, &tmp, buf, buflen);
 
 	} while (deleted != d_unlinked(path->dentry));
+	spin_unlock(&dcache_lock);
 
 	*name = res;
 	/* handle error conditions - and still allow a partial path to
@@ -77,41 +82,55 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 	if (IS_ERR(res)) {
 		error = PTR_ERR(res);
 		*name = buf;
-	} else if (deleted) {
-		if (!path->dentry->d_inode || flags & PFLAG_DELETED_NAMES)
-			/* On some filesystems, newly allocated dentries appear
-			 * to the security_path hooks as a deleted
-			 * dentry except without an inode allocated.
-			 *
-			 * Remove the appended deleted text and return as a
-			 * string for normal mediation.  The (deleted) string
-			 * is guarenteed to be added in this case, so just
-			 * strip it.
-			 */
-			buf[buflen - 11] = 0;	/* - (len(" (deleted)") +\0) */
-		else
+		goto out;
+	}
+	if (deleted) {
+		/* On some filesystems, newly allocated dentries appear to the
+		 * security_path hooks as a deleted dentry except without an
+		 * inode allocated.
+		 *
+		 * Remove the appended deleted text and return as string for
+		 * normal mediation, or auditing.  The (deleted) string is
+		 * guarenteed to be added in this case, so just strip it.
+		 */
+		buf[buflen - 11] = 0;	/* - (len(" (deleted)") +\0) */
+
+		if (path->dentry->d_inode && !(flags & PATH_MEDIATE_DELETED)) {
 			error = -ENOENT;
-	} else if (flags & ~PFLAG_CONNECT_PATH &&
-		   tmp.dentry != ns_root.dentry && tmp.mnt != ns_root.mnt) {
+			goto out;
+		}
+	}
+
+	if (flags & PATH_CHROOT_REL)
+		connected = tmp.dentry == root.dentry && tmp.mnt == root.mnt;
+	else
+		connected = tmp.dentry == ns_root.dentry &&
+			tmp.mnt == ns_root.mnt;
+
+	if (!connected && 
+	    !(flags & PATH_CONNECT_PATH) &&
+	    !((flags & PATH_CHROOT_REL) && (flags & PATH_CHROOT_NSCONNECT) &&
+	      (tmp.dentry == ns_root.dentry && tmp.mnt == ns_root.mnt))) {
 		/* disconnected path, don't return pathname starting with '/' */
 		error = -ESTALE;
 		if (*res == '/')
 			*name = res + 1;
 	}
 
-	spin_unlock(&dcache_lock);
+out:
 	path_put(&root);
 	path_put(&ns_root);
 
 	return error;
 }
 
-static int get_name_to_buffer(struct path *path, int is_dir, char *buffer,
-			      int size, char **name, int flags)
+static int get_name_to_buffer(struct path *path, int flags, char *buffer,
+			      int size, char **name)
 {
-	int error = d_namespace_path(path, buffer, size - is_dir, name, flags);
+	int adjust = (flags & PATH_IS_DIR) ? 1 : 0;
+	int error = d_namespace_path(path, buffer, size - adjust, name, flags);
 
-	if (!error && is_dir && (*name)[1] != '\0')
+	if (!error && (flags & PATH_IS_DIR) && (*name)[1] != '\0')
 		/*
 		 * Append "/" to the pathname.  The root directory is a special
 		 * case; it already ends in slash.
@@ -124,9 +143,9 @@ static int get_name_to_buffer(struct path *path, int is_dir, char *buffer,
 /**
  * aa_get_name - compute the pathname of a file
  * @path: path the file
- * @is_dir: set if the file is a directory
+ * @flags: flags controling path name generation
  * @buffer: buffer that aa_get_name() allocated
- * @name: the error code indicating whether aa_get_name failed
+ * @name: the generated path name if there is an error
  *
  * Returns an error code if the there was a failure in obtaining the
  * name.
@@ -136,10 +155,11 @@ static int get_name_to_buffer(struct path *path, int is_dir, char *buffer,
  * may contain a partial or invalid name (in the case of a deleted file), that
  * can be used for audit purposes, but it can not be used for mediation.
  *
- * We need @is_dir to indicate whether the file is a directory or not because
- * the file may not yet exist, and so we cannot check the inode's file type.
+ * We need PATH_IS_DIR to indicate whether the file is a directory or not
+ * because the file may not yet exist, and so we cannot check the inode's
+ * file type.
  */
-int aa_get_name(struct path *path, int is_dir, char **buffer, char **name)
+int aa_get_name(struct path *path, int flags, char **buffer, char **name)
 {
 	char *buf, *str = NULL;
 	int size = 256;
@@ -153,7 +173,7 @@ int aa_get_name(struct path *path, int is_dir, char **buffer, char **name)
 		if (!buf)
 			return -ENOMEM;
 
-		error = get_name_to_buffer(path, is_dir, buf, size, &str, 0);
+		error = get_name_to_buffer(path, flags, buf, size, &str);
 		if (!error || (error == -ENOENT) || (error == -ESTALE))
 			break;
 

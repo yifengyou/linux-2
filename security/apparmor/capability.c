@@ -55,16 +55,16 @@ static int aa_audit_caps(struct aa_profile *profile, struct aa_audit_caps *sa)
 
 	if (likely(!sa->base.error)) {
 		/* test if auditing is being forced */
-		if (likely((PROFILE_AUDIT_MODE(profile) != AUDIT_ALL) &&
+		if (likely((AUDIT_MODE(profile) != AUDIT_ALL) &&
 			   !cap_raised(profile->caps.audit, sa->cap)))
 			return 0;
 		type = AUDIT_APPARMOR_AUDIT;
-	} else if (PROFILE_KILL(profile) ||
+	} else if (DO_KILL(profile) ||
 		   cap_raised(profile->caps.kill, sa->cap)) {
 		type = AUDIT_APPARMOR_KILL;
 	} else if (cap_raised(profile->caps.quiet, sa->cap) &&
-		   PROFILE_AUDIT_MODE(profile) != AUDIT_NOQUIET &&
-		   PROFILE_AUDIT_MODE(profile) != AUDIT_ALL) {
+		   AUDIT_MODE(profile) != AUDIT_NOQUIET &&
+		   AUDIT_MODE(profile) != AUDIT_ALL) {
 		/* quiet auditing */
 		return sa->base.error;
 	}
@@ -73,7 +73,7 @@ static int aa_audit_caps(struct aa_profile *profile, struct aa_audit_caps *sa)
 	ent = &get_cpu_var(audit_cache);
 	if (sa->base.task == ent->task && cap_raised(ent->caps, sa->cap)) {
 		put_cpu_var(audit_cache);
-		if (PROFILE_COMPLAIN(profile))
+		if (COMPLAIN_MODE(profile))
 			return 0;
 		return sa->base.error;
 	} else {
@@ -113,7 +113,7 @@ int aa_capable(struct task_struct *task, struct aa_profile *profile, int cap,
 	};
 
 	if (!audit) {
-		if (PROFILE_COMPLAIN(profile))
+		if (COMPLAIN_MODE(profile))
 			return 0;
 		return error;
 	}

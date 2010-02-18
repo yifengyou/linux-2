@@ -158,51 +158,114 @@ static const struct file_operations aa_fs_profile_remove = {
 	.write = aa_profile_remove
 };
 
+
 /**
- * next_profile - step to the next profile to be output
- * @profile: profile that was last output
+ * __next_namespace - find the next namespace to list
+ * @root: root namespace to stop search at
+ * @ns: current ns position
  *
- * Perform a depth first traversal over profile tree.
+ * Find the next namespace and to list and handle all locking needed
+ * while switching current namespace.
  *
- * Returns: next profile or NULL if done
- * Requires: ns_list_lock, and profile->ns->base.lock be held
- *           will unlock profile->ns.base.lock and aquire lock for next ns
- *           __releases(last ns lock);
+ * NOTE: will not unlock root->lock
  */
-static struct aa_profile *next_profile(struct aa_profile *profile)
+static struct aa_namespace *__next_namespace(struct aa_namespace *root,
+					     struct aa_namespace *ns)
 {
-	struct aa_profile *parent;
-	struct aa_namespace *ns = profile->ns;
+	struct aa_namespace *parent;
 
-	/* is next profile a child */
-	if (!list_empty(&profile->base.profiles))
-		return list_first_entry(&profile->base.profiles,
-					struct aa_profile, base.list);
+	/* is next namespace a child */
+	if (!list_empty(&ns->sub_ns)) {
+		struct aa_namespace *next;
+		next = list_first_entry(&ns->sub_ns, typeof(*ns), base.list);
+		read_lock(&next->lock);
+		return next;
+	}
 
-	/* is next a sibling, parent sibling, gp sibling */
-	parent = profile->parent;
+	parent = ns->parent;
 	while (parent) {
-		list_for_each_entry_continue(profile, &parent->base.profiles,
-					     base.list)
-			return profile;
-		profile = parent;
+		read_unlock(&ns->lock);
+		list_for_each_entry_continue(ns, &parent->sub_ns, base.list) {
+			read_lock(&ns->lock);
+			return ns;
+		}
+		if (parent == root)
+			return NULL;
+		ns = parent;
 		parent = parent->parent;
 	}
 
-	/* is next the another profile in the namespace */
-	list_for_each_entry_continue(profile, &ns->base.profiles, base.list)
-		return profile;
+	return NULL;
+}
 
-	/* finished all profiles in namespace move to next namespace */
-	read_unlock(&ns->base.lock);
-	list_for_each_entry_continue(ns, &ns_list, base.list) {
-		read_lock(&ns->base.lock);
-		return list_first_entry(&ns->base.profiles, struct aa_profile,
+/**
+ * __first_profile - find the first profile in a namespace
+ * @root: namespace that is root of profiles being displayed
+ * @ns: namespace to start in
+ */
+	static struct aa_profile *__first_profile(struct aa_namespace *root,
+						  struct aa_namespace *ns)
+{
+	for ( ; ns; ns = __next_namespace(root, ns)) {
+		if (!list_empty(&ns->base.profiles))
+			return list_first_entry(&ns->base.profiles,
+						struct aa_profile, base.list);
+	}
+	return NULL;
+}
+
+/**
+ * __next_profile - step to the next profile in a profile tree
+ * @profile: current profile in tree
+ *
+ * Perform a depth first taversal on the profile tree in a namespace
+ *
+ * Returns: next profile or NULL if done
+ * Requires: profile->ns.lock to be held
+ */
+static struct aa_profile *__next_profile(struct aa_profile *p)
+{
+	struct aa_profile *parent;
+	struct aa_namespace *ns = p->ns;
+
+	/* is next profile a child */
+	if (!list_empty(&p->base.profiles))
+		return list_first_entry(&p->base.profiles, typeof(*p),
 					base.list);
+
+	/* is next profile a sibling, parent sibling, gp, subling, .. */
+	parent = p->parent;
+	while (parent) {
+		list_for_each_entry_continue(p, &parent->base.profiles,
+					     base.list)
+				return p;
+		p = parent;
+		parent = parent->parent;
 	}
 
-	/* done all profiles */
+	/* is next another profile in the namespace */
+	list_for_each_entry_continue(p, &ns->base.profiles, base.list)
+		return p;
+
 	return NULL;
+}
+
+/**
+ * next_profile - step to the next profile in where ever it may be
+ * @root: root namespace
+ * @profile: current profile
+ *
+ * Returns: next profile or NULL if there isn't one
+ */
+static struct aa_profile *next_profile(struct aa_namespace *root,
+				       struct aa_profile *profile)
+{
+	struct aa_profile *next = __next_profile(profile);
+	if (next)
+		return next;
+
+	/* finished all profiles in namespace move to next namespace */
+	return __first_profile(root, __next_namespace(root, profile->ns));
 }
 
 /**
@@ -210,39 +273,35 @@ static struct aa_profile *next_profile(struct aa_profile *profile)
  * @f: seq_file to fill
  * @pos: current position
  *
- * acquires first ns->base.lock
+ * acquires first ns->lock
  */
-static void *p_start(struct seq_file *f, loff_t *pos) __acquires(ns_list_lock)
+static void *p_start(struct seq_file *f, loff_t *pos)
+	__acquires(root->lock)
 {
-	struct aa_namespace *ns;
+	struct aa_profile *profile = NULL;
+	struct aa_namespace *root = aa_current_profile()->ns;
 	loff_t l = *pos;
+	f->private = aa_get_namespace(root);
 
-	read_lock(&ns_list_lock);
-	if (!list_empty(&ns_list)) {
-		struct aa_profile *profile = NULL;
-		ns = list_first_entry(&ns_list, typeof(*ns), base.list);
-		read_lock(&ns->base.lock);
-		if (!list_empty(&ns->base.profiles)) {
-			profile = list_first_entry(&ns->base.profiles,
-						   typeof(*profile), base.list);
-			/* skip to position */
-			for (; profile && l > 0; l--)
-				profile = next_profile(profile);
-			return profile;
-		} else
-			read_unlock(&ns->base.lock);
-	}
-	return NULL;
+
+	/* find the first profile */
+	read_lock(&root->lock);
+	profile = __first_profile(root, root);
+
+	/* skip to position */
+	for (; profile && l > 0; l--)
+		profile = next_profile(root, profile);
+
+	return profile;
 }
 
 static void *p_next(struct seq_file *f, void *p, loff_t *pos)
 {
-	struct aa_profile *profile = (struct aa_profile *)p;
-
+	struct aa_profile *profile = p;
+	struct aa_namespace *root = f->private;
 	(*pos)++;
-	profile = next_profile(profile);
 
-	return profile;
+	return next_profile(root, profile);
 }
 
 /**
@@ -251,36 +310,54 @@ static void *p_next(struct seq_file *f, void *p, loff_t *pos)
  * @p: the last profile writen
  *
  * if we haven't completely traversed the profile tree will release the
- * ns->base.lock, if we have the ns->base.lock was released in next_profile
+ * locking.
  */
-static void p_stop(struct seq_file *f, void *p) __releases(ns_list_lock)
+static void p_stop(struct seq_file *f, void *p)
+	__releases(root->lock)
 {
-	struct aa_profile *profile = (struct aa_profile *)p;
+	struct aa_profile *profile = p;
+	struct aa_namespace *root = f->private, *ns;
 
-	if (profile)
-		read_unlock(&profile->ns->base.lock);
-	read_unlock(&ns_list_lock);
+	if (profile) {
+		for (ns = profile->ns; ns && ns != root; ns = ns->parent)
+			read_unlock(&ns->lock);
+	}
+	read_unlock(&root->lock);
+	aa_put_namespace(root);
 }
 
-static void print_name(struct seq_file *f, struct aa_profile *profile)
+/**
+ * print_ns_name - print a namespace name back to @root
+ * @root: root namespace to stop at
+ * @ns: namespace to gen name for
+ *
+ * Returns: true if it printed a name
+ */
+static bool print_ns_name(struct seq_file *f, struct aa_namespace *root,
+			  struct aa_namespace *ns)
 {
-	if (profile->parent) {
-		print_name(f, profile->parent);
+	if (!ns || ns == root)
+		return 0;
+
+	if (ns->parent && print_ns_name(f, root, ns->parent))
 		seq_printf(f, "//");
-	}
-	seq_printf(f, "%s", profile->base.name);
+
+	seq_printf(f, "%s", ns->base.name);
+	return 1;
 }
 
 /* Returns: error on failure */
 static int seq_show_profile(struct seq_file *f, void *p)
 {
 	struct aa_profile *profile = (struct aa_profile *)p;
+	struct aa_namespace *root = f->private;
 
-	if (profile->ns != default_namespace)
-		seq_printf(f, ":%s:", profile->ns->base.name);
-	print_name(f, profile);
-	seq_printf(f, " (%s)\n",
-		   PROFILE_COMPLAIN(profile) ? "complain" : "enforce");
+	if (profile->ns != root)
+		seq_printf(f, ":");
+	if (print_ns_name(f, root, profile->ns))
+		seq_printf(f, "://");
+	seq_printf(f, "%s (%s)\n", profile->base.hname,
+		   COMPLAIN_MODE(profile) ? "complain" : "enforce");
 
 	return 0;
 }

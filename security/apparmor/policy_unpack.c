@@ -85,9 +85,10 @@ static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 int aa_audit_iface(struct aa_audit_iface *sa)
 {
 	struct aa_profile *profile;
-	struct cred *cred = aa_get_task_cred(current, &profile);
-	int error = aa_audit(AUDIT_APPARMOR_STATUS, profile, &sa->base,
-			     audit_cb);
+	const struct cred *cred = get_current_cred();
+	int error;
+	profile = aa_cred_profile(cred);
+	error = aa_audit(AUDIT_APPARMOR_STATUS, profile, &sa->base, audit_cb);
 	put_cred(cred);
 	return error;
 }
@@ -306,7 +307,7 @@ static bool verify_accept(struct aa_dfa *dfa, int flags)
  * unpack_dfa - unpack a file rule dfa
  * @e: serialized data extent information
  *
- * returns dfa or ERR_PTR
+ * returns dfa or ERR_PTR or NULL if no dfa
  */
 static struct aa_dfa *unpack_dfa(struct aa_ext *e)
 {
@@ -330,15 +331,15 @@ static struct aa_dfa *unpack_dfa(struct aa_ext *e)
 			flags |= DFA_FLAG_VERIFY_STATES;
 
 		dfa = aa_dfa_unpack(blob + pad, size - pad, flags);
-
-		if (aa_g_paranoid_load && !verify_accept(dfa, flags))
+		
+		if (!IS_ERR(dfa) && !verify_accept(dfa, flags))
 			goto fail;
 	}
 
 	return dfa;
 
 fail:
-	aa_dfa_free(dfa);
+	aa_put_dfa(dfa);
 	return ERR_PTR(-EPROTO);
 }
 
@@ -440,6 +441,7 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 	const char *name = NULL;
 	size_t size = 0;
 	int i, error = -EPROTO;
+	kernel_cap_t tmpcap;
 	u32 tmp;
 	u64 tmp64;
 
@@ -463,10 +465,12 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 		profile->xmatch = NULL;
 		goto fail;
 	}
-	/* xmatch_len is not optional is xmatch is set */
-	if (profile->xmatch && !unpack_u32(e, &tmp, NULL))
-		goto fail;
-	profile->xmatch_len = tmp;
+	/* xmatch_len is not optional if xmatch is set */
+	if (profile->xmatch) {
+		if (!unpack_u32(e, &tmp, NULL))
+			goto fail;
+		profile->xmatch_len = tmp;
+	}
 
 	/* per profile debug flags (complain, audit) */
 	if (!unpack_nameX(e, AA_STRUCT, "flags"))
@@ -487,6 +491,10 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 	if (!unpack_nameX(e, AA_STRUCTEND, NULL))
 		goto fail;
 
+	/* path_flags is optional */
+	unpack_u32(e, &profile->path_flags, "path_flags");
+	profile->path_flags |= profile->flags & PFLAG_MEDIATE_DELETED;
+
 	/* mmap_min_addr is optional */
 	if (unpack_u64(e, &tmp64, "mmap_min_addr")) {
 		profile->mmap_min_addr = (unsigned long)tmp64;
@@ -504,7 +512,7 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 		goto fail;
 	if (!unpack_u32(e, &(profile->caps.quiet.cap[0]), NULL))
 		goto fail;
-	if (!unpack_u32(e, &(profile->caps.set.cap[0]), NULL))
+	if (!unpack_u32(e, &tmpcap.cap[0], NULL))
 		goto fail;
 
 	if (unpack_nameX(e, AA_STRUCT, "caps64")) {
@@ -515,9 +523,17 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 			goto fail;
 		if (!unpack_u32(e, &(profile->caps.quiet.cap[1]), NULL))
 			goto fail;
-		if (!unpack_u32(e, &(profile->caps.set.cap[1]), NULL))
+		if (!unpack_u32(e, &(tmpcap.cap[1]), NULL))
 			goto fail;
 		if (!unpack_nameX(e, AA_STRUCTEND, NULL))
+			goto fail;
+	}
+
+	if (unpack_nameX(e, AA_STRUCT, "capsx")) {
+		/* optional extended caps mediation mask */
+		if (!unpack_u32(e, &(profile->caps.extended.cap[0]), NULL))
+			goto fail;
+		if (!unpack_u32(e, &(profile->caps.extended.cap[1]), NULL))
 			goto fail;
 	}
 
@@ -554,6 +570,10 @@ static struct aa_profile *unpack_profile(struct aa_ext *e,
 		profile->file.dfa = NULL;
 		goto fail;
 	}
+
+	if (!unpack_u32(e, &profile->file.start, "dfa_start"))
+		/* default start state */
+		profile->file.start = DFA_START;
 
 	if (!unpack_trans_table(e, profile))
 		goto fail;
@@ -635,7 +655,8 @@ static bool verify_dfa_xindex(struct aa_dfa *dfa, int table_size)
 static int verify_profile(struct aa_profile *profile, struct aa_audit_iface *sa)
 {
 	if (aa_g_paranoid_load) {
-		if (!verify_dfa_xindex(profile->file.dfa,
+		if (profile->file.dfa &&
+		    !verify_dfa_xindex(profile->file.dfa,
 				       profile->file.trans.size)) {
 			sa->base.info = "Invalid named transition";
 			return -EPROTO;
