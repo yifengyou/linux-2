@@ -4552,7 +4552,6 @@ EXPORT_SYMBOL vmlinux 0x799e9c90	I_BDEV
 EXPORT_SYMBOL vmlinux 0x79a94701	tty_driver_kref_put
 EXPORT_SYMBOL vmlinux 0x79aa04a2	get_random_bytes
 EXPORT_SYMBOL vmlinux 0x79ad224b	tasklet_kill
-EXPORT_SYMBOL vmlinux 0x79c115ae	x86_mce_decode_callback
 EXPORT_SYMBOL vmlinux 0x79c86915	dm_exception_store_type_unregister
 EXPORT_SYMBOL vmlinux 0x79caa36e	setup_new_exec
 EXPORT_SYMBOL vmlinux 0x79f82ed1	gnet_stats_copy_basic
@@ -6211,6 +6210,7 @@ EXPORT_SYMBOL vmlinux 0xf704a18d	uart_get_divisor
 EXPORT_SYMBOL vmlinux 0xf7085af2	scsi_calculate_bounce_limit
 EXPORT_SYMBOL vmlinux 0xf735d1bb	blkdev_get
 EXPORT_SYMBOL vmlinux 0xf749534a	gen_pool_free
+EXPORT_SYMBOL vmlinux 0xf74a63b5	x86_mce_decode_callback
 EXPORT_SYMBOL vmlinux 0xf78d04ab	netlink_register_notifier
 EXPORT_SYMBOL vmlinux 0xf7a1c43e	vm_insert_pfn
 EXPORT_SYMBOL vmlinux 0xf7d3ace2	netif_napi_add
@@ -8741,6 +8741,7 @@ EXPORT_SYMBOL_GPL vmlinux 0x35b520cd	save_stack_trace_tsk
 EXPORT_SYMBOL_GPL vmlinux 0x35d8c94a	sdev_evt_alloc
 EXPORT_SYMBOL_GPL vmlinux 0x35e918ce	init_dummy_netdev
 EXPORT_SYMBOL_GPL vmlinux 0x35eba57d	__inet_lookup_listener
+EXPORT_SYMBOL_GPL vmlinux 0x35fd0312	per_cpu__injectm
 EXPORT_SYMBOL_GPL vmlinux 0x3613a242	blk_abort_request
 EXPORT_SYMBOL_GPL vmlinux 0x361e2bcc	save_stack_trace
 EXPORT_SYMBOL_GPL vmlinux 0x362e23ec	call_rcu_bh
@@ -8766,7 +8767,6 @@ EXPORT_SYMBOL_GPL vmlinux 0x3849181c	fuse_put_request
 EXPORT_SYMBOL_GPL vmlinux 0x38c03e7f	class_compat_remove_link
 EXPORT_SYMBOL_GPL vmlinux 0x38da882b	__pci_reset_function
 EXPORT_SYMBOL_GPL vmlinux 0x38ea936e	__memory_failure
-EXPORT_SYMBOL_GPL vmlinux 0x38fc318a	per_cpu__injectm
 EXPORT_SYMBOL_GPL vmlinux 0x392a643e	sysdev_class_register
 EXPORT_SYMBOL_GPL vmlinux 0x394cae88	ata_sff_hsm_move
 EXPORT_SYMBOL_GPL vmlinux 0x396f4bde	ata_eh_qc_retry
@@ -8839,6 +8839,7 @@ EXPORT_SYMBOL_GPL vmlinux 0x4225ad57	apply_to_page_range
 EXPORT_SYMBOL_GPL vmlinux 0x424219ce	ata_pci_device_do_suspend
 EXPORT_SYMBOL_GPL vmlinux 0x42494cea	ring_buffer_event_length
 EXPORT_SYMBOL_GPL vmlinux 0x424acc6d	scatterwalk_done
+EXPORT_SYMBOL_GPL vmlinux 0x426f13b9	e820_all_mapped
 EXPORT_SYMBOL_GPL vmlinux 0x4280fd53	rtc_class_open
 EXPORT_SYMBOL_GPL vmlinux 0x428a35b0	blk_insert_cloned_request
 EXPORT_SYMBOL_GPL vmlinux 0x42a18c66	__dma_request_channel
@@ -9658,6 +9659,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xb79c68b9	xenbus_dev_changed
 EXPORT_SYMBOL_GPL vmlinux 0xb7b92b55	regulator_register
 EXPORT_SYMBOL_GPL vmlinux 0xb7d7c12e	hpet_set_alarm_time
 EXPORT_SYMBOL_GPL vmlinux 0xb7db45b7	dm_rh_get_state
+EXPORT_SYMBOL_GPL vmlinux 0xb7e2eb91	mce_cpu_specific_poll
 EXPORT_SYMBOL_GPL vmlinux 0xb7fdd0df	eventfd_ctx_put
 EXPORT_SYMBOL_GPL vmlinux 0xb80d7ec8	crypto_register_ahash
 EXPORT_SYMBOL_GPL vmlinux 0xb82e4164	hvc_instantiate

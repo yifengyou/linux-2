@@ -709,6 +709,7 @@ hid-logitech
 hid-microsoft
 hid-monterey
 hid-ntrig
+hid-ortek
 hidp
 hid-petalynx
 hid-pl
@@ -1147,6 +1148,7 @@ mc13783-core
 mc33880
 mc44s803
 mce-inject
+mce-xeon75xx
 mcp2120-sir
 mcp23s08
 mcs5000_ts
