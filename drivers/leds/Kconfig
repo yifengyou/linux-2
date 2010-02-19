@@ -236,6 +236,13 @@ config LEDS_BD2802
 	  This option enables support for BD2802GU RGB LED driver chips
 	  accessed via the I2C bus.
 
+config LEDS_DELL_NETBOOKS
+	tristate "External LED on Dell Business Netbooks"
+	depends on LEDS_CLASS && X86 && ACPI_WMI
+	help
+	  This adds support for the Latitude 2100 and similar
+	  notebooks that have an external LED.
+
 comment "LED Triggers"
 
 config LEDS_TRIGGERS
