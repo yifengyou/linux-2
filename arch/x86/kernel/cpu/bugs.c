@@ -151,6 +151,20 @@ static void __init check_config(void)
 #endif
 }
 
+static void __init check_atom(void)
+{	
+
+	/* 
+	 *  Disable 4MB page tables to work around Intel errata AAE44 for
+	 *  Atom. We cannot guarantee stopping undefined processor behaviour
+	 *  when two pageing structure translations differ with respect to
+	 *  page frame sizes.  Hence, for Atoms we disable the PSE.
+	 */
+	if (boot_cpu_data.x86_model == 0x1c) {
+		clear_bit(X86_FEATURE_PSE, boot_cpu_data.x86_capability);
+		printk(KERN_INFO "Disabling 4MB page tables to avoid TLB bug\n");
+	}
+}
 
 void __init check_bugs(void)
 {
@@ -163,6 +177,7 @@ void __init check_bugs(void)
 	check_fpu();
 	check_hlt();
 	check_popad();
+	check_atom();
 	init_utsname()->machine[1] =
 		'0' + (boot_cpu_data.x86 > 6 ? 6 : boot_cpu_data.x86);
 	alternative_instructions();
