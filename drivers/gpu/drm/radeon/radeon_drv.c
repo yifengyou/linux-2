@@ -86,7 +86,7 @@ int radeon_benchmarking = 0;
 int radeon_testing = 0;
 int radeon_connector_table = 0;
 int radeon_tv = 1;
-int radeon_new_pll = 1;
+int radeon_new_pll = -1;
 int radeon_audio = 1;
 
 MODULE_PARM_DESC(no_wb, "Disable AGP writeback for scratch registers");
@@ -122,7 +122,7 @@ module_param_named(connector_table, radeon_connector_table, int, 0444);
 MODULE_PARM_DESC(tv, "TV enable (0 = disable)");
 module_param_named(tv, radeon_tv, int, 0444);
 
-MODULE_PARM_DESC(new_pll, "Select new PLL code for AVIVO chips");
+MODULE_PARM_DESC(new_pll, "Select new PLL code");
 module_param_named(new_pll, radeon_new_pll, int, 0444);
 
 MODULE_PARM_DESC(audio, "Audio enable (0 = disable)");
