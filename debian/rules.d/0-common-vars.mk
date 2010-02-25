@@ -86,7 +86,6 @@ stampdir	:= $(CURDIR)/debian/stamps
 # assumption that the binary package always starts with linux-image will never change.
 #
 bin_pkg_name=linux-image-$(abi_release)
-dbg_pkg_name=linux-image-debug-$(abi_release)
 hdrs_pkg_name=linux-headers-$(abi_release)
 #
 # The generation of content in the doc package depends on both 'AUTOBUILD=' and

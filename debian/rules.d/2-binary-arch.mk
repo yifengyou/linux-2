@@ -40,7 +40,7 @@ $(stampdir)/stamp-build-%: prepare-%
 # Install the finished build
 install-%: pkgdir = $(CURDIR)/debian/$(bin_pkg_name)-$*
 install-%: bindoc = $(pkgdir)/usr/share/doc/$(bin_pkg_name)-$*
-install-%: dbgpkgdir = $(CURDIR)/debian/$(dbg_pkg_name)-$*
+install-%: dbgpkgdir = $(CURDIR)/debian/$(bin_pkg_name)-$*-dbgsym
 install-%: basepkg = $(hdrs_pkg_name)
 install-%: hdrdir = $(CURDIR)/debian/$(basepkg)-$*/usr/src/$(basepkg)-$*
 install-%: target_flavour = $*
@@ -248,7 +248,7 @@ endif
 
 binary-%: pkgimg = $(bin_pkg_name)-$*
 binary-%: pkghdr = $(hdrs_pkg_name)-$*
-binary-%: dbgpkg = $(dbg_pkg_name)-$*
+binary-%: dbgpkg = $(bin_pkg_name)-$*-dbgsym
 binary-%: install-%
 	dh_testdir
 	dh_testroot

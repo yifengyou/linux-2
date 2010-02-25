@@ -60,7 +60,7 @@ Description: Linux kernel headers for version PKGVER on DESC
  This is for sites that want the latest kernel headers.  Please read
  /usr/share/doc/SRCPKGNAME-headers-PKGVER-ABINUM/debian.README.gz for details.
 
-Package: linux-image-debug-PKGVER-ABINUM-FLAVOUR
+Package: linux-image-PKGVER-ABINUM-FLAVOUR-dbgsym
 Architecture: ARCH
 Section: devel
 Priority: optional
