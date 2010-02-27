@@ -1,10 +1,10 @@
-aoe
+aoe ?
 aten ?
 bpck ?
 bpck6 ?
-cciss
+cciss ?
 comm ?
-cpqarray
+cpqarray ?
 DAC960
 dstr ?
 epat ?
@@ -15,7 +15,7 @@ friq ?
 frpw ?
 kbic ?
 ktti ?
-nbd
+nbd ?
 on20 ?
 on26 ?
 paride ?
@@ -24,6 +24,6 @@ pd ?
 pf ?
 pg ?
 pt ?
-sx8
-umem
+sx8 ?
+umem ?
 virtio_blk ?

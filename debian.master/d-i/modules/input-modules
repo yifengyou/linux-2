@@ -18,4 +18,4 @@ hid-sony ?
 hid-sunplus ?
 hid-tmff ?
 hid-zpff ?
-usbhid
+usbhid ?
