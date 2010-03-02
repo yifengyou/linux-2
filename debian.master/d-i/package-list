@@ -182,3 +182,9 @@ Priority: extra
 Description: squashfs modules
  This package contains squashfs modules.
 
+Package: vlan-modules
+Depends: kernel-image
+Priority: extra
+Description: vlan modules
+ This package contains vlan (8021.Q) modules.
+
