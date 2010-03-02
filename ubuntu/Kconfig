@@ -8,6 +8,7 @@ source "ubuntu/iscsitarget/Kconfig"
 source "ubuntu/lirc/Kconfig"
 source "ubuntu/ndiswrapper/Kconfig"
 source "ubuntu/omnibook/Kconfig"
+source "ubuntu/rtl8192se/Kconfig"
 source "ubuntu/rfkill/Kconfig"
 
 endmenu

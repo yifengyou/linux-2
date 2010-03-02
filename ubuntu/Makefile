@@ -10,6 +10,7 @@ obj-$(CONFIG_SCSI_ISCSITARGET)	+= iscsitarget/
 obj-$(CONFIG_LIRC_DEV)          += lirc/
 obj-$(CONFIG_NDISWRAPPER)	+= ndiswrapper/
 obj-$(CONFIG_OMNIBOOK)		+= omnibook/
+obj-$(CONFIG_RTL8192SE)		+= rtl8192se/
 obj-m				+= rfkill/
 
 # This is a stupid trick to get kbuild to create ubuntu/built-in.o
