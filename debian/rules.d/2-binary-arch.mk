@@ -24,6 +24,12 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 	cat $^ | sed -e 's/.*CONFIG_VERSION_SIGNATURE.*/CONFIG_VERSION_SIGNATURE="Ubuntu $(release)-$(revision)-$*"/' > $(builddir)/build-$*/.config
 	find $(builddir)/build-$* -name "*.ko" | xargs rm -f
 	$(build_cd) $(kmake) $(build_O) silentoldconfig prepare scripts
+ifeq ($(do_tools),true)
+	install -d $(builddir)/tools-$*
+	for i in *; do ln -s $(CURDIR)/$$i $(builddir)/tools-$*/; done
+	rm $(builddir)/tools-$*/tools
+	rsync -a tools/ $(builddir)/tools-$*/tools/
+endif
 	touch $@
 
 
@@ -35,6 +41,9 @@ $(stampdir)/stamp-build-%: prepare-%
 	@echo "Building $*..."
 	$(build_cd) $(kmake) $(build_O) $(conc_level) $(build_image)
 	$(build_cd) $(kmake) $(build_O) $(conc_level) modules
+ifeq ($(do_tools),true)
+	cd $(builddir)/tools-$*/tools/perf && make
+endif
 	@touch $@
 
 # Install the finished build
@@ -92,6 +101,13 @@ endif
 	  ln -f $(pkgdir)/lib/modules/$(abi_release)-$*/kernel/drivers/video/vesafb.ko \
 		$(pkgdir)/lib/modules/$(abi_release)-$*/initrd/; \
 	fi
+
+	# Add the tools.
+ifeq ($(do_tools),true)
+	install -d $(pkgdir)/usr/bin
+	install -s -m755 $(builddir)/tools-$*/tools/perf/perf \
+		$(pkgdir)/usr/bin/perf_$(abi_release)-$*
+endif
 
 	# Now the image scripts
 	install -d $(pkgdir)/DEBIAN
@@ -258,6 +274,7 @@ binary-%: install-%
 	dh_compress -p$(pkgimg)
 	dh_fixperms -p$(pkgimg)
 	dh_installdeb -p$(pkgimg)
+	dh_shlibdeps -p$(pkgimg)
 	dh_gencontrol -p$(pkgimg)
 	dh_md5sums -p$(pkgimg)
 	dh_builddeb -p$(pkgimg) -- -Zbzip2 -z9

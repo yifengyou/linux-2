@@ -99,6 +99,7 @@ endif
 	@echo "do_libc_dev_package       = $(do_libc_dev_package)"
 	@echo "do_common_headers_indep   = $(do_common_headers_indep)"
 	@echo "do_full_source            = $(do_full_source)"
+	@echo "do_tools                  = $(do_tools)"
 
 printchanges:
 	@baseCommit=$$(git log --pretty=format:'%H %s' | \

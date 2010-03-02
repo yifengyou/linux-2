@@ -119,6 +119,12 @@ do_common_headers_indep=true
 # add a 'full source' mode
 do_full_source=false
 
+# build tools
+do_tools=false
+ifneq ($(wildcard $(CURDIR)/tools),)
+do_tools=true
+endif
+
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 #
 # These 2 environment variables set the -j value of the kernel build. For example,
