@@ -104,6 +104,7 @@ doc_pkg_name=$(src_pkg_name)-doc
 # somewhat I/O intensive and utterly useless.
 #
 do_source_package=true
+do_linux_source_content=false
 ifneq ($(wildcard /CurrentlyBuilding),)
 do_linux_source_content=true
 endif
