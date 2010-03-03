@@ -14,8 +14,6 @@ DEBIAN=$(shell awk -F= '($$1 == "DEBIAN") { print $$2 }' <debian/debian.env)
 unexport CFLAGS
 unexport LDFLAGS
 
-# This is the debhelper compatability version to use.
-export DH_COMPAT=5
 export LC_ALL=C
 export SHELL=/bin/bash -e
 
