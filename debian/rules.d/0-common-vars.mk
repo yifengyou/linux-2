@@ -124,6 +124,7 @@ do_tools=false
 ifneq ($(wildcard $(CURDIR)/tools),)
 do_tools=true
 endif
+tools_pkg_name=$(src_pkg_name)-tools
 
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 #

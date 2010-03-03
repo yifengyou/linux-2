@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Kernel Team <kernel-team@lists.ubuntu.com>
 Standards-Version: 3.8.4.0
 Build-Depends: debhelper (>= 5), cpio, module-init-tools, kernel-wedge (>= 2.24ubuntu1), makedumpfile [amd64 i386 lpia], device-tree-compiler [powerpc], libelf-dev, binutils-dev, rsync
-Build-Depends-Indep: xmlto, docbook-utils, ghostscript, transfig, bzip2, sharutils
+Build-Depends-Indep: xmlto, docbook-utils, ghostscript, transfig, bzip2, sharutils, asciidoc
 Build-Conflicts: findutils (= 4.4.1-1ubuntu1)
 Vcs-Git: http://kernel.ubuntu.com/git-repos/ubuntu/ubuntu-lucid.git
 
@@ -44,6 +44,16 @@ Description: Linux kernel specific documentation for version PKGVER
  drivers, and so on.  See
  /usr/share/doc/SRCPKGNAME-doc/00-INDEX for a list of what is
  contained in each file.
+
+Package: SRCPKGNAME-tools
+Architecture: all
+Section: admin
+Priority: optional
+Depends: ${misc:Depends}
+Conflicts: SRCPKGNAME-tools-2.6
+Replaces: SRCPKGNAME-tools-2.6
+Description: Linux kernel specific tools for version PKGVER
+ This package provides the various tools in the PKGVER kernel source.
 
 Package: linux-headers-PKGVER-ABINUM
 Architecture: all
