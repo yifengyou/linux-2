@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Kernel Team <kernel-team@lists.ubuntu.com>
 Standards-Version: 3.8.4.0
 Build-Depends: debhelper (>= 5), cpio, module-init-tools, kernel-wedge (>= 2.24ubuntu1), makedumpfile [amd64 i386 lpia], device-tree-compiler [powerpc]
-Build-Depends-Indep: xmlto, docbook-utils, gs, transfig, bzip2, sharutils
+Build-Depends-Indep: xmlto, docbook-utils, ghostscript, transfig, bzip2, sharutils
 Build-Conflicts: findutils (= 4.4.1-1ubuntu1)
 Vcs-Git: http://kernel.ubuntu.com/git-repos/ubuntu/ubuntu-lucid.git
 
