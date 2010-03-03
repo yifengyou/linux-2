@@ -94,6 +94,7 @@ hdrs_pkg_name=linux-headers-$(abi_release)
 # failures get sorted out. Finally, the doc package doesn't really need to be built
 # for developer testing (its kind of slow), so only do it if on a buildd.
 do_doc_package=true
+do_doc_package_content=true
 ifeq ($(wildcard /CurrentlyBuilding),)
 do_doc_package_content=false
 endif
