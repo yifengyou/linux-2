@@ -27,7 +27,7 @@ Section: admin
 Priority: optional
 Pre-Depends: dpkg (>= 1.10.24)
 Provides: linux-image, linux-image-2.6, fuse-module, =PROVIDES=
-Depends: initramfs-tools (>= 0.36ubuntu6), coreutils | fileutils (>= 4.0), module-init-tools (>= 3.3-pre11-4ubuntu3), wireless-crda
+Depends: ${misc:Depends}, initramfs-tools (>= 0.36ubuntu6), coreutils | fileutils (>= 4.0), module-init-tools (>= 3.3-pre11-4ubuntu3), wireless-crda
 Conflicts: hotplug (<< 0.0.20040105-1)
 Recommends: BOOTLOADER
 Suggests: fdutils, SRCPKGNAME-doc-PKGVER | SRCPKGNAME-source-PKGVER
@@ -51,7 +51,7 @@ Package: linux-headers-PKGVER-ABINUM-FLAVOUR
 Architecture: ARCH
 Section: devel
 Priority: optional
-Depends: coreutils | fileutils (>= 4.0), SRCPKGNAME-headers-PKGVER-ABINUM, ${shlibs:Depends}
+Depends: ${misc:Depends}, coreutils | fileutils (>= 4.0), SRCPKGNAME-headers-PKGVER-ABINUM, ${shlibs:Depends}
 Provides: SRCPKGNAME-headers, SRCPKGNAME-headers-2.6
 Description: Linux kernel headers for version PKGVER on DESC
  This package provides kernel header files for version PKGVER on
@@ -64,6 +64,7 @@ Package: linux-image-PKGVER-ABINUM-FLAVOUR-dbgsym
 Architecture: ARCH
 Section: devel
 Priority: optional
+Depends: ${misc:Depends}
 Provides: linux-debug
 Description: Linux kernel debug image for version PKGVER on DESC
  This package provides a kernel debug image for version PKGVER on
