@@ -4323,7 +4323,7 @@ static netdev_tx_t rtl8169_start_xmit(struct sk_buff *skb,
 
 	tp->cur_tx += frags + 1;
 
-	smp_wmb();
+	wmb();
 
 	RTL_W8(TxPoll, NPQ);	/* set polling bit */
 
@@ -4683,7 +4683,7 @@ static int rtl8169_poll(struct napi_struct *napi, int budget)
 		 * until it does.
 		 */
 		tp->intr_mask = 0xffff;
-		smp_wmb();
+		wmb();
 		RTL_W16(IntrMask, tp->intr_event);
 	}
 
