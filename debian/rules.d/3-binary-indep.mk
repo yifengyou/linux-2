@@ -53,7 +53,7 @@ install-source:
 	dh_clean -k -p$(srcpkg)
 
 	install -d $(srcdir)
-ifeq ($(do_linux_source_content),true)
+ifeq ($(do_source_package_content),true)
 	find . -path './debian' -prune -o -path './$(DEBIAN)' -prune -o \
 		-path './.*' -prune -o -print | \
 		cpio -pd --preserve-modification-time $(srcdir)

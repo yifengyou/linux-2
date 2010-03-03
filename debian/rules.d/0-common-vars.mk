@@ -104,9 +104,9 @@ doc_pkg_name=$(src_pkg_name)-doc
 # somewhat I/O intensive and utterly useless.
 #
 do_source_package=true
-do_linux_source_content=false
-ifneq ($(wildcard /CurrentlyBuilding),)
-do_linux_source_content=true
+do_source_package_content=true
+ifeq ($(wildcard /CurrentlyBuilding),)
+do_source_package_content=false
 endif
 
 # linux-libc-dev may not be needed, default to building it.
