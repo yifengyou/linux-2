@@ -114,6 +114,13 @@ unsigned int aa_dfa_match_len(struct aa_dfa *dfa, unsigned int start,
 unsigned int aa_dfa_match(struct aa_dfa *dfa, unsigned int start,
 			  const char *str);
 void aa_dfa_free_kref(struct kref *kref);
+
+/**
+ * aa_put_dfa - put a dfa refcount
+ * @dfa: dfa to put refcount   (MAYBE NULL)
+ *
+ * Requires: if @dfa != NULL that valid refcount be held
+ */
 static inline void aa_put_dfa(struct aa_dfa *dfa)
 {
 	if (dfa)

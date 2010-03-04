@@ -59,7 +59,7 @@ static int apparmor_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
 	/* freed by apparmor_cred_free */
 	struct aa_task_cxt *cxt = aa_alloc_task_context(gfp);
-	if (cxt)
+	if (!cxt)
 		return -ENOMEM;
 
 	cred->security = cxt;
@@ -186,6 +186,15 @@ out:
 	return error;
 }
 
+/**
+ * common_perm - basic common permission check wrapper fn for paths
+ * @op: operation name  (NOT NULL)
+ * @path: path to check permission of  (NOT NULL)
+ * @mask: requested permissions mask
+ * @cond: conditional info for the permission request  (NOT NULL)
+ *
+ * Returns: %0 else error code if error or permission denied
+ */
 static int common_perm(const char *op, struct path *path, u16 mask,
 		       struct path_cond *cond)
 {
@@ -199,6 +208,16 @@ static int common_perm(const char *op, struct path *path, u16 mask,
 	return error;
 }
 
+/**
+ * common_perm_dentry - common permission wrapper when path is dir, dentry
+ * @op: operation name  (NOT NULL)
+ * @dir: directory of the dentry  (NOT NULL)
+ * @dentry: dentry to check  (NOT NULL)
+ * @mask: requested permissions mask
+ * @cond: conditional info for the permission request  (NOT NULL)
+ *
+ * Returns: %0 else error code if error or permission denied
+ */
 static int common_perm_dentry(const char *op, struct path *dir,
 			      struct dentry *dentry, u16 mask,
 			      struct path_cond *cond)
@@ -208,6 +227,15 @@ static int common_perm_dentry(const char *op, struct path *dir,
 	return common_perm(op, &path, mask, cond);
 }
 
+/**
+ * common_perm_rm - common permission wrapper for operations doing rm
+ * @op: operation name  (NOT NULL)
+ * @dir: directory that the dentry is in  (NOT NULL)
+ * @dentry: dentry being rm'd  (NOT NULL)
+ * @mask: requested permission mask
+ *
+ * Returns: %0 else error code if error or permission denied
+ */
 static int common_perm_rm(const char *op, struct path *dir,
 			  struct dentry *dentry, u16 mask)
 {
@@ -223,6 +251,16 @@ static int common_perm_rm(const char *op, struct path *dir,
 	return common_perm_dentry(op, dir, dentry, mask, &cond);
 }
 
+/**
+ * common_perm_create - common permission wrapper for operations doing create
+ * @op: operation name  (NOT NULL)
+ * @dir: directory that dentry will be created in  (NOT NULL)
+ * @dentry: dentry to create   (NOT NULL)
+ * @mask: request permission mask
+ * @mode: created file mode
+ *
+ * Returns: %0 else error code if error or permission denied
+ */
 static int common_perm_create(const char *op, struct path *dir,
 			      struct dentry *dentry, u16 mask, umode_t mode)
 {
@@ -419,15 +457,9 @@ static int apparmor_file_permission(struct file *file, int mask)
 
 	profile = __aa_current_profile();
 
-#ifdef CONFIG_SECURITY_APPARMOR_COMPAT_24
-	/*
-	 * AppArmor <= 2.4 revalidates files at access time instead
-	 * of at exec.
-	 */
 	if (!unconfined(profile) &&
 	    ((fprofile != profile) || (mask & ~fcxt->allowed)))
 		error = aa_file_perm(profile, "file_perm", file, mask);
-#endif
 
 	return error;
 }
@@ -548,12 +580,11 @@ static int apparmor_setprocattr(struct task_struct *task, char *name,
 
 	args = value;
 	args[size] = '\0';
-	args = strstrip(args);
+	args = strim(args);
 	command = strsep(&args, " ");
 	if (!args)
 		return -EINVAL;
-	while (isspace(*args))
-		args++;
+	args = skip_spaces(args);
 	if (!*args)
 		return -EINVAL;
 
@@ -583,7 +614,7 @@ static int apparmor_setprocattr(struct task_struct *task, char *name,
 			return aa_audit(AUDIT_APPARMOR_DENIED, NULL, &sa, NULL);
 		}
 	} else if (strcmp(name, "exec") == 0) {
-		error = aa_setprocattr_changeprofile(strstrip(args), AA_ONEXEC,
+		error = aa_setprocattr_changeprofile(args, AA_ONEXEC,
 						     !AA_DO_TEST);
 	} else {
 		/* only support the "current" and "exec" process attributes */
@@ -606,7 +637,6 @@ static int apparmor_task_setrlimit(unsigned int resource,
 	return error;
 }
 
-#ifdef CONFIG_SECURITY_APPARMOR_NETWORK
 static int apparmor_socket_create(int family, int type, int protocol, int kern)
 {
 	struct aa_profile *profile;
@@ -715,7 +745,6 @@ static int apparmor_socket_shutdown(struct socket *sock, int how)
 
 	return aa_revalidate_sk(sk, "socket_shutdown");
 }
-#endif
 
 static struct security_operations apparmor_ops = {
 	.name =				"apparmor",
@@ -748,7 +777,6 @@ static struct security_operations apparmor_ops = {
 	.getprocattr =			apparmor_getprocattr,
 	.setprocattr =			apparmor_setprocattr,
 
-#ifdef CONFIG_SECURITY_APPARMOR_NETWORK
 	.socket_create =		apparmor_socket_create,
 	.socket_post_create =		apparmor_socket_post_create,
 	.socket_bind =			apparmor_socket_bind,
@@ -762,7 +790,6 @@ static struct security_operations apparmor_ops = {
 	.socket_getsockopt =		apparmor_socket_getsockopt,
 	.socket_setsockopt =		apparmor_socket_setsockopt,
 	.socket_shutdown =		apparmor_socket_shutdown,
-#endif
 
 	.cred_alloc_blank =		apparmor_cred_alloc_blank,
 	.cred_free =			apparmor_cred_free,
@@ -850,15 +877,8 @@ module_param_named(paranoid_load, aa_g_paranoid_load, aabool,
 		   S_IRUSR | S_IWUSR);
 
 /* Boot time disable flag */
-#ifdef CONFIG_SECURITY_APPARMOR_DISABLE
-#define AA_ENABLED_PERMS 0600
-#else
-#define AA_ENABLED_PERMS 0400
-#endif
-static int param_set_aa_enabled(const char *val, struct kernel_param *kp);
 static unsigned int apparmor_enabled = CONFIG_SECURITY_APPARMOR_BOOTPARAM_VALUE;
-module_param_call(enabled, param_set_aa_enabled, param_get_aauint,
-		  &apparmor_enabled, AA_ENABLED_PERMS);
+module_param_named(enabled, apparmor_enabled, aabool, S_IRUSR);
 
 static int __init apparmor_enabled_setup(char *str)
 {
@@ -914,33 +934,6 @@ static int param_get_aauint(char *buffer, struct kernel_param *kp)
 	if (!capable(CAP_MAC_ADMIN))
 		return -EPERM;
 	return param_get_uint(buffer, kp);
-}
-
-/* allow run time disabling of apparmor */
-static int param_set_aa_enabled(const char *val, struct kernel_param *kp)
-{
-	unsigned long l;
-
-	if (!apparmor_initialized) {
-		apparmor_enabled = 0;
-		return 0;
-	}
-
-	if (!capable(CAP_MAC_ADMIN))
-		return -EPERM;
-
-	if (!apparmor_enabled)
-		return -EINVAL;
-
-	if (!val)
-		return -EINVAL;
-
-	if (strict_strtoul(val, 0, &l) || l != 0)
-		return -EINVAL;
-
-	apparmor_enabled = 0;
-	apparmor_disable();
-	return 0;
 }
 
 static int param_get_audit(char *buffer, struct kernel_param *kp)
@@ -1012,6 +1005,12 @@ static int param_set_mode(const char *val, struct kernel_param *kp)
 /*
  * AppArmor init functions
  */
+
+/**
+ * set_init_cxt - set a task context and profile on the first task.
+ *
+ * TODO: allow setting an alternate profile than unconfined
+ */
 static int __init set_init_cxt(void)
 {
 	struct cred *cred = (struct cred *)current->real_cred;
@@ -1078,14 +1077,3 @@ alloc_out:
 }
 
 security_initcall(apparmor_init);
-
-void apparmor_disable(void)
-{
-	/* FIXME: cleanup profiles references on files */
-	aa_free_root_ns();
-
-	aa_destroy_aafs();
-	apparmor_initialized = 0;
-
-	aa_info_message("AppArmor protection disabled");
-}

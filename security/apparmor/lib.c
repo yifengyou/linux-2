@@ -34,19 +34,19 @@
  */
 char *aa_split_fqname(char *fqname, char **ns_name)
 {
-	char *name = strstrip(fqname);
+	char *name = strim(fqname);
 
 	*ns_name = NULL;
-	if (fqname[0] == ':') {
-		char *split = strchr(&fqname[1], ':');
+	if (name[0] == ':') {
+		char *split = strchr(&name[1], ':');
 		if (split) {
 			/* overwrite ':' with \0 */
 			*split = 0;
-			name = strstrip(split + 1);
+			name = skip_spaces(split + 1);
 		} else
 			/* a ns name without a following profile is allowed */
 			name = NULL;
-		*ns_name = &fqname[1];
+		*ns_name = &name[1];
 	}
 	if (name && *name == 0)
 		name = NULL;

@@ -101,15 +101,14 @@ const char *profile_mode_names[] = {
 
 /**
  * hname_tail - find the last component of an hname
- * @name: hname to find the tail component of
+ * @name: hname to find the tail component of  (NOT NULL)
  *
  * Returns: the tail name component of an hname
  */
 static const char *hname_tail(const char *hname)
 {
 	char *split;
-	/* check for namespace which begins with a : and ends with : or \0 */
-	hname = strstrip((char *)hname);
+	hname = strim((char *)hname);
 	for (split = strstr(hname, "//"); split; split = strstr(hname, "//"))
 		hname = split + 2;
 
@@ -118,8 +117,8 @@ static const char *hname_tail(const char *hname)
 
 /**
  * policy_init - initialize a policy structure
- * @policy: policy to initialize
- * @name: name of the policy, init will make a copy of it
+ * @policy: policy to initialize  (NOT NULL)
+ * @name: name of the policy, init will make a copy of it  (NOT NULL)
  */
 static bool policy_init(struct aa_policy *policy, const char *name)
 {
@@ -139,7 +138,7 @@ static bool policy_init(struct aa_policy *policy, const char *name)
 
 /**
  * policy_destroy - free the elements referenced by @policy
- * @policy: policy that is to have its elements freed
+ * @policy: policy that is to have its elements freed  (NOT NULL)
  */
 static void policy_destroy(struct aa_policy *policy)
 {
@@ -162,8 +161,8 @@ static void policy_destroy(struct aa_policy *policy)
 
 /**
  * __policy_find - find a policy by @name on a policy list
- * @head: list to search
- * @name: name to search for
+ * @head: list to search  (NOT NULL)
+ * @name: name to search for  (NOT NULL)
  *
  * Requires: correct locks for the @head list be held
  *
@@ -182,8 +181,8 @@ static struct aa_policy *__policy_find(struct list_head *head, const char *name)
 
 /**
  * __policy_strn_find - find a policy thats name matches @len chars of @str
- * @head: list to search
- * @str: string to search for
+ * @head: list to search  (NOT NULL)
+ * @str: string to search for  (NOT NULL)
  * @len: length of match required
  *
  * Requires: correct locks for the @head list be held
@@ -212,8 +211,9 @@ static struct aa_policy *__policy_strn_find(struct list_head *head,
 
 /**
  * aa_alloc_namespace - allocate, initialize and return a new namespace
- * @name: a preallocated name
- * Returns NULL on failure.
+ * @name: a preallocated name  (NOT NULL)
+ *
+ * Returns: NULL on failure.
  */
 static struct aa_namespace *aa_alloc_namespace(const char *name)
 {
@@ -237,7 +237,7 @@ static struct aa_namespace *aa_alloc_namespace(const char *name)
 	if (!ns->unconfined)
 		goto fail_unconfined;
 
-	ns->unconfined->sid = aa_alloc_sid(AA_ALLOC_SYS_SID);
+	ns->unconfined->sid = aa_alloc_sid();
 	ns->unconfined->flags = PFLAG_UNCONFINED | PFLAG_IX_ON_NAME_ERROR |
 	    PFLAG_IMMUTABLE;
 
@@ -259,7 +259,7 @@ fail_ns:
 
 /**
  * aa_free_namespace - free a profile namespace
- * @namespace: the namespace to free
+ * @ns: the namespace to free  (MAYBE NULL)
  *
  * Requires: All references to the namespace must have been put, if the
  *           namespace was referenced by a profile confining a task,
@@ -281,7 +281,7 @@ static void aa_free_namespace(struct aa_namespace *ns)
 
 /**
  * aa_free_namespace_kref - free aa_namespace by kref (see aa_put_namespace)
- * @kr: kref callback for freeing of a namespace
+ * @kr: kref callback for freeing of a namespace  (NOT NULL)
  */
 void aa_free_namespace_kref(struct kref *kref)
 {
@@ -290,9 +290,10 @@ void aa_free_namespace_kref(struct kref *kref)
 
 /**
  * __aa_find_namespace - find a namespace on a list by @name
- * @name - name of namespace to look for
+ * @head: list to search for namespace on  (NOT NULL)
+ * @name: name of namespace to look for  (NOT NULL)
  *
- * Return: unrefcounted namespace
+ * Returns: unrefcounted namespace
  *
  * Requires: ns lock be held
  */
@@ -304,10 +305,10 @@ static struct aa_namespace *__aa_find_namespace(struct list_head *head,
 
 /**
  * aa_find_namespace  -  look up a profile namespace on the namespace list
- * @root: namespace to search in
- * @name: name of namespace to find
+ * @root: namespace to search in  (NOT NULL)
+ * @name: name of namespace to find  (NOT NULL)
  *
- * Return: a pointer to the namespace on the list, or NULL if no namespace
+ * Returns: a pointer to the namespace on the list, or NULL if no namespace
  * called @name exists.
  *
  * refcount released by caller
@@ -326,9 +327,9 @@ struct aa_namespace *aa_find_namespace(struct aa_namespace *root,
 
 /**
  * aa_prepare_namespace - find an existing or create a new namespace of @name
- * @name: the namespace to find or add
+ * @name: the namespace to find or add  (NOT NULL)
  *
- * Return: refcounted namespace or NULL if failed to create one
+ * Returns: refcounted namespace or NULL if failed to create one
  */
 static struct aa_namespace *aa_prepare_namespace(const char *name)
 {
@@ -337,12 +338,17 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 	root = aa_current_profile()->ns;
 
 	write_lock(&root->lock);
-	if (name)
-		/* released by caller */
-		ns = aa_get_namespace(__aa_find_namespace(&root->sub_ns, name));
-	else
+
+	/* if name isn't specified the profile is loaded to the current ns */
+	if (!name) {
 		/* released by caller */
 		ns = aa_get_namespace(root);
+		goto out;
+	}
+
+	/* try and find the specified ns and if it doesn't exist create it */
+	/* released by caller */
+	ns = aa_get_namespace(__aa_find_namespace(&root->sub_ns, name));
 	if (!ns) {
 		/* name && namespace not found */
 		struct aa_namespace *new_ns;
@@ -367,6 +373,7 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 			aa_get_namespace(ns);
 		}
 	}
+out:
 	write_unlock(&root->lock);
 
 	/* return ref */
@@ -375,8 +382,8 @@ static struct aa_namespace *aa_prepare_namespace(const char *name)
 
 /**
  * __aa_add_profile - add a profile to a list
- * @list: list to add it to
- * @profile: the profile to add
+ * @list: list to add it to  (NOT NULL)
+ * @profile: the profile to add  (NOT NULL)
  *
  * refcount @profile, should be put by __aa_remove_profile
  *
@@ -392,7 +399,7 @@ static void __aa_add_profile(struct list_head *list,
 
 /**
  * __aa_remove_profile - remove a profile from the list it is one
- * @profile: the profile to remove
+ * @profile: the profile to remove  (NOT NULL)
  *
  * remove a profile from the list, warning generally removal should
  * be done with __aa_replace_profile as most profile removals are
@@ -412,8 +419,8 @@ static void __aa_remove_profile(struct aa_profile *profile)
 
 /**
  * __aa_replace_profile - replace @old with @new on a list
- * @old: profile to be replaced
- * @new: profile to replace @old with
+ * @old: profile to be replaced  (NOT NULL)
+ * @new: profile to replace @old with  (MAYBE NULL)
  *
  * Will duplicaticate and refcount elements that @new inherits from @old
  * and will inherit @old children.  If new is NULL it will replace to the
@@ -460,7 +467,7 @@ static void __aa_replace_profile(struct aa_profile *old,
 
 /**
  * __aa_profile_list_release - remove all profiles on the list and put refs
- * @head: list of profiles
+ * @head: list of profiles  (NOT NULL)
  *
  * Requires: namespace lock be held
  */
@@ -478,7 +485,7 @@ static void __aa_remove_namespace(struct aa_namespace *ns);
 
 /**
  * __aa_ns_list_release - remove all profile namespaces on the list put refs
- * @head: list of profile namespaces
+ * @head: list of profile namespaces  (NOT NULL)
  *
  * Requires: namespace lock be held
  */
@@ -492,7 +499,7 @@ static void __aa_ns_list_release(struct list_head *head)
 
 /**
  * aa_destroy_namespace - remove everything contained by @ns
- * @ns: namespace to have it contents removed
+ * @ns: namespace to have it contents removed  (NOT NULL)
  */
 static void aa_destroy_namespace(struct aa_namespace *ns)
 {
@@ -511,7 +518,7 @@ static void aa_destroy_namespace(struct aa_namespace *ns)
 
 /**
  * __aa_remove_namespace - remove a namespace and all its children
- * @ns: namespace to be removed
+ * @ns: namespace to be removed  (NOT NULL)
  * 
  * Requires: ns->parent->lock be held and ns removed from parent.
  */
@@ -542,7 +549,7 @@ static void __aa_remove_namespace(struct aa_namespace *ns)
 /**
  * aa_alloc_root_ns - allocate the root profile namespace
  *
- * Returns 0 on success else error
+ * Returns: %0 on success else error
  *
  */
 int __init aa_alloc_root_ns(void)
@@ -569,9 +576,9 @@ void aa_free_root_ns(void)
 
 /**
  * aa_alloc_profile - allocate, initialize and return a new profile
- * @hname: name of the profile
+ * @hname: name of the profile  (NOT NULL)
  *
- * Returns NULL on failure, else refcounted profile
+ * Returns: NULL on failure, else refcounted profile
  */
 struct aa_profile *aa_alloc_profile(const char *hname)
 {
@@ -593,7 +600,7 @@ struct aa_profile *aa_alloc_profile(const char *hname)
 
 /**
  * aa_new_null_profile - create a new null-X learning profile
- * @parent: profile that caused this profile to be created
+ * @parent: profile that caused this profile to be created (NOT NULL)
  * @hat: true if the null- learning profile is a hat
  *
  * Create a null- complain mode profile used in learning mode.  The name of
@@ -602,12 +609,14 @@ struct aa_profile *aa_alloc_profile(const char *hname)
  * null profiles are added to the profile list but the list does not
  * hold a count on them so that they are automatically released when
  * not in use.
+ *
+ * Returns: new profile else NULL on failure
  */
 struct aa_profile *aa_new_null_profile(struct aa_profile *parent, int hat)
 {
 	struct aa_profile *profile = NULL;
 	char *name;
-	u32 sid = aa_alloc_sid(AA_ALLOC_SYS_SID);
+	u32 sid = aa_alloc_sid();
 
 	/* freed below */
 	name = kmalloc(strlen(parent->base.hname) + 2 + 7 + 8, GFP_KERNEL);
@@ -620,7 +629,7 @@ struct aa_profile *aa_new_null_profile(struct aa_profile *parent, int hat)
 	if (!profile)
 		goto fail;
 
-	profile->sid = aa_alloc_sid(AA_ALLOC_SYS_SID);
+	profile->sid = sid;
 	profile->mode = APPARMOR_COMPLAIN;
 	profile->flags = PFLAG_NULL | PFLAG_NO_LIST_REF;
 	if (hat)
@@ -643,7 +652,7 @@ fail:
 
 /**
  * aa_free_profile - free a profile
- * @profile: the profile to free
+ * @profile: the profile to free  (MAYBE NULL)
  *
  * Free a profile, its hats and null_profile. All references to the profile,
  * its hats and null_profile must have been put.
@@ -687,7 +696,7 @@ static void aa_free_profile(struct aa_profile *profile)
 
 /**
  * aa_free_profile_kref - free aa_profile by kref (called by aa_put_profile)
- * @kr: kref callback for freeing of a profile
+ * @kr: kref callback for freeing of a profile  (NOT NULL)
  */
 void aa_free_profile_kref(struct kref *kref)
 {
@@ -701,12 +710,12 @@ void aa_free_profile_kref(struct kref *kref)
 
 /**
  * __aa_find_child - find a profile on @head list with a name matching @name
- * @head: list to search
- * @name: name of profile
+ * @head: list to search  (NOT NULL)
+ * @name: name of profile (NOT NULL)
  *
  * Requires: ns lock protecting list be held
  *
- * Returns unrefcounted profile ptr, or NULL if not found
+ * Returns: unrefcounted profile ptr, or NULL if not found
  */
 static struct aa_profile *__aa_find_child(struct list_head *head,
 					  const char *name)
@@ -716,13 +725,13 @@ static struct aa_profile *__aa_find_child(struct list_head *head,
 
 /**
  * __aa_strn_find_child - find a profile on @head list using substring of @name
- * @head: list to search
- * @name: name of profile
+ * @head: list to search  (NOT NULL)
+ * @name: name of profile (NOT NULL)
  * @len: length of @name substring to match
  *
  * Requires: ns lock protecting list be held
  *
- * Returns unrefcounted profile ptr, or NULL if not found
+ * Returns: unrefcounted profile ptr, or NULL if not found
  */
 static struct aa_profile *__aa_strn_find_child(struct list_head *head,
 					       const char *name, int len)
@@ -732,10 +741,10 @@ static struct aa_profile *__aa_strn_find_child(struct list_head *head,
 
 /**
  * aa_find_child - find a profile by @name in @parent
- * @parent: profile to search
- * @name: profile name to search for
+ * @parent: profile to search  (NOT NULL)
+ * @name: profile name to search for  (NOT NULL)
  *
- * Returns a ref counted profile or NULL if not found
+ * Returns: a ref counted profile or NULL if not found
  */
 struct aa_profile *aa_find_child(struct aa_profile *parent, const char *name)
 {
@@ -750,8 +759,8 @@ struct aa_profile *aa_find_child(struct aa_profile *parent, const char *name)
 
 /**
  * __aa_find_parent - lookup the parent of a profile of name @hname
- * @ns: namespace to lookup profile in
- * @hname: hierarchical profile name to find parent of
+ * @ns: namespace to lookup profile in  (NOT NULL)
+ * @hname: hierarchical profile name to find parent of  (NOT NULL)
  *
  * Lookups up the parent of a fully qualified profile name, the profile
  * that matches hname does not need to exist, in general this
@@ -786,8 +795,8 @@ static struct aa_policy *__aa_find_parent(struct aa_namespace *ns,
 
 /**
  * __aa_find_profile - lookup the profile matching @hname
- * @base: base list to start looking up profile name from
- * @hname: hierarchical profile name
+ * @base: base list to start looking up profile name from  (NOT NULL)
+ * @hname: hierarchical profile name  (NOT NULL)
  *
  * Requires: ns->lock be held
  *
@@ -836,6 +845,11 @@ struct aa_profile *aa_find_profile(struct aa_namespace *ns, const char *hname)
 
 /**
  * replacement_allowed - test to see if replacement is allowed
+ * @profile: profile to test if it can be replaced  (MAYBE NULL)
+ * @sa: audit data  (NOT NULL)
+ * @add_only: true if replacement shouldn't be allowed but addition is okay
+ *
+ * Returns: %1 if replacement allowed else %0
  */
 static bool replacement_allowed(struct aa_profile *profile,
 				struct aa_audit_iface *sa,
@@ -857,9 +871,9 @@ static bool replacement_allowed(struct aa_profile *profile,
 
 /**
  * __add_new_profile - simple wrapper around __aa_add_profile
- * @ns: namespace that profile is being added to
- * @policy: the policy container to add the profile to
- * @profile: profile to add
+ * @ns: namespace that profile is being added to  (NOT NULL)
+ * @policy: the policy container to add the profile to  (NOT NULL)
+ * @profile: profile to add  (NOT NULL)
  *
  * add a profile to a list and do other required basic allocations
  */
@@ -872,19 +886,21 @@ static void __add_new_profile(struct aa_namespace *ns,
 		profile->parent = aa_get_profile((struct aa_profile *) policy);
 	__aa_add_profile(&policy->profiles, profile);
 	/* released on aa_free_profile */
-	profile->sid = aa_alloc_sid(AA_ALLOC_SYS_SID);
+	profile->sid = aa_alloc_sid();
 	profile->ns = aa_get_namespace(ns);
 }
 
 /**
  * aa_interface_replace_profiles - replace profile(s) on the profile list
- * @udata: serialized data stream
+ * @udata: serialized data stream  (NOT NULL)
  * @size: size of the serialized data stream
  * @add_only: true if only doing addition, no replacement allowed
  *
  * unpack and replace a profile on the profile list and uses of that profile
  * by any aa_task_cxt.  If the profile does not exist on the profile list
- * it is added.  Return %0 or error.
+ * it is added.
+ *
+ * Returns: size of data consumed else error code on failure.
  */
 ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 {
@@ -943,12 +959,9 @@ ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 		/* released below */
 		aa_get_profile(rename_profile);
 
-		/* must be cleared as it is shared with replaced-by */
-		kzfree(new_profile->rename);
-		new_profile->rename = NULL;
-
 		if (!rename_profile) {
 			sa.base.info = "profile to rename does not exist";
+			sa.name = new_profile->rename;
 			sa.base.error = -ENOENT;
 			goto audit;
 		}
@@ -965,6 +978,12 @@ audit:
 		sa.base.operation = "profile_load";
 
 	error = aa_audit_iface(&sa);
+
+	/* rename field must be cleared as it is shared with replaced-by */
+	if (new_profile->rename) {
+		kzfree(new_profile->rename);
+		new_profile->rename = NULL;
+	}
 
 	if (!error) {
 		if (old_profile)
@@ -992,13 +1011,15 @@ fail:
 
 /**
  * aa_interface_remove_profiles - remove profile(s) from the system
- * @fqname: name of the profile or namespace to remove
+ * @fqname: name of the profile or namespace to remove  (NOT NULL)
  * @size: size of the name
  *
  * Remove a profile or sub namespace from the current namespace, so that
  * they can not be found anymore and mark them as replaced by unconfined
  *
  * NOTE: removing confinement does not restore rlimits to preconfinemnet values
+ *
+ * Returns: size of data consume else error code if fails
  */
 ssize_t aa_interface_remove_profiles(char *fqname, size_t size)
 {

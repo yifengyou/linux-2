@@ -41,14 +41,24 @@ static char *aa_audit_type[] = {
  * Currently AppArmor auditing is fed straight into the audit framework.
  *
  * TODO:
+ * convert to LSM audit
  * netlink interface for complain mode
  * user auditing, - send user auditing to netlink interface
  * system control of whether user audit messages go to system log
  */
 
 /**
+ * aa_audit_base - core AppArmor function.
+ * @type: type of audit message (see include/linux/apparmor.h)
+ * @profile: active profile for event (MAY BE NULL)
+ * @sa: audit structure containing data to audit
+ * @audit_cxt: audit_cxt that event is under
+ * @cb: audit cb for this event
  *
- * NOTE: profile can be NULL if audit is a none profile based message
+ * Record an audit message for data is @sa, and handle deal with kill and
+ * complain messages switches.
+ *
+ * Returns: 0 or sa->error on success, else error
  */
 static int aa_audit_base(int type, struct aa_profile *profile,
 			 struct aa_audit *sa, struct audit_context *audit_cxt,
@@ -90,7 +100,10 @@ static int aa_audit_base(int type, struct aa_profile *profile,
 	audit_log_format(ab, " pid=%d", task->pid);
 
 	if (profile && !unconfined(profile)) {
-		pid_t pid = task->real_parent->pid;
+		pid_t pid;
+		rcu_read_lock();
+		pid = task->real_parent->pid;
+		rcu_read_unlock();
 		audit_log_format(ab, " parent=%d", pid);
 		audit_log_format(ab, " profile=");
 		audit_log_untrustedstring(ab, profile->base.hname);

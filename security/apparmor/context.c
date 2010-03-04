@@ -11,16 +11,39 @@
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2 of the
  * License.
+ *
+ *
+ * AppArmor sets confinement on every task, via the the aa_task_cxt and
+ * the aa_task_cxt profile, both of which are required and are not allowed
+ * to be NULL.  The aa_task_cxt is not reference counted and is unique
+ * to each cred (which is reference count).  The profile pointed to by
+ * the task_cxt is reference counted.
+ *
+ * TODO
+ * If a task uses change_hat it currently does not return to the old
+ * cred or task context but instead creates a new one.  Ideally the task
+ * should return to the previous cred if it has not been modified.
+ *
  */
 
 #include "include/context.h"
 #include "include/policy.h"
 
+/**
+ * aa_alloc_task_context - allocat a new task_cxt
+ * @flags: gfp flags for allocation
+ *
+ * Returns: allocated buffer or NULL on failure
+ */
 struct aa_task_cxt *aa_alloc_task_context(gfp_t flags)
 {
 	return kzalloc(sizeof(struct aa_task_cxt), flags);
 }
 
+/**
+ * aa_free_task_context - free a task_cxt
+ * @cxt: task_cxt to free (MAYBE NULL)
+ */
 void aa_free_task_context(struct aa_task_cxt *cxt)
 {
 	if (cxt) {
@@ -34,8 +57,8 @@ void aa_free_task_context(struct aa_task_cxt *cxt)
 
 /**
  * aa_dup_task_context - duplicate a task context, incrementing reference counts
- * @new: a blank task context
- * @old: the task context to copy
+ * @new: a blank task context      (NOT NULL)
+ * @old: the task context to copy  (NOT NULL)
  */
 void aa_dup_task_context(struct aa_task_cxt *new, const struct aa_task_cxt *old)
 {
@@ -47,8 +70,8 @@ void aa_dup_task_context(struct aa_task_cxt *new, const struct aa_task_cxt *old)
 
 /**
  * replace_cxt - replace a context profile
- * @cxt: task context
- * @profile: profile to replace cxt group
+ * @cxt: task context  (NOT NULL)
+ * @profile: profile to replace cxt group  (NOT NULL)
  *
  * Replace context grouping profile reference with @profile
  */
@@ -74,11 +97,11 @@ static void replace_group(struct aa_task_cxt *cxt, struct aa_profile *profile)
 
 /**
  * aa_replace_current_profiles - replace the current tasks profiles
- * @sys: new system profile
+ * @profile: new profile  (NOT NULL)
  *
- * Returns: error on failure
+ * Returns: 0 or error on failure
  */
-int aa_replace_current_profiles(struct aa_profile *sys)
+int aa_replace_current_profiles(struct aa_profile *profile)
 {
 	struct aa_task_cxt *cxt;
 	struct cred *new = prepare_creds();
@@ -86,7 +109,7 @@ int aa_replace_current_profiles(struct aa_profile *sys)
 		return -ENOMEM;
 
 	cxt = new->security;
-	replace_group(cxt, sys);
+	replace_group(cxt, profile);
 	/* todo add user group */
 
 	commit_creds(new);
@@ -95,11 +118,11 @@ int aa_replace_current_profiles(struct aa_profile *sys)
 
 /**
  * aa_set_current_onexec - set the tasks change_profile to happen onexec
- * @sys: system profile to set at exec
+ * @profile: system profile to set at exec  (MAYBE NULL)
  *
- * Returns: error on failure
+ * Returns: 0 or error on failure
  */
-int aa_set_current_onexec(struct aa_profile *sys)
+int aa_set_current_onexec(struct aa_profile *profile)
 {
 	struct aa_task_cxt *cxt;
 	struct cred *new = prepare_creds();
@@ -108,7 +131,7 @@ int aa_set_current_onexec(struct aa_profile *sys)
 
 	cxt = new->security;
 	aa_put_profile(cxt->onexec);
-	cxt->onexec = aa_get_profile(sys);
+	cxt->onexec = aa_get_profile(profile);
 
 	commit_creds(new);
 	return 0;
@@ -116,13 +139,13 @@ int aa_set_current_onexec(struct aa_profile *sys)
 
 /**
  * aa_set_current_hat - set the current tasks hat
- * @profile: profile to set as the current hat
+ * @profile: profile to set as the current hat  (NOT NULL)
  * @token: token value that must be specified to change from the hat
  *
  * Do switch of tasks hat.  If the task is currently in a hat
  * validate the token to match.
  *
- * Returns: error on failure
+ * Returns: 0 or error on failure
  */
 int aa_set_current_hat(struct aa_profile *profile, u64 token)
 {
@@ -130,6 +153,7 @@ int aa_set_current_hat(struct aa_profile *profile, u64 token)
 	struct cred *new = prepare_creds();
 	if (!new)
 		return -ENOMEM;
+	BUG_ON(!profile);
 
 	cxt = new->security;
 	if (!cxt->previous) {
@@ -158,7 +182,7 @@ int aa_set_current_hat(struct aa_profile *profile, u64 token)
  * Attempt to return out of a hat to the previous profile.  The token
  * must match the stored token value.
  *
- * Returns: error of failure
+ * Returns: 0 or error of failure
  */
 int aa_restore_previous_profile(u64 token)
 {
@@ -180,6 +204,7 @@ int aa_restore_previous_profile(u64 token)
 
 	aa_put_profile(cxt->profile);
 	cxt->profile = aa_newest_version(cxt->previous);
+	BUG_ON(!cxt->profile);
 	if (unlikely(cxt->profile != cxt->previous)) {
 		aa_get_profile(cxt->profile);
 		aa_put_profile(cxt->previous);

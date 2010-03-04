@@ -30,22 +30,34 @@ struct aa_file_cxt {
 	u16 allowed;
 };
 
+/**
+ * aa_alloc_file_context - allocate file_cxt
+ * @gfp: gfp flags for allocation
+ *
+ * Returns: file_cxt or NULL on failure
+ */
 static inline struct aa_file_cxt *aa_alloc_file_context(gfp_t gfp)
 {
 	return kzalloc(sizeof(struct aa_file_cxt), gfp);
 }
 
+/**
+ * aa_free_file_context - free a file_cxt
+ * @cxt: file_cxt to free  (MAYBE_NULL)
+ */
 static inline void aa_free_file_context(struct aa_file_cxt *cxt)
 {
-	aa_put_profile(cxt->profile);
-	kzfree(cxt);
+	if (cxt) {
+		aa_put_profile(cxt->profile);
+		kzfree(cxt);
+	}
 }
 
 /**
  * struct aa_task_cxt - primary label for confined tasks
- * @profile: the current profile
- * @exec: profile to transition to on next exec
- * @previous: profile the task may return to
+ * @profile: the current profile   (NOT NULL)
+ * @exec: profile to transition to on next exec  (MAYBE NULL)
+ * @previous: profile the task may return to     (MAYBE NULL)
  * @token: magic value the task must know for returning to @previous_profile
  *
  * Contains the task's current profile (which could change due to
@@ -64,14 +76,14 @@ struct aa_task_cxt *aa_alloc_task_context(gfp_t flags);
 void aa_free_task_context(struct aa_task_cxt *cxt);
 void aa_dup_task_context(struct aa_task_cxt *new,
 			 const struct aa_task_cxt *old);
-int aa_replace_current_profiles(struct aa_profile *sys);
-int aa_set_current_onexec(struct aa_profile *sys);
+int aa_replace_current_profiles(struct aa_profile *profile);
+int aa_set_current_onexec(struct aa_profile *profile);
 int aa_set_current_hat(struct aa_profile *profile, u64 token);
 int aa_restore_previous_profile(u64 cookie);
 
 /**
  * __aa_task_is_confined - determine if @task has any confinement
- * @task: task to check confinement of
+ * @task: task to check confinement of  (NOT NULL)
  *
  * If @task != current needs to be called in RCU safe critical section
  */
@@ -79,7 +91,7 @@ static inline bool __aa_task_is_confined(struct task_struct *task)
 {
 	struct aa_task_cxt *cxt = __task_cred(task)->security;
 
-	BUG_ON(!cxt);
+	BUG_ON(!cxt || !cxt->profile);
 	if (unconfined(aa_newest_version(cxt->profile)))
 		return 0;
 
@@ -88,23 +100,23 @@ static inline bool __aa_task_is_confined(struct task_struct *task)
 
 /**
  * aa_cred_profile - obtain cred's profiles
- * @cred: cred to obtain profiles from
+ * @cred: cred to obtain profiles from  (NOT NULL)
  *
- * Returns: system confining profile
+ * Returns: confining profile
  *
  * does NOT increment reference count
  */
 static inline struct aa_profile *aa_cred_profile(const struct cred *cred)
 {
 	struct aa_task_cxt *cxt = cred->security;
-	BUG_ON(!cxt);
+	BUG_ON(!cxt || !cxt->profile);
 	return aa_newest_version(cxt->profile);
 }
 
 /**
  * __aa_current_profile - find the current tasks confining profile
  *
- * Returns: up to date confining profile or NULL if task is unconfined
+ * Returns: up to date confining profile or the ns unconfined profile (NOT NULL)
  *
  * This fn will not update the tasks cred to the most up to date version
  * of the profile so it is safe to call when inside of locks.
@@ -117,7 +129,7 @@ static inline struct aa_profile *__aa_current_profile(void)
 /**
  * aa_current_profile - find the current tasks confining profile and do updates
  *
- * Returns: up to date confinging profile or NULL if task is unconfined
+ * Returns: up to date confining profile or the ns unconfined profile (NOT NULL)
  *
  * This fn will update the tasks cred structure if the profile has been
  * replaced.  Not safe to call inside locks
@@ -126,7 +138,7 @@ static inline struct aa_profile *aa_current_profile(void)
 {
 	const struct aa_task_cxt *cxt = current_cred()->security;
 	struct aa_profile *profile;
-	BUG_ON(!cxt);
+	BUG_ON(!cxt || !cxt->profile);
 
 	profile = aa_newest_version(cxt->profile);
 	/*

@@ -32,24 +32,31 @@
 
 /**
  * aa_free_domain_entries - free entries in a domain table
- * @domain: the domain table to free
+ * @domain: the domain table to free  (MAYBE NULL)
  */
 void aa_free_domain_entries(struct aa_domain *domain)
 {
 	int i;
+	if (domain) {
+		if (!domain->table)
+			return;
 
-	if (!domain->table)
-		return;
-
-	for (i = 0; i < domain->size; i++)
-		kzfree(domain->table[i]);
-	kzfree(domain->table);
-	domain->table = NULL;
+		for (i = 0; i < domain->size; i++)
+			kzfree(domain->table[i]);
+		kzfree(domain->table);
+		domain->table = NULL;
+	}
 }
 
-/*
- * check if the task is ptraced and if so if the tracing task is allowed
+/**
+ * aa_may_change_ptraced_domain - check if can change profile on ptraced task
+ * @task: task we want to change profile of   (NOT NULL)
+ * @to_profile: profile to change to  (NOT NULL)
+ *
+ * Check if the task is ptraced and if so if the tracing task is allowed
  * to trace the new domain
+ *
+ * Returns: %0 or error if change not allowed
  */
 static int aa_may_change_ptraced_domain(struct task_struct *task,
 					struct aa_profile *to_profile)
@@ -83,10 +90,12 @@ out:
 
 /**
  * change_profile_perms - find permissions for change_profile
- * @profile: the current profile
- * @ns: the namespace being switched to
- * @name: the name of the profile to change to
- * @rstate: if !NULL will contain the state the match finished in
+ * @profile: the current profile  (NOT NULL)
+ * @ns: the namespace being switched to  (NOT NULL)
+ * @name: the name of the profile to change to  (NOT NULL)
+ * @rstate: if !NULL will contain the state the match finished in (MAYBE NULL)
+ *
+ * Returns: permission set
  */
 static struct file_perms change_profile_perms(struct aa_profile *profile,
 					      struct aa_namespace *ns,
@@ -121,14 +130,19 @@ static struct file_perms change_profile_perms(struct aa_profile *profile,
 	return aa_str_perms(profile->file.dfa, state, name, &cond, rstate);
 }
 
-/* __aa_attach_match_ - find an attachment match
- * @name - to match against
- * @head - profile list to walk
+/**
+ * __aa_attach_match_ - find an attachment match
+ * @name - to match against  (NOT NULL)
+ * @head - profile list to walk  (NOT NULL)
  *
  * Do a linear search on the profiles in the list.  There is a matching
  * preference where an exact match is prefered over a name which uses
  * expressions to match, and matching expressions with the greatest
  * xmatch_len are prefered.
+ *
+ * Requires: @head not be shared or have appropriate locks held
+ *
+ * Returns: profile or NULL if no match found
  */
 static struct aa_profile *__aa_attach_match(const char *name,
 					    struct list_head *head)
@@ -157,10 +171,12 @@ static struct aa_profile *__aa_attach_match(const char *name,
 }
 
 /**
- * aa_find_attach - do attachment search for sys unconfined processes
- * @ns: the current namespace
- * @list: list to search
- * @name: the executable name to match against
+ * aa_find_attach - do attachment search for unconfined processes
+ * @ns: the current namespace  (NOT NULL)
+ * @list: list to search  (NOT NULL)
+ * @name: the executable name to match against  (NOT NULL)
+ *
+ * Returns: profile or NULL if no match found
  */
 static struct aa_profile *aa_find_attach(struct aa_namespace *ns,
 					 struct list_head *list,
@@ -177,10 +193,8 @@ static struct aa_profile *aa_find_attach(struct aa_namespace *ns,
 
 /**
  * separate_fqname - separate the namespace and profile names
- * @fqname: the fqname name to split
- * @ns_name: the namespace name if it exists
- *
- * Returns: profile name if it is specified
+ * @fqname: the fqname name to split  (NOT NULL)
+ * @ns_name: the namespace name if it exists  (NOT NULL)
  *
  * This is the xtable equivalent routine of aa_split_fqname.  It finds the
  * split in an xtable fqname which contains an embedded \0 instead of a :
@@ -193,6 +207,10 @@ static struct aa_profile *aa_find_attach(struct aa_namespace *ns,
  * profile_name\0
  * :ns_name\0profile_name\0
  * :ns_name\0\0
+ *
+ * NOTE: the xtable fqname is prevalidated at load time in unpack_trans_table
+ *
+ * Returns: profile name if it is specified else NULL
  */
 static const char *separate_fqname(const char *fqname, const char **ns_name)
 {
@@ -218,8 +236,8 @@ static const char *next_name(int xtype, const char *name)
 
 /**
  * x_to_profile - get target profile for a given xindex
- * @profile: current profile
- * @name: to to lookup if specified
+ * @profile: current profile  (NOT NULL)
+ * @name: to to lookup if specified  (NOT NULL)
  * @xindex: index into x transition table
  *
  * find profile for a transition index
@@ -248,8 +266,8 @@ static struct aa_profile *x_to_profile(struct aa_profile *profile,
 			/* released by caller */
 			new_profile = aa_find_attach(ns, &ns->base.profiles,
 						     name);
-
-		goto out;
+		/* released by caller */
+		return new_profile;
 	case AA_X_TABLE:
 		/* index is guarenteed to be in range */
 		name = profile->file.trans.table[index];
@@ -294,16 +312,15 @@ static struct aa_profile *x_to_profile(struct aa_profile *profile,
 		aa_put_namespace(new_ns);
 	}
 
-out:
 	/* released by caller */
 	return new_profile;
 }
 
 /**
  * apparmor_bprm_set_creds - set the new creds on the bprm struct
- * @bprm: binprm for the exec
+ * @bprm: binprm for the exec  (NOT NULL)
  *
- * Returns: error on failure
+ * Returns: %0 or error on failure
  */
 int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 {
@@ -470,6 +487,12 @@ cleanup:
 	return sa.base.error;
 }
 
+/**
+ * apparmor_bprm_secureexec - determine if secureexec is needed
+ * @bprm: binprm for exec  (NOT NULL)
+ *
+ * Returns: %1 if secureexec is needed else %0
+ */
 int apparmor_bprm_secureexec(struct linux_binprm *bprm)
 {
 	int ret = cap_bprm_secureexec(bprm);
@@ -483,6 +506,10 @@ int apparmor_bprm_secureexec(struct linux_binprm *bprm)
 	return ret;
 }
 
+/**
+ * apparmor_bprm_committing_creds - do task cleanup on committing new creds
+ * @bprm: binprm for the exec  (NOT NULL)
+ */
 void apparmor_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct aa_profile *profile = __aa_current_profile();
@@ -499,6 +526,10 @@ void apparmor_bprm_committing_creds(struct linux_binprm *bprm)
 	__aa_transition_rlimits(profile, new_cxt->profile);
 }
 
+/**
+ * apparmor_bprm_commited_cred - do cleanup after new creds committed
+ * @bprm: binprm for the exec  (NOT NULL)
+ */
 void apparmor_bprm_committed_creds(struct linux_binprm *bprm)
 {
 	/* TODO: cleanup signals - ipc mediation */
@@ -509,6 +540,13 @@ void apparmor_bprm_committed_creds(struct linux_binprm *bprm)
  * Functions for self directed profile change
  */
 
+/**
+ * new_compound_name - create an hname with @n2 appended to @n1
+ * @n1: base of hname  (NOT NULL)
+ * @n2: name to append (NOT NULL)
+ *
+ * Returns: new name or NULL on error
+ */
 static char *new_compound_name(const char *n1, const char *n2)
 {
 	char *name = kmalloc(strlen(n1) + strlen(n2) + 3, GFP_KERNEL);
@@ -575,6 +613,16 @@ int aa_change_hat(const char *hats[], int count, u64 token, bool permtest)
 					sa.base.error = -ENOENT;
 				goto out;
 			}
+
+			/*
+			 * In complain mode and failed to match any hats.
+			 * Audit the failure based off of the first hat
+			 * supplied.  This is done due how userspace
+			 * interacts with change_hat.
+			 *
+			 * TODO: Add logging of all failed hats
+			 */
+
 			/* freed below */
 			name = new_compound_name(root->base.hname, hats[0]);
 			sa.name = name;

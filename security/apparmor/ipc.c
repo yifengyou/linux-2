@@ -34,13 +34,28 @@ static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 	audit_log_format(ab, " tracer=%d tracee=%d", sa->tracer, sa->tracee);
 }
 
+/**
+ * aa_audit_ptrace - do auditing for ptrace
+ * @profile: profile being enforced  (NOT NULL)
+ * @sa: audit structure  (NOT NULL)
+ *
+ * Returns: %0 or error code
+ */
 static int aa_audit_ptrace(struct aa_profile *profile,
 			   struct aa_audit_ptrace *sa)
 {
 	return aa_audit(AUDIT_APPARMOR_AUTO, profile, &sa->base, audit_cb);
 }
 
-/* Returns error on failure */
+/**
+ * aa_may_ptrace - test if tracer task can trace the tracee
+ * @tracer_task: task who will do the tracing  (NOT NULL)
+ * @tracer: profile of the task doing the tracing  (NOT NULL)
+ * @tracee: task to be traced
+ * @mode: whether PTRACE_MODE_READ || PTRACE_MODE_ATTACH
+ *
+ * Returns: %0 else error code if permission denied or error
+ */
 int aa_may_ptrace(struct task_struct *tracer_task, struct aa_profile *tracer,
 		  struct aa_profile *tracee, unsigned int mode)
 {
@@ -55,6 +70,14 @@ int aa_may_ptrace(struct task_struct *tracer_task, struct aa_profile *tracer,
 	return aa_capable(tracer_task, tracer, CAP_SYS_PTRACE, 1);
 }
 
+/**
+ * aa_ptrace - do ptrace permission check and auditing
+ * @tracer: task doing the tracing
+ * @tracee: task being traced
+ * @mode: ptrace mode either PTRACE_MODE_READ || PTRACE_MODE_ATTACH
+ *
+ * Returns: %0 else error code if permission denied or error
+ */
 int aa_ptrace(struct task_struct *tracer, struct task_struct *tracee,
 	      unsigned int mode)
 {

@@ -212,6 +212,13 @@ static inline struct aa_policy *aa_get_common(struct aa_policy *c)
 	return c;
 }
 
+/**
+ * aa_get_namespace - increment references count on @ns
+ * @ns: namespace to increment reference count of (MAYBE NULL)
+ *
+ * Returns: pointer to @ns if @ns is NULL returns NULL
+ * Requires: @ns must be held with valid refcount when called
+ */
 static inline struct aa_namespace *aa_get_namespace(struct aa_namespace *ns)
 {
 	if (ns)
@@ -220,6 +227,12 @@ static inline struct aa_namespace *aa_get_namespace(struct aa_namespace *ns)
 	return ns;
 }
 
+/**
+ * aa_put_namespace - decrement refcount on @ns
+ * @ns: namespace to put reference to
+ *
+ * Decrement reference count to @ns and if no longer in use free it
+ */
 static inline void aa_put_namespace(struct aa_namespace *ns)
 {
 	if (ns)
@@ -240,10 +253,10 @@ ssize_t aa_interface_remove_profiles(char *name, size_t size);
 
 /**
  * aa_newest_version - find the newest version of @profile
- * @profile: the profile to check for newer versions of
+ * @profile: the profile to check for newer versions of (NOT NULL)
  *
- * Find the newest version of @profile, if @profile is the newest version
- * return @profile.
+ * Returns: newest version of @profile, if @profile is the newest version
+ *          return @profile.
  *
  * NOTE: the profile returned is not refcounted, The refcount on @profile
  * must be held until the caller decides what to do with the returned newest
@@ -259,7 +272,10 @@ static inline struct aa_profile *aa_newest_version(struct aa_profile *profile)
 
 /**
  * aa_get_profile - increment refcount on profile @p
- * @p: profile
+ * @p: profile  (MAYBE NULL)
+ *
+ * Returns: pointer to @p if @p is NULL will return NULL
+ * Requires: @p must be held with valid refcount when called
  */
 static inline struct aa_profile *aa_get_profile(struct aa_profile *p)
 {
@@ -271,7 +287,7 @@ static inline struct aa_profile *aa_get_profile(struct aa_profile *p)
 
 /**
  * aa_put_profile - decrement refcount on profile @p
- * @p: profile
+ * @p: profile  (MAYBE NULL)
  */
 static inline void aa_put_profile(struct aa_profile *p)
 {

@@ -24,6 +24,7 @@ struct aa_audit_resource {
 	int rlimit;
 };
 
+/* audit callback for resource specific fields */
 static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 {
 	struct aa_audit_resource *sa = container_of(va,
@@ -34,6 +35,13 @@ static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 		audit_log_format(ab, " rlimit=%d", sa->rlimit - 1);
 }
 
+/**
+ * aa_audit_resource - audit setting resource limit
+ * @profile: profile being enforced  (NOT NULL)
+ * @sa: audit data  (NOT NULL)
+ *
+ * Returns: 0 or sa->error else other error code on failure
+ */
 static int aa_audit_resource(struct aa_profile *profile,
 			     struct aa_audit_resource *sa)
 {
@@ -42,11 +50,13 @@ static int aa_audit_resource(struct aa_profile *profile,
 
 /**
  * aa_task_setrlimit - test permission to set an rlimit
- * @profile - profile confining the task
+ * @profile - profile confining the task  (NOT NULL)
  * @resource - the resource being set
- * @new_rlim - the new resource limit
+ * @new_rlim - the new resource limit  (NOT NULL)
  *
  * Control raising the processes hard limit.
+ *
+ * Returns: 0 or error code if setting resource failed
  */
 int aa_task_setrlimit(struct aa_profile *profile, unsigned int resource,
 		      struct rlimit *new_rlim)
@@ -68,6 +78,11 @@ int aa_task_setrlimit(struct aa_profile *profile, unsigned int resource,
 	return error;
 }
 
+/**
+ * __aa_transition_rlimits - apply new profile rlimits
+ * @old: old profile on task  (MAYBE NULL)
+ * @new: new profile with rlimits to apply  (NOT NULL)
+ */
 void __aa_transition_rlimits(struct aa_profile *old, struct aa_profile *new)
 {
 	unsigned int mask = 0;

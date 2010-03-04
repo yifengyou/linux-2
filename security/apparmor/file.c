@@ -21,6 +21,14 @@
 
 struct file_perms nullperms;
 
+/**
+ * aa_audit_file_sub_mask - convert a permission mask into string
+ * @buffer: buffer to write string to  (NOT NULL)
+ * @mask: permission mask to convert
+ * @xindex: xindex
+ *
+ * NOTE: caller must make sure buffer is large enough for @mask
+ */
 static void aa_audit_file_sub_mask(char *buffer, u16 mask, u16 xindex)
 {
 	char *m = buffer;
@@ -29,11 +37,14 @@ static void aa_audit_file_sub_mask(char *buffer, u16 mask, u16 xindex)
 		*m++ = 'm';
 	if (mask & MAY_READ)
 		*m++ = 'r';
-	if (mask & (MAY_WRITE | AA_MAY_CREATE | AA_MAY_DELETE | AA_MAY_CHMOD |
-		    AA_MAY_CHOWN))
+	if (mask & (MAY_WRITE | AA_MAY_CHMOD | AA_MAY_CHOWN))
 		*m++ = 'w';
 	else if (mask & MAY_APPEND)
 		*m++ = 'a';
+	if (mask & AA_MAY_CREATE)
+		*m++ = 'c';
+	if (mask & AA_MAY_DELETE)
+		*m++ = 'd';
 	if (mask & AA_MAY_LINK)
 		*m++ = 'l';
 	if (mask & AA_MAY_LOCK)
@@ -43,6 +54,13 @@ static void aa_audit_file_sub_mask(char *buffer, u16 mask, u16 xindex)
 	*m++ = '\0';
 }
 
+/**
+ * aa_audit_file_mask - convert mask to owner::other string
+ * @buffer: buffer to write string to (NOT NULL)
+ * @mask: permission mask to convert
+ * @xindex: xindex
+ * @owner: if the mask is for owner or other
+ */
 static void aa_audit_file_mask(struct audit_buffer *ab, u16 mask, int xindex,
 			       int owner)
 {
@@ -58,16 +76,18 @@ static void aa_audit_file_mask(struct audit_buffer *ab, u16 mask, int xindex,
 	audit_log_string(ab, str);
 }
 
+/**
+ * file_audit_cb - call back for file specific audit fields
+ * @ab: audit_buffer  (NOT NULL)
+ * @va: audit struct to audit values of  (NOT NULL)
+ */
 static void file_audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 {
 	struct aa_audit_file *sa = container_of(va, struct aa_audit_file, base);
 	u16 denied = sa->request & ~sa->perms.allowed;
 	uid_t fsuid;
 
-	if (sa->base.task)
-		fsuid = task_uid(sa->base.task);
-	else
-		fsuid = current_fsuid();
+	fsuid = current_fsuid();
 
 	if (sa->request & AA_AUDIT_FILE_MASK) {
 		audit_log_format(ab, " requested_mask=");
@@ -102,10 +122,10 @@ static void file_audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 
 /**
  * aa_audit_file - handle the auditing of file operations
- * @profile: the profile being enforced
- * @sa: file auditing context
+ * @profile: the profile being enforced  (NOT NULL)
+ * @sa: file auditing context  (NOT NULL)
  *
- * Returns: error on failure
+ * Returns: %0 or error on failure
  */
 int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa)
 {
@@ -142,7 +162,17 @@ int aa_audit_file(struct aa_profile *profile, struct aa_audit_file *sa)
 	return aa_audit(type, profile, &sa->base, file_audit_cb);
 }
 
-/* TODO: convert from dfa + state to permission entry */
+/**
+ * aa_compute_perms - convert dfa compressed perms to internal perms
+ * @dfa: dfa to compute perms for   (NOT NULL)
+ * @state: state in dfa
+ * @cond:  conditions to consider  (NOT NULL)
+ *
+ * TODO: convert from dfa + state to permission entry, do computation conversion
+ *       at load time.
+ *
+ * Returns: computed permission set
+ */
 static struct file_perms aa_compute_perms(struct aa_dfa *dfa,
 					  unsigned int state,
 					  struct path_cond *cond)
@@ -193,6 +223,18 @@ static struct file_perms aa_compute_perms(struct aa_dfa *dfa,
 	return perms;
 }
 
+/**
+ * aa_str_perms - find permission that match @name
+ * @dfa: to match against  (NOT NULL)
+ * @state: state to start matching in
+ * @name: string to match against dfa  (NOT NULL)
+ * @cond: conditions to consider for permission set computation  (NOT NULL)
+ * @rstate: if !NULL return state match finished in (MAYBE NULL)
+ *
+ * TODO: Update when permission mapping is moved to load time
+ *
+ * Returns: file permission for @name
+ */
 struct file_perms aa_str_perms(struct aa_dfa *dfa, unsigned int start,
 			       const char *name, struct path_cond *cond,
 			       unsigned int *rstate)
@@ -211,6 +253,19 @@ struct file_perms aa_str_perms(struct aa_dfa *dfa, unsigned int start,
 	return aa_compute_perms(dfa, state, cond);
 }
 
+/**
+ * aa_pathstr_perm - do permission check & audit for @name
+ * @profile: profile being enforced  (NOT NULL)
+ * @op: name of the operation  (NOT NULL)
+ * @name: path string to check permission for  (NOT NULL)
+ * @request: requested permissions
+ * @cond: conditional info for this request  (NOT NULL)
+ *
+ * Do permission check for paths that are predefined.  This fn will
+ * be removed once security_sysctl goes away.
+ *
+ * Returns: %0 else error if access denied or other error
+ */
 int aa_pathstr_perm(struct aa_profile *profile, const char *op,
 		    const char *name, u16 request, struct path_cond *cond)
 {
@@ -230,6 +285,16 @@ int aa_pathstr_perm(struct aa_profile *profile, const char *op,
 	return aa_audit_file(profile, &sa);
 }
 
+/**
+ * aa_path_perm - do permissions check & audit for @path
+ * @profile: profile being enforced  (NOT NULL)
+ * @operation: name of the operation being enforced  (NOT NULL)
+ * @path: path to check permissions of  (NOT NULL)
+ * @request: requested permissions
+ * @cond: conditional info for this request  (NOT NULL)
+ *
+ * Returns: %0 else error if access denied or other error
+ */
 int aa_path_perm(struct aa_profile *profile, const char *operation,
 		 struct path *path, u16 request, struct path_cond *cond)
 {
@@ -267,7 +332,17 @@ int aa_path_perm(struct aa_profile *profile, const char *operation,
 	return sa.base.error;
 }
 
-/* helper for aa_path_link - test target xindex == OR subset of link xindex */
+/**
+ * xindex_is_subset - helper for aa_path_link
+ * @link: link permission set
+ * @target: target permission set
+ *
+ * test target x permissions are equal OR a subset of link x permissions
+ * this is done as part of the subset test, where a hardlink must have
+ * a subset of permissions that the target has.
+ *
+ * Returns: %1 if subset else %0
+ */
 static inline bool xindex_is_subset(u16 link, u16 target)
 {
 	if (((link & ~AA_X_UNSAFE) != (target & ~AA_X_UNSAFE)) ||
@@ -279,10 +354,10 @@ static inline bool xindex_is_subset(u16 link, u16 target)
 
 /**
  * aa_path_link - Handle hard link permission check
- * @profile: the profile being enforced
- * @old_dentry: the target dentry
- * @new_dir: directory the new link will be created in
- * @new_dentry: the link being created
+ * @profile: the profile being enforced  (NOT NULL)
+ * @old_dentry: the target dentry  (NOT NULL)
+ * @new_dir: directory the new link will be created in  (NOT NULL)
+ * @new_dentry: the link being created  (NOT NULL)
  *
  * Handle the permission test for a link & target pair.  Permission
  * is encoded as a pair where the link permission is determined
@@ -292,6 +367,8 @@ static inline bool xindex_is_subset(u16 link, u16 target)
  *
  * The subset test if required forces that permissions granted
  * on link are a subset of the permission granted to target.
+ *
+ * Returns: %0 if allowed else error
  */
 int aa_path_link(struct aa_profile *profile, struct dentry *old_dentry,
 		 struct path *new_dir, struct dentry *new_dentry)
@@ -385,6 +462,12 @@ audit:
 	return sa.base.error;
 }
 
+/**
+ * aa_is_deleted_file - test if a file has been completely unlinked
+ * @dentry: dentry of file to test for deletion  (NOT NULL)
+ *
+ * Returns: %1 if deleted else %0
+ */
 static inline bool aa_is_deleted_file(struct dentry *dentry)
 {
 	if (d_unlinked(dentry) && dentry->d_inode->i_nlink == 0)
@@ -392,6 +475,17 @@ static inline bool aa_is_deleted_file(struct dentry *dentry)
 	return 0;
 }
 
+/**
+ * aa_file_common_perm - core permission check & audit for files
+ * @profile: profile being enforced   (NOT NULL)
+ * @operation: name of operation      (NOT NULL)
+ * @file: file to check permissions of  (NOT NULL)
+ * @request: requested permissions
+ * @name: path name to revalidate permission on  (MAYBE NULL if @error != 0)
+ * @error: error result of name lookup when find @name
+ *
+ * Returns: %0 if access allowed else %1
+ */
 static int aa_file_common_perm(struct aa_profile *profile,
 			       const char *operation, struct file *file,
 			       u16 request, const char *name, int error)
@@ -437,6 +531,15 @@ static int aa_file_common_perm(struct aa_profile *profile,
 	return sa.base.error;
 }
 
+/**
+ * aa_file_perm - do permission revalidation check & audit for @file
+ * @profile: profile being enforced   (NOT NULL)
+ * @operation: name of the operation  (NOT NULL)
+ * @file: file to revalidate access permissions on  (NOT NULL)
+ * @request: requested permissions
+ *
+ * Returns: %0 if access allowed else error
+ */
 int aa_file_perm(struct aa_profile *profile, const char *operation,
 		 struct file *file, u16 request)
 {

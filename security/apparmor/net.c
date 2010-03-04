@@ -41,6 +41,7 @@ struct aa_audit_net {
 
 };
 
+/* audit callback for net specific fields */
 static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 {
 	struct aa_audit_net *sa = container_of(va, struct aa_audit_net, base);
@@ -65,7 +66,13 @@ static void audit_cb(struct audit_buffer *ab, struct aa_audit *va)
 
 }
 
-/* Returns: error on failure */
+/**
+ * aa_audit_net - audit network access
+ * @profile: profile being enforced  (NOT NULL)
+ * @sa: audit data  (NOT NULL)
+ *
+ * Returns: %0 or sa->error else other errorcode on failure
+ */
 static int aa_audit_net(struct aa_profile *profile, struct aa_audit_net *sa)
 {
 	int type = AUDIT_APPARMOR_AUTO;
@@ -93,7 +100,16 @@ static int aa_audit_net(struct aa_profile *profile, struct aa_audit_net *sa)
 	return aa_audit(type, profile, &sa->base, audit_cb);
 }
 
-/* Returns: error on failure */
+/**
+ * aa_net_perm - very course network access check
+ * @profile: profile being enforced  (NOT NULL)
+ * @operation: name of the operation being checked  (NOT NULL)
+ * @family: network family
+ * @type:   network type
+ * @protocol: network protocol
+ *
+ * Returns: %0 else error if permission denied
+ */
 int aa_net_perm(struct aa_profile *profile, char *operation,
 		int family, int type, int protocol)
 {
@@ -123,7 +139,13 @@ int aa_net_perm(struct aa_profile *profile, char *operation,
 	return aa_audit_net(profile, &sa);
 }
 
-/* Returns: error on failure */
+/**
+ * aa_revalidate_sk - Revalidate access to a sock
+ * @sk: sock being revalidated  (NOT NULL)
+ * @operation: name of operation being checked  (NOT NULL)
+ *
+ * Returns: %0 else error if permission denied
+ */
 int aa_revalidate_sk(struct sock *sk, char *operation)
 {
 	struct aa_profile *profile;

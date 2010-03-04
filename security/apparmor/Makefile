@@ -4,10 +4,7 @@ obj-$(CONFIG_SECURITY_APPARMOR) += apparmor.o
 
 apparmor-y := apparmorfs.o audit.o capability.o context.o ipc.o lib.o match.o \
               path.o domain.o policy.o policy_unpack.o procattr.o lsm.o \
-              resource.o sid.o file.o
-
-apparmor-$(CONFIG_SECURITY_APPARMOR_NETWORK) += net.o
-apparmor-$(CONFIG_SECURITY_APPARMOR_COMPAT_24) += apparmorfs-24.o
+              resource.o sid.o file.o net.o
 
 clean-files: capability_names.h af_names.h
 

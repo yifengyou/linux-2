@@ -202,8 +202,12 @@ static inline void aa_free_file_rules(struct aa_file_rules *rules)
 
 /* from namei.c */
 #define MAP_OPEN_FLAGS(x) ((((x) + 1) & O_ACCMODE) ? (x) + 1 : (x))
-/*
- * map file flags to AppArmor permissions
+
+/**
+ * aa_map_file_perms - map file flags to AppArmor permissions
+ * @file: open file to map flags to AppArmor permissions
+ *
+ * Returns: apparmor permission set for the file
  */
 static inline u16 aa_map_file_to_perms(struct file *file)
 {

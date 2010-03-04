@@ -15,6 +15,7 @@
 #include <linux/mnt_namespace.h>
 #include <linux/mount.h>
 #include <linux/namei.h>
+#include <linux/nsproxy.h>
 #include <linux/path.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
@@ -26,35 +27,41 @@
 
 /**
  * d_namespace_path - lookup a name associated with a given path
- * @path: path to lookup
- * @buf:  buffer to store path to
+ * @path: path to lookup  (NOT NULL)
+ * @buf:  buffer to store path to  (NOT NULL)
  * @buflen: length of @buf
- * @name: returns pointer for start of path name with in @buf
+ * @name: return pointer for start of path name with in @buf  (NOT NULL)
  * @flags: flags controling path lookup
  *
+ * Handle path name lookup.
+ *
+ * Returns: %0 else error code if path lookup fails
+ *          When no error the path name is returned in @name which points to
+ *          to a position in @buf
  */
 static int d_namespace_path(struct path *path, char *buf, int buflen,
 			    char **name, int flags)
 {
-	struct path root, tmp, ns_root = { };
+	struct path root, tmp;
 	char *res;
 	int deleted, connected;
 	int error = 0;
 
-	read_lock(&current->fs->lock);
-	root = current->fs->root;
-	/* released below */
-	path_get(&root);
-	read_unlock(&current->fs->lock);
-
-	spin_lock(&vfsmount_lock);
-	if (root.mnt && root.mnt->mnt_ns)
+	/* Get the root we want to resolve too */
+	if (flags & PATH_CHROOT_REL) {
+		/* resolve paths relative to chroot */
+		read_lock(&current->fs->lock);
+		root = current->fs->root;
 		/* released below */
-		ns_root.mnt = mntget(root.mnt->mnt_ns->root);
-	if (ns_root.mnt)
+		path_get(&root);
+		read_unlock(&current->fs->lock);
+	} else {
+		/* resolve paths relative to namespace */
+		root.mnt = current->nsproxy->mnt_ns->root;
+		root.dentry = root.mnt->mnt_root;
 		/* released below */
-		ns_root.dentry = dget(ns_root.mnt->mnt_root);
-	spin_unlock(&vfsmount_lock);
+		path_get(&root);
+	}
 
 	spin_lock(&dcache_lock);
 	/* There is a race window between path lookup here and the
@@ -65,10 +72,7 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 	 * with an updated __d_path
 	 */
 	do {
-		if (flags & PATH_CHROOT_REL)
-			tmp = root;
-		else
-			tmp = ns_root;
+		tmp = root;
 		deleted = d_unlinked(path->dentry);
 		res = __d_path(path, &tmp, buf, buflen);
 
@@ -101,16 +105,24 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 		}
 	}
 
-	if (flags & PATH_CHROOT_REL)
-		connected = tmp.dentry == root.dentry && tmp.mnt == root.mnt;
-	else
-		connected = tmp.dentry == ns_root.dentry &&
-			tmp.mnt == ns_root.mnt;
+	/* Determine if the path is connected to the expected root */
+	connected = tmp.dentry == root.dentry && tmp.mnt == root.mnt;
 
+	/* If the path is not connected, then remove any leading / that
+	 * __d_path may have returned.
+	 * Unless
+	 *     specifically directed to connect the path,
+	 * OR
+	 *     if in a chroot and doing chroot relative paths and the path
+	 *     resolves to the namespace root (would be connected outside
+	 *     of chroot) and specifically directed to connect paths to
+	 *     namespace root.
+	 */
 	if (!connected && 
 	    !(flags & PATH_CONNECT_PATH) &&
 	    !((flags & PATH_CHROOT_REL) && (flags & PATH_CHROOT_NSCONNECT) &&
-	      (tmp.dentry == ns_root.dentry && tmp.mnt == ns_root.mnt))) {
+	      (tmp.mnt == current->nsproxy->mnt_ns->root &&
+	       tmp.dentry == current->nsproxy->mnt_ns->root->mnt_root))) {
 		/* disconnected path, don't return pathname starting with '/' */
 		error = -ESTALE;
 		if (*res == '/')
@@ -119,11 +131,20 @@ static int d_namespace_path(struct path *path, char *buf, int buflen,
 
 out:
 	path_put(&root);
-	path_put(&ns_root);
 
 	return error;
 }
 
+/**
+ * get_name_to_buffer - get the pathname to a buffer ensure dir / is appended
+ * @path: path to get name for  (NOT NULL)
+ * @flags: flags controlling path lookup
+ * @buffer: buffer to put name in  (NOT NULL)
+ * @size: size of buffer
+ * @name: on return contains position of path name in @buffer  (NOT NULL)
+ *
+ * Returns: %0 else error on failure
+ */
 static int get_name_to_buffer(struct path *path, int flags, char *buffer,
 			      int size, char **name)
 {
@@ -142,22 +163,21 @@ static int get_name_to_buffer(struct path *path, int flags, char *buffer,
 
 /**
  * aa_get_name - compute the pathname of a file
- * @path: path the file
+ * @path: path the file  (NOT NULL)
  * @flags: flags controling path name generation
- * @buffer: buffer that aa_get_name() allocated
- * @name: the generated path name if there is an error
- *
- * Returns an error code if the there was a failure in obtaining the
- * name.
+ * @buffer: buffer that aa_get_name() allocated  (NOT NULL)
+ * @name: the generated path name if !error
  *
  * @name is a pointer to the beginning of the pathname (which usually differs
  * from the beginning of the buffer), or NULL.  If there is an error @name
- * may contain a partial or invalid name (in the case of a deleted file), that
- * can be used for audit purposes, but it can not be used for mediation.
+ * may contain a partial or invalid name that can be used for audit purposes,
+ * but it can not be used for mediation.
  *
  * We need PATH_IS_DIR to indicate whether the file is a directory or not
  * because the file may not yet exist, and so we cannot check the inode's
  * file type.
+ *
+ * Returns: %0 else error code if could retrieve name
  */
 int aa_get_name(struct path *path, int flags, char **buffer, char **name)
 {
@@ -188,6 +208,14 @@ int aa_get_name(struct path *path, int flags, char **buffer, char **name)
 	return error;
 }
 
+/**
+ * sysctl_pathname - generate a pathname for a sysctl
+ * @table: sysctl name table  (NOT NULL)
+ * @buffer: buffer to put name in  (NOT NULL)
+ * @buflen: length of @buffer
+ *
+ * Returns: sysctl path name in @buffer or NULL on error
+ */
 char *sysctl_pathname(struct ctl_table *table, char *buffer, int buflen)
 {
 	if (buflen < 1)

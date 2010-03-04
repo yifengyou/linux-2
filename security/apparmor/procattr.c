@@ -18,8 +18,8 @@
 
 /**
  * aa_getprocattr - Return the profile information for @profile
- * @profile: the profile to print profile info about
- * @string: the string that will contain the profile and namespace info
+ * @profile: the profile to print profile info about  (NOT NULL)
+ * @string: the string that will contain the profile and namespace info (!NULL)
  *
  * Returns: length of @string on success else error on failure
  *
@@ -27,6 +27,8 @@
  *
  * Creates a string containing the namespace_name://profile_name for
  * @profile.
+ *
+ * Returns: size of string placed in @string else error code on failure
  */
 int aa_getprocattr(struct aa_profile *profile, char **string)
 {
@@ -59,6 +61,14 @@ int aa_getprocattr(struct aa_profile *profile, char **string)
 	return len;
 }
 
+/**
+ * split_token_from_name - separate a string of form  <token>^<name>
+ * @op: operation name  (NOT NULL)
+ * @args: string to parse  (NOT NULL)
+ * @token: stores returned parsed token value  (NOT NULL)
+ *
+ * Returns: start position of name after token else NULL on failure
+ */
 static char *split_token_from_name(const char *op, char *args, u64 * token)
 {
 	char *name;
@@ -75,6 +85,14 @@ static char *split_token_from_name(const char *op, char *args, u64 * token)
 	return name;
 }
 
+/**
+ * aa_setprocattr_chagnehat - handle procattr interface to change_hat
+ * @args: args received from writing to /proc/<pid>/attr/current (NOT NULL)
+ * @size: size of the args
+ * @test: true if this is a test of change_hat permissions
+ *
+ * Returns: %0 or error code if change_hat fails
+ */
 int aa_setprocattr_changehat(char *args, size_t size, int test)
 {
 	char *hat;
@@ -109,6 +127,14 @@ int aa_setprocattr_changehat(char *args, size_t size, int test)
 	return aa_change_hat(hats, count, token, test);
 }
 
+/**
+ * aa_setprocattr_changeprofile - handle procattr interface to changeprofile
+ * @fqname: args received from writting to /proc/<pid>/attr/current (NOT NULL)
+ * @onexec: true if change_profile should be delayed until exec
+ * @test: true if this is a test of change_profile permissions
+ *
+ * Returns: %0 or error code if change_profile fails
+ */
 int aa_setprocattr_changeprofile(char *fqname, int onexec, int test)
 {
 	char *name, *ns_name;

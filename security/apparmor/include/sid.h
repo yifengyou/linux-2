@@ -18,28 +18,7 @@
 
 struct aa_profile;
 
-#define AA_ALLOC_USR_SID 1
-#define AA_ALLOC_SYS_SID 0
-
-u32 aa_alloc_sid(int is_usr);
+u32 aa_alloc_sid(void);
 void aa_free_sid(u32 sid);
-int aa_add_sid_profile(u32 sid, struct aa_profile *profile);
-int aa_replace_sid_profile(u32 sid, struct aa_profile *profile);
-struct aa_profile *aa_get_sid_profile(u32 sid);
-
-static inline u32 aa_compound_sid(u32 sys, u32 usr)
-{
-	return sys | usr;
-}
-
-static inline u32 aa_usr_sid(u32 sid)
-{
-	return sid & 0xffff0000;
-}
-
-static inline u32 aa_sys_sid(u32 sid)
-{
-	return sid & 0xffff;
-}
 
 #endif /* __AA_SID_H */
