@@ -35,17 +35,17 @@ PS_METHOD	= $(prefer-db2x)
 PHONY += xmldocs sgmldocs psdocs pdfdocs htmldocs mandocs installmandocs cleandocs xmldoclinks
 
 BOOKS := $(addprefix $(obj)/,$(DOCBOOKS))
-xmldocs: $(BOOKS) xmldoclinks
+xmldocs: xmldoclinks $(BOOKS)
 sgmldocs: xmldocs
 
 PS := $(patsubst %.xml, %.ps, $(BOOKS))
-psdocs: $(PS)
+psdocs: xmldoclinks $(PS)
 
 PDF := $(patsubst %.xml, %.pdf, $(BOOKS))
-pdfdocs: $(PDF)
+pdfdocs: xmldoclinks $(PDF)
 
 HTML := $(sort $(patsubst %.xml, %.html, $(BOOKS)))
-htmldocs: $(HTML)
+htmldocs: xmldoclinks $(HTML)
 	$(call build_main_index)
 	$(call build_images)
 
