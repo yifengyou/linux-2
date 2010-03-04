@@ -54,6 +54,7 @@ void apparmor_disable(void);
 char *aa_split_fqname(char *args, char **ns_name);
 bool aa_strneq(const char *str, const char *sub, int len);
 void aa_info_message(const char *str);
+char *skip_spaces(const char *str);
 
 /**
  * aa_dfa_null_transition - step to next state after null character

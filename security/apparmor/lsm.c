@@ -580,7 +580,7 @@ static int apparmor_setprocattr(struct task_struct *task, char *name,
 
 	args = value;
 	args[size] = '\0';
-	args = strim(args);
+	args = strstrip(args);
 	command = strsep(&args, " ");
 	if (!args)
 		return -EINVAL;

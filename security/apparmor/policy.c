@@ -108,7 +108,7 @@ const char *profile_mode_names[] = {
 static const char *hname_tail(const char *hname)
 {
 	char *split;
-	hname = strim((char *)hname);
+	hname = strstrip((char *)hname);
 	for (split = strstr(hname, "//"); split; split = strstr(hname, "//"))
 		hname = split + 2;
 

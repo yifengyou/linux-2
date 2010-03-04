@@ -13,10 +13,25 @@
  */
 
 #include <linux/slab.h>
+#include <linux/ctype.h>
 #include <linux/string.h>
 
 #include "include/audit.h"
 
+/**
+ * skip_spaces - Removes leading whitespace from @str.
+ * @str: The string to be stripped.
+ *
+ * From: 2.6.33 lib/string.c
+ *
+ * Returns a pointer to the first non-whitespace character in @str.
+ */
+char *skip_spaces(const char *str)
+{
+        while (isspace(*str))
+                ++str;
+        return (char *)str;
+}
 
 /**
  * aa_split_fqname - split a fqname into a profile and namespace name
@@ -34,7 +49,7 @@
  */
 char *aa_split_fqname(char *fqname, char **ns_name)
 {
-	char *name = strim(fqname);
+	char *name = strstrip(fqname);
 
 	*ns_name = NULL;
 	if (name[0] == ':') {
