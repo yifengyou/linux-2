@@ -15,4 +15,7 @@ no_dumpfile	= true
 skipabi		= true
 skipmodule	= true
 
+# XXX: ia64 libelf-dev/binutils-dev dependancy does not supply libraries?!?
+do_tools	= false
+
 family=ports
