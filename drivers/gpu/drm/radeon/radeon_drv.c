@@ -324,6 +324,16 @@ static int __init radeon_init(void)
 		radeon_modeset = 0;
 	}
 #endif
+	/* Check for known bad devices by default. */
+	if (radeon_modeset == -1) {
+		static struct pci_device_id radeon_badmodeset[] = {
+			{ },
+		};
+		if (pci_dev_present(radeon_badmodeset)) {
+			DRM_INFO("radeon disabling kernel modesetting for known bad device.\n");
+			radeon_modeset = 0;
+		}
+	}
 	/* if enabled by default */
 	if (radeon_modeset == -1) {
 #ifdef CONFIG_DRM_RADEON_KMS
