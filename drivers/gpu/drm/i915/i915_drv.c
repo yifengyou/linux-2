@@ -565,6 +565,19 @@ static int __init i915_init(void)
 	 * Allow optional vga_text_mode_force boot option to override
 	 * the default behavior.
 	 */
+	/*
+	 * If the user has not specified modesetting the check for known
+         * bad devices and disable them.
+         */
+	if (i915_modeset == -1) {
+		static struct pci_device_id i915_badmodeset[] = {
+			{ },
+		};
+		if (pci_dev_present(i915_badmodeset)) {
+			DRM_INFO("i915 disabling kernel modesetting for known bad device.\n");
+			i915_modeset = 0;
+		}
+	}
 #if defined(CONFIG_DRM_I915_KMS)
 	if (i915_modeset != 0)
 		driver.driver_features |= DRIVER_MODESET;
