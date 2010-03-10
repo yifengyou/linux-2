@@ -751,6 +751,7 @@ hfc_usb
 hfs
 hfsplus
 hgafb
+hid
 hid-a4tech
 hid-apple
 hid-belkin
