@@ -24,7 +24,7 @@ export DROOT=debian
 include $(DROOT)/rules.d/0-common-vars.mk
 
 # Pull in some arch specific stuff
-include $(DEBIAN)/rules.d/$(arch).mk
+-include $(DEBIAN)/rules.d/$(arch).mk
 
 # Maintainer targets
 include $(DROOT)/rules.d/1-maintainer.mk
