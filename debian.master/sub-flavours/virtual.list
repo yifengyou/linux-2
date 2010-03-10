@@ -53,6 +53,7 @@ drivers/net/slhc.ko
 drivers/net/slip.ko
 drivers/net/tun.ko
 drivers/net/veth.ko
+drivers/net/vmxnet3/vmxnet3.ko
 drivers/net/xen-netfront.ko
 drivers/parport/parport.ko
 drivers/parport/parport_pc.ko
@@ -74,6 +75,7 @@ drivers/scsi/scsi_wait_scan.ko
 drivers/scsi/sd_mod.ko
 drivers/scsi/sg.ko
 drivers/scsi/sr_mod.ko
+drivers/scsi/vmw_pvscsi.ko
 drivers/usb/core/usbcore.ko
 drivers/usb/storage/usb-storage.ko
 drivers/video/cirrusfb.ko
