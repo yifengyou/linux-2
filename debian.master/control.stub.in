@@ -45,15 +45,15 @@ Description: Linux kernel specific documentation for version PKGVER
  /usr/share/doc/SRCPKGNAME-doc/00-INDEX for a list of what is
  contained in each file.
 
-Package: SRCPKGNAME-tools
+Package: SRCPKGNAME-tools-common
 Architecture: all
 Section: admin
 Priority: optional
 Depends: ${misc:Depends}
-Conflicts: SRCPKGNAME-tools-2.6
-Replaces: SRCPKGNAME-tools-2.6
+Replaces: SRCPKGNAME-tools (<= 2.6.32-16.25)
 Description: Linux kernel specific tools for version PKGVER
- This package provides the various tools in the PKGVER kernel source.
+ This package provides the architecture independent parts for kernel
+ version locked tools in the PKGVER kernel source.
 
 Package: linux-headers-PKGVER-ABINUM
 Architecture: all
@@ -77,3 +77,14 @@ Description: Linux Kernel Headers for development
  are used by the installed headers for GNU glibc and other system
  libraries. They are NOT meant to be used to build third-party modules for
  your kernel. Use SRCPKGNAME-headers-* packages for that.
+
+Package: linux-tools-PKGVER-ABINUM
+Architecture: i386 amd64 lpia ia64 powerpc sparc armel
+Section: devel
+Priority: optional
+Depends: ${misc:Depends}, ${shlibs:Depends}, linux-tools-common
+Description: Linux kernel tools for version PKGVER-ABINUM
+ This package provides the architecture dependant parts for kernel
+ version locked tools for version PKGVER-ABINUM on
+ DESC.
+

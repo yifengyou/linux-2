@@ -1,2 +1,4 @@
-#!/bin/sh
-exec perf_`uname -r` "$@"
+#!/bin/bash
+version=`uname -r`
+version=${version%-*}
+exec "perf_$version" "$@"

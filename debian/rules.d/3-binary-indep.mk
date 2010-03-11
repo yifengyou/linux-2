@@ -62,9 +62,9 @@ ifeq ($(do_source_package_content),true)
 	rm -rf $(srcdir)
 endif
 
-toolspkg = $(tools_pkg_name)
-toolsbin = $(CURDIR)/debian/$(toolspkg)/usr/bin
-toolsman = $(CURDIR)/debian/$(toolspkg)/usr/share/man
+install-tools: toolspkg = $(tools_common_pkg_name)
+install-tools: toolsbin = $(CURDIR)/debian/$(toolspkg)/usr/bin
+install-tools: toolsman = $(CURDIR)/debian/$(toolspkg)/usr/share/man
 install-tools:
 	dh_testdir
 	dh_testroot
