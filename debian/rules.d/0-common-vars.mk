@@ -49,6 +49,9 @@ ifneq ($(PRINTSHAS),)
 ubuntu_log_opts += --print-shas
 endif
 
+# Get the kernels own extra version to be added to the release signature.
+extraversion=$(shell awk '/EXTRAVERSION =/ { print $$3 }' <Makefile)
+
 #
 # The debug packages are ginormous, so you probably want to skip
 # building them (as a developer).
