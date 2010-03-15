@@ -73,6 +73,9 @@ for arch in $archs; do
 				cat $archconfdir/config.common.$arch >> "$fullconf"
 			fi
 			cat "$archconfdir/$config" >>"$fullconf"
+			if [ -f $confdir/OVERRIDES ]; then
+				cat $confdir/OVERRIDES >> "$fullconf"
+			fi
 			;;
 		esac
 	done
