@@ -349,6 +349,7 @@ endif
 
 binary-perarch: toolspkg = $(tools_pkg_name)
 binary-perarch: install-perarch
+	@# Empty for make to be happy
 ifeq ($(do_tools),true)
 	dh_installchangelogs -p$(toolspkg)
 	dh_installdocs -p$(toolspkg)
