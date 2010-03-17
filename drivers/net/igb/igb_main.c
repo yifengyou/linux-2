@@ -5269,6 +5269,7 @@ void igb_alloc_rx_buffers_adv(struct igb_ring *rx_ring, int cleaned_count)
 			}
 		}
 
+		skb = buffer_info->skb;
 		if (!buffer_info->skb) {
 			skb = netdev_alloc_skb(netdev, bufsz + NET_IP_ALIGN);
 			if (!skb) {
