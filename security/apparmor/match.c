@@ -72,7 +72,7 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 		goto out;
 
 	/* freed by free_table */
-	table = kmalloc(tsize, GFP_KERNEL);
+	table = kmalloc(tsize, GFP_KERNEL | __GFP_NOWARN);
 	if (!table)
 		table = vmalloc(tsize);
 	if (table) {
