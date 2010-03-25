@@ -1355,6 +1355,16 @@ static int __init vga16fb_probe(struct platform_device *dev)
 
 	vga16fb_update_fix(info);
 
+	/*
+	 * Ubuntu: Don't register vga16fb if another fb exists. Bad interactions
+	 * can occur.
+	 */
+	if (num_registered_fb > 0) {
+		printk(KERN_NOTICE "vga16fb: not registering due to another "
+		       "framebuffer present\n");
+		goto err_check_var;
+	}
+
 	if (register_framebuffer(info) < 0) {
 		printk(KERN_ERR "vga16fb: unable to register framebuffer\n");
 		ret = -EINVAL;
