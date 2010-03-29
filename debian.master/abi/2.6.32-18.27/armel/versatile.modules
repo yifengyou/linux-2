@@ -180,6 +180,7 @@ configfs
 core
 cp210x
 cpqarray
+cramfs
 crc32c
 crc7
 crc-ccitt
