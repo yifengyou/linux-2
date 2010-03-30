@@ -707,9 +707,10 @@ struct aa_profile *aa_unpack(void *udata, size_t size,
 		return ERR_PTR(error);
 
 	profile = unpack_profile(&e, sa);
-	if (IS_ERR(profile))
+	if (IS_ERR(profile)) {
 		sa->pos = e.pos - e.start;
-
+		return profile;
+	}
 	error = verify_profile(profile, sa);
 	if (error) {
 		aa_put_profile(profile);
