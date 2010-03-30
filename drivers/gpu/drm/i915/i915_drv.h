@@ -1026,7 +1026,7 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
 #define IS_845G(dev)		((dev)->pci_device == 0x2562)
 #define IS_I85X(dev)		((dev)->pci_device == 0x3582)
 #define IS_I865G(dev)		((dev)->pci_device == 0x2572)
-#define IS_I8XX(dev)		(INTEL_INFO(dev)->is_i8xx)
+#define IS_GEN2(dev)           (INTEL_INFO(dev)->is_i8xx)
 #define IS_I915G(dev)		(INTEL_INFO(dev)->is_i915g)
 #define IS_I915GM(dev)		((dev)->pci_device == 0x2592)
 #define IS_I945G(dev)		((dev)->pci_device == 0x2772)
@@ -1044,6 +1044,13 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
 #define IS_IRONLAKE(dev)	(INTEL_INFO(dev)->is_ironlake)
 #define IS_I9XX(dev)		(INTEL_INFO(dev)->is_i9xx)
 #define IS_MOBILE(dev)		(INTEL_INFO(dev)->is_mobile)
+
+#define IS_GEN3(dev)   (IS_I915G(dev) ||                       \
+                        IS_I915GM(dev) ||                      \
+                        IS_I945G(dev) ||                       \
+                        IS_I945GM(dev) ||                      \
+                        IS_G33(dev) || \
+                        IS_PINEVIEW(dev))
 
 #define I915_NEED_GFX_HWS(dev)	(INTEL_INFO(dev)->need_gfx_hws)
 

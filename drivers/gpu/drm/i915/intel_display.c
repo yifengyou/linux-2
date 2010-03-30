@@ -4449,7 +4449,7 @@ static void intel_setup_outputs(struct drm_device *dev)
 			DRM_DEBUG_KMS("probing DP_D\n");
 			intel_dp_init(dev, DP_D);
 		}
-	} else if (IS_I8XX(dev))
+	} else if (IS_GEN2(dev))
 		intel_dvo_init(dev);
 
 	if (SUPPORTS_TV(dev))
