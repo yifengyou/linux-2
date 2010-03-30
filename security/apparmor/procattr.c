@@ -51,9 +51,11 @@ int aa_getprocattr(struct aa_profile *profile, char **string)
 		sprintf(s, "%s://", ns->base.name);
 		s += ns_len;
 	}
-	if (profile->flags & PFLAG_UNCONFINED)
+	if (profile->flags & PFLAG_UNCONFINED) {
 		sprintf(s, "%s\n", profile->base.hname);
-	else
+		/* mode string not being appended so reduce string size */
+		len -= mode_len;
+	} else
 		sprintf(s, "%s (%s)\n", profile->base.hname, mode_str);
 	*string = str;
 
