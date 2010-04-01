@@ -151,3 +151,4 @@ winbond-840 ?
 yellowfin ?
 znet ?
 vmxnet3 ?
+xen-netfront ?

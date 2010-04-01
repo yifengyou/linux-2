@@ -27,3 +27,4 @@ pt ?
 sx8 ?
 umem ?
 virtio_blk ?
+xen-blkfront ?
