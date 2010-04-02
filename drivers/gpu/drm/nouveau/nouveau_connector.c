@@ -239,14 +239,12 @@ nouveau_connector_detect(struct drm_connector *connector)
 	if (connector->connector_type == DRM_MODE_CONNECTOR_LVDS)
 		nv_encoder = find_encoder_by_type(connector, OUTPUT_LVDS);
 	if (nv_encoder && nv_connector->native_mode) {
-		unsigned status = connector_status_connected;
-
 #ifdef CONFIG_ACPI
 		if (!nouveau_ignorelid && !acpi_lid_open())
-			status = connector_status_unknown;
+			return connector_status_disconnected;
 #endif
 		nouveau_connector_set_encoder(connector, nv_encoder);
-		return status;
+		return connector_status_connected;
 	}
 
 	/* Cleanup the previous EDID block. */
