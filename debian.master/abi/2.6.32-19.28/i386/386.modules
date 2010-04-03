@@ -753,6 +753,7 @@ hfs
 hfsplus
 hgafb
 hid
+hid-3m-pct
 hid-a4tech
 hid-apple
 hid-belkin
@@ -768,14 +769,17 @@ hid-kye
 hid-logitech
 hid-microsoft
 hid-monterey
+hid-mosart
 hid-ntrig
 hid-ortek
 hidp
 hid-petalynx
 hid-pl
+hid-quanta
 hid-samsung
 hid-sjoy
 hid-sony
+hid-stantum
 hid-sunplus
 hid-tmff
 hid-topseed
