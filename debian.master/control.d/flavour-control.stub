@@ -29,6 +29,7 @@ Pre-Depends: dpkg (>= 1.10.24)
 Provides: linux-image, linux-image-2.6, fuse-module, =PROVIDES=
 Depends: ${misc:Depends}, ${shlibs:Depends}, initramfs-tools (>= 0.36ubuntu6), coreutils | fileutils (>= 4.0), module-init-tools (>= 3.3-pre11-4ubuntu3), wireless-crda
 Conflicts: hotplug (<< 0.0.20040105-1)
+Breaks: lvm2 (<< 2.02.54-1ubuntu3)
 Recommends: BOOTLOADER
 Suggests: fdutils, SRCPKGNAME-doc-PKGVER | SRCPKGNAME-source-PKGVER, SRCPKGNAME-tools
 Description: Linux kernel image for version PKGVER on DESC
