@@ -599,6 +599,15 @@ static void nouveau_OF_copy_vbios_to_ramin(struct drm_device *dev)
 #endif
 }
 
+static void nouveau_apply_noaccel_quirks (struct drm_device *dev)
+{
+	struct drm_nouveau_private *dev_priv = dev->dev_private;
+	if (nouveau_noaccel == -1) {
+		/* If not specified, noaccel should default off */
+		nouveau_noaccel = 0;
+	}
+}
+
 int nouveau_load(struct drm_device *dev, unsigned long flags)
 {
 	struct drm_nouveau_private *dev_priv;
@@ -727,6 +736,9 @@ int nouveau_load(struct drm_device *dev, unsigned long flags)
 		dev_priv->flags |= NV_NFORCE;
 	else if (dev->pci_device == 0x01f0)
 		dev_priv->flags |= NV_NFORCE2;
+
+	/* Apply noaccel quirks */
+	nouveau_apply_noaccel_quirks(dev);
 
 	/* For kernel modesetting, init card now and bring up fbcon */
 	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
