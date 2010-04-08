@@ -614,6 +614,13 @@ static void nouveau_apply_noaccel_quirks (struct drm_device *dev)
 			NV_INFO(dev, "Detected MacBook Pro 9600GT chip. "
 				 "Disabling acceleration\n");
 		}
+		/* At least two of the three nv20 cards hang with acceleration */
+		/* See https://bugs.launchpad.net/bugs/544088 */
+		if (dev_priv->chipset == 0x20) {
+			nouveau_noaccel = 1;
+			NV_INFO(dev, "Detected NV20 (GeForce 3) chip. "
+				 "Disabling acceleration\n");
+		}
 	}
 }
 
