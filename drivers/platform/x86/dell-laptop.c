@@ -288,8 +288,10 @@ static const struct rfkill_ops dell_rfkill_ops = {
 /*
  * Called for each KEY_WLAN key press event. Note that a physical
  * rf-kill switch change also causes the BIOS to emit a KEY_WLAN.
+ *
+ * dell_rfkill_set may block, so schedule it on a worker thread.
  */
-static void dell_rfkill_update(void)
+static void dell_rfkill_update(struct work_struct *work)
 {
 	hw_switch_status ^= BIT(HW_SWITCH_MASK);
 	if (wifi_rfkill && (hw_switch_status & BIT(WLAN_SWITCH_MASK))) {
@@ -307,6 +309,7 @@ static void dell_rfkill_update(void)
 		dell_rfkill_set((void*)3, rfkill_blocked(wwan_rfkill));
 	}
 }
+DECLARE_WORK(dell_rfkill_update_work, &dell_rfkill_update);
 
 static int dell_setup_rfkill(void)
 {
@@ -431,7 +434,9 @@ static bool dell_input_filter(struct input_handle *handle, unsigned int type,
 			     unsigned int code, int value)
 {
 	if (type == EV_KEY && code == KEY_WLAN && value == 1) {
-		dell_rfkill_update();
+		if (!schedule_work(&dell_rfkill_update_work))
+			printk(KERN_NOTICE "rfkill switch handling already "
+					   "scheduled, dropping this event\n");
 		return 1;
 	}
 
