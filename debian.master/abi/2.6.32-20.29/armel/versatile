@@ -3734,6 +3734,7 @@ EXPORT_SYMBOL vmlinux 0x8f6b7950	set_irq_data
 EXPORT_SYMBOL vmlinux 0x8f76ccc3	pcibios_fixup_bus
 EXPORT_SYMBOL vmlinux 0x8f7a9793	consume_skb
 EXPORT_SYMBOL vmlinux 0x8f8acac9	md_unregister_thread
+EXPORT_SYMBOL vmlinux 0x8f8bd22f	inode_add_rsv_space
 EXPORT_SYMBOL vmlinux 0x8f92edf1	pci_get_subsys
 EXPORT_SYMBOL vmlinux 0x8f9b86b2	kfifo_alloc
 EXPORT_SYMBOL vmlinux 0x8fb6350c	check_disk_change
@@ -4116,6 +4117,7 @@ EXPORT_SYMBOL vmlinux 0xae1074c9	inet_frags_exit_net
 EXPORT_SYMBOL vmlinux 0xae395308	per_cpu__vm_event_states
 EXPORT_SYMBOL vmlinux 0xae7c8c4c	serio_unregister_child_port
 EXPORT_SYMBOL vmlinux 0xae8f9601	xfrm_state_update
+EXPORT_SYMBOL vmlinux 0xae958d31	inode_claim_rsv_space
 EXPORT_SYMBOL vmlinux 0xaea710a4	dev_addr_add
 EXPORT_SYMBOL vmlinux 0xaec655c7	alloc_pages_exact
 EXPORT_SYMBOL vmlinux 0xaed013b9	posix_acl_valid
@@ -4572,6 +4574,7 @@ EXPORT_SYMBOL vmlinux 0xd624d32a	netlink_set_err
 EXPORT_SYMBOL vmlinux 0xd627480b	strncat
 EXPORT_SYMBOL vmlinux 0xd62c833f	schedule_timeout
 EXPORT_SYMBOL vmlinux 0xd66c6228	down_read_trylock
+EXPORT_SYMBOL vmlinux 0xd685f40a	inode_sub_rsv_space
 EXPORT_SYMBOL vmlinux 0xd6a78d08	smp_call_function_single
 EXPORT_SYMBOL vmlinux 0xd6e2a842	__dev_getfirstbyhwtype
 EXPORT_SYMBOL vmlinux 0xd6ee688f	vmalloc
@@ -8180,6 +8183,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xf51c75ea	ata_bus_reset
 EXPORT_SYMBOL_GPL vmlinux 0xf521270b	crypto_ahash_type
 EXPORT_SYMBOL_GPL vmlinux 0xf5384ac1	__trace_printk
 EXPORT_SYMBOL_GPL vmlinux 0xf5446db6	class_dev_iter_next
+EXPORT_SYMBOL_GPL vmlinux 0xf54bd49b	lcm
 EXPORT_SYMBOL_GPL vmlinux 0xf553318d	cpuidle_pause_and_lock
 EXPORT_SYMBOL_GPL vmlinux 0xf55bd741	da903x_reads
 EXPORT_SYMBOL_GPL vmlinux 0xf578cc70	mnt_want_write_file

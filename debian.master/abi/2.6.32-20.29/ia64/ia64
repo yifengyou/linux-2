@@ -3208,6 +3208,7 @@ EXPORT_SYMBOL vmlinux 0x19fd3133	nf_log_register
 EXPORT_SYMBOL vmlinux 0x1a098f4c	compat_tcp_getsockopt
 EXPORT_SYMBOL vmlinux 0x1a305457	filemap_fdatawait_range
 EXPORT_SYMBOL vmlinux 0x1a513d3d	sk_dst_check
+EXPORT_SYMBOL vmlinux 0x1a5a09e4	inode_add_rsv_space
 EXPORT_SYMBOL vmlinux 0x1a8a845e	idle_nomwait
 EXPORT_SYMBOL vmlinux 0x1a8d692f	journal_check_used_features
 EXPORT_SYMBOL vmlinux 0x1ac29dd0	alloc_fcdev
@@ -4448,6 +4449,7 @@ EXPORT_SYMBOL vmlinux 0x7cc30117	register_quota_format
 EXPORT_SYMBOL vmlinux 0x7cc6a0b2	current_fs_time
 EXPORT_SYMBOL vmlinux 0x7cd78a87	user_path_at
 EXPORT_SYMBOL vmlinux 0x7d11c268	jiffies
+EXPORT_SYMBOL vmlinux 0x7d1ee981	inode_sub_rsv_space
 EXPORT_SYMBOL vmlinux 0x7d64bd6a	xfrm_bundle_ok
 EXPORT_SYMBOL vmlinux 0x7d697d81	input_close_device
 EXPORT_SYMBOL vmlinux 0x7d6b2621	phy_start_aneg
@@ -5794,6 +5796,7 @@ EXPORT_SYMBOL vmlinux 0xf3b26dc4	submit_bio
 EXPORT_SYMBOL vmlinux 0xf3bd7d80	pneigh_enqueue
 EXPORT_SYMBOL vmlinux 0xf3bf0bce	__bitmap_complement
 EXPORT_SYMBOL vmlinux 0xf42bfe13	ida_remove
+EXPORT_SYMBOL vmlinux 0xf43cc2ae	inode_claim_rsv_space
 EXPORT_SYMBOL vmlinux 0xf441ac43	ioread8_rep
 EXPORT_SYMBOL vmlinux 0xf46097c4	kern_path
 EXPORT_SYMBOL vmlinux 0xf48f1a4e	alloc_trdev
@@ -9214,6 +9217,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xf4b46a93	crypto_aead_type
 EXPORT_SYMBOL_GPL vmlinux 0xf4cdb9df	fsnotify
 EXPORT_SYMBOL_GPL vmlinux 0xf51605d0	class_dev_iter_exit
 EXPORT_SYMBOL_GPL vmlinux 0xf51ca0e1	shmem_file_setup
+EXPORT_SYMBOL_GPL vmlinux 0xf54bd49b	lcm
 EXPORT_SYMBOL_GPL vmlinux 0xf5799f7a	stop_machine_destroy
 EXPORT_SYMBOL_GPL vmlinux 0xf589b391	inet_twdr_twkill_work
 EXPORT_SYMBOL_GPL vmlinux 0xf5a5e065	usb_mon_register
