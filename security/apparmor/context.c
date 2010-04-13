@@ -91,8 +91,13 @@ static void replace_group(struct aa_task_cxt *cxt, struct aa_profile *profile)
 		cxt->onexec = NULL;
 		cxt->token = 0;
 	}
+	/* be careful switching cxt->profile, when racing replacement it
+	 * is possible that cxt->profile->replacedby is the reference keeping
+	 * @profile valid, so make sure to get its reference before dropping
+	 * the reference on cxt->profile */
+	aa_get_profile(profile);
 	aa_put_profile(cxt->profile);
-	cxt->profile = aa_get_profile(profile);
+	cxt->profile = profile;
 }
 
 /**
@@ -130,8 +135,9 @@ int aa_set_current_onexec(struct aa_profile *profile)
 		return -ENOMEM;
 
 	cxt = new->security;
+	aa_get_profile(profile);
 	aa_put_profile(cxt->onexec);
-	cxt->onexec = aa_get_profile(profile);
+	cxt->onexec = profile;
 
 	commit_creds(new);
 	return 0;
