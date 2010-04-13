@@ -17,10 +17,24 @@
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
+#include <linux/workqueue.h>
 #include <linux/err.h>
 #include <linux/kref.h>
 
 #include "include/match.h"
+
+/**
+ * do_vfree - workqueue routine for freeing vmalloced memory
+ * @work: data to be freed
+ *
+ * The work_struct is overlayed to the data being freed, as at the point
+ * the work is scheduled the data is no longer valid, be its freeing
+ * needs to be delayed until safe.
+ */
+static void do_vfree(struct work_struct *work)
+{
+	vfree(work);
+}
 
 /**
  * free_table - free a table allocated by unpack table
@@ -31,9 +45,14 @@ static void free_table(struct table_header *table)
 	if (!table)
 		return;
 
-	if (is_vmalloc_addr(table))
-		vfree(table);
-	else
+	if (is_vmalloc_addr(table)) {
+		/* Data is no longer valid so just use the allocated space
+		 * as the work_struct
+		 */
+		struct work_struct *work = (struct work_struct *) table;
+		INIT_WORK(work, do_vfree);
+		schedule_work(work);	  
+	} else
 		kzfree(table);
 }
 
@@ -75,6 +94,8 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 	/* freed by free_table */
 	table = kmalloc(tsize, GFP_KERNEL | __GFP_NOWARN);
 	if (!table) {
+		tsize = tsize < sizeof(struct work_struct) ?
+			sizeof(struct work_struct) : tsize;
 		unmap_alias = 1;
 		table = vmalloc(tsize);
 	}
