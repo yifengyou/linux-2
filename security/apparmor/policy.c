@@ -904,7 +904,7 @@ ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 	struct aa_policy *policy;
 	struct aa_profile *old_profile = NULL, *new_profile = NULL;
 	struct aa_profile *rename_profile = NULL;
-	struct aa_namespace *ns;
+	struct aa_namespace *ns = NULL;
 	ssize_t error;
 	struct aa_audit_iface sa = {
 		.base.operation = "profile_replace",
