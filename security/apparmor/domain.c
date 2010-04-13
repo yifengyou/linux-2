@@ -452,7 +452,7 @@ int apparmor_bprm_set_creds(struct linux_binprm *bprm)
 	 * to avoid having to recompute in secureexec
 	 */
 	if (!(sa.perms.xindex & AA_X_UNSAFE)) {
-		AA_DEBUG("scubbing environment variables for %s profile=%s\n",
+		AA_DEBUG("scrubbing environment variables for %s profile=%s\n",
 			 sa.name, new_profile->base.hname);
 		bprm->unsafe |= AA_SECURE_X_NEEDED;
 	}
