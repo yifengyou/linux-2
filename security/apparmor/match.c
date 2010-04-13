@@ -50,6 +50,7 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 {
 	struct table_header *table = NULL;
 	struct table_header th;
+	int unmap_alias = 0;
 	size_t tsize;
 
 	if (bsize < sizeof(struct table_header))
@@ -73,8 +74,10 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 
 	/* freed by free_table */
 	table = kmalloc(tsize, GFP_KERNEL | __GFP_NOWARN);
-	if (!table)
+	if (!table) {
+		unmap_alias = 1;
 		table = vmalloc(tsize);
+	}
 	if (table) {
 		*table = th;
 		if (th.td_flags == YYTD_DATA8)
@@ -91,6 +94,8 @@ static struct table_header *unpack_table(char *blob, size_t bsize)
 	}
 
 out:
+	if (unmap_alias)
+		vm_unmap_aliases();
 	return table;
 fail:
 	free_table(table);
