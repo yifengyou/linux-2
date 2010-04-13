@@ -419,7 +419,7 @@ static int apparmor_dentry_open(struct file *file, const struct cred *cred)
 		/* released by aa_free_file_context */
 		fcxt->profile = aa_get_profile(profile);
 		/* todo cache actual allowed permissions */
-		fcxt->allowed = 0;
+		fcxt->allowed = aa_map_file_to_perms(file);
 	}
 
 	return error;
@@ -448,7 +448,7 @@ static int apparmor_file_permission(struct file *file, int mask)
 	 * TODO: cache profiles that have revalidated?
 	 */
 	struct aa_file_cxt *fcxt = file->f_security;
-	struct aa_profile *profile, *fprofile = fcxt->profile;
+	struct aa_profile *profile, *fprofile = aa_newest_version(fcxt->profile);
 	int error = 0;
 
 	if (!fprofile || !file->f_path.mnt ||
