@@ -621,6 +621,13 @@ static void nouveau_apply_noaccel_quirks (struct drm_device *dev)
 			NV_INFO(dev, "Detected NV20 (GeForce 3) chip. "
 				 "Disabling acceleration\n");
 		}
+		/* GeForce 6100 cards also hang with acceleration */
+		/* See https://bugs.launchpad.net/bugs/542950 */
+		if (dev->pdev->device == 0x0242) {
+			nouveau_noaccel = 1;
+			NV_INFO(dev, "Detected GeForce 6100 chip. "
+				 "Disabling acceleration\n");
+		}
 	}
 }
 
