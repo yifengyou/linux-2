@@ -573,6 +573,7 @@ static int __init i915_init(void)
 		static struct pci_device_id i915_badmodeset[] = {
 			INTEL_VGA_DEVICE(0x3577, 0),
 			INTEL_VGA_DEVICE(0x2562, 0),
+			INTEL_VGA_DEVICE(0x3582, 0),
 			{ },
 		};
 		if (pci_dev_present(i915_badmodeset)) {
