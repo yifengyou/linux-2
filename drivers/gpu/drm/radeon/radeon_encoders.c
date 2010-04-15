@@ -847,6 +847,8 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 		else if (radeon_encoder->devices & (ATOM_DEVICE_DFP_SUPPORT)) {
 			if (dig->coherent_mode)
 				args.v2.acConfig.fCoherentMode = 1;
+			if (radeon_encoder->pixel_clock > 165000)
+				args.v2.acConfig.fDualLinkConnector = 1;
 		}
 	} else {
 
