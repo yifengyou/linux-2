@@ -327,6 +327,8 @@ static int __init radeon_init(void)
 	/* Check for known bad devices by default. */
 	if (radeon_modeset == -1) {
 		static struct pci_device_id radeon_badmodeset[] = {
+			{ PCI_DEVICE(0x1002, 0x515e) },
+			{ PCI_DEVICE(0x1002, 0x515f) },
 			{ },
 		};
 		if (pci_dev_present(radeon_badmodeset)) {
