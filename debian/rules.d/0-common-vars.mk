@@ -123,9 +123,10 @@ do_common_headers_indep=true
 do_full_source=false
 
 # build tools
-do_tools=false
 ifneq ($(wildcard $(CURDIR)/tools),)
-do_tools=true
+do_tools?=true
+else
+do_tools?=false
 endif
 tools_pkg_name=$(src_pkg_name)-tools-$(abi_release)
 tools_common_pkg_name=$(src_pkg_name)-tools-common
