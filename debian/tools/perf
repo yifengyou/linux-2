@@ -1,4 +1,7 @@
 #!/bin/bash
 version=`uname -r`
-version=${version%-*}
+flavour=${version#*-}
+flavour=${flavour#*-}
+version=${version%-$flavour}
+
 exec "perf_$version" "$@"
