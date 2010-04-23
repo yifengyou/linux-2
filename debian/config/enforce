@@ -32,3 +32,6 @@ value CONFIG_DEVTMPFS_MOUNT y
 
 # Ramdisk size should be a minimum of 64M
 value CONFIG_BLK_DEV_RAM_SIZE 65536
+
+# LVM requires dm_mod built in to activate correctly (LP: #560717)
+value CONFIG_BLK_DEV_DM y
