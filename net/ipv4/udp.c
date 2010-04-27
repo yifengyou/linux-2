@@ -1169,6 +1169,10 @@ int udp_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 			goto drop;
 	}
 
+
+	if (sk_rcvqueues_full(sk, skb))
+		goto drop;
+
 	rc = 0;
 
 	bh_lock_sock(sk);
