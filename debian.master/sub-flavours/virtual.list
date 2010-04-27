@@ -1,6 +1,7 @@
 arch/*/{crypto,kernel,oprofile}
 crypto/*
 drivers/acpi/*
+drivers/ata/ahci.ko
 drivers/ata/ata_generic.ko
 drivers/ata/ata_piix.ko
 drivers/ata/libata.ko
