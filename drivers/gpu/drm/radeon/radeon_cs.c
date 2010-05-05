@@ -248,8 +248,7 @@ int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 	}
 	r = radeon_cs_parser_relocs(&parser);
 	if (r) {
-		if (r != -ERESTARTSYS)
-			DRM_ERROR("Failed to parse relocation %d!\n", r);
+		DRM_ERROR("Failed to parse relocation !\n");
 		radeon_cs_parser_fini(&parser, r);
 		mutex_unlock(&rdev->cs_mutex);
 		return r;
