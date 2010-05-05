@@ -30,6 +30,9 @@ value CONFIG_USB_DEVICEFS n
 value CONFIG_DEVTMPFS y
 value CONFIG_DEVTMPFS_MOUNT y
 
+# some /dev nodes require POSIX ACLs, like /dev/dsp
+value CONFIG_TMPFS_POSIX_ACL y
+
 # Ramdisk size should be a minimum of 64M
 value CONFIG_BLK_DEV_RAM_SIZE 65536
 
