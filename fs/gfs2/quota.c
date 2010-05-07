@@ -654,15 +654,27 @@ static int gfs2_adjust_quota(struct gfs2_inode *ip, loff_t loc,
 	unsigned blocksize, iblock, pos;
 	struct buffer_head *bh;
 	struct page *page;
-	void *kaddr;
-	char *ptr;
-	struct gfs2_quota_host qp;
+	void *kaddr, *ptr;
+	struct gfs2_quota q;
 	s64 value;
-	int err = -EIO;
+	int err, nbytes;
 
 	if (gfs2_is_stuffed(ip))
 		gfs2_unstuff_dinode(ip, NULL);
-	
+
+	memset(&q, 0, sizeof(struct gfs2_quota));
+	err = gfs2_internal_read(ip, NULL, (char *)&q, &loc, sizeof(q));
+	if (err < 0)
+		return err;
+
+	value = be64_to_cpu(q.qu_value) + change;
+	q.qu_value = cpu_to_be64(value);
+
+	/* Write the quota into the quota file on disk */
+	err = -EIO;
+	ptr = &q;
+	nbytes = sizeof(struct gfs2_quota);
+get_a_page:
 	page = grab_cache_page(mapping, index);
 	if (!page)
 		return -ENOMEM;
@@ -685,6 +697,11 @@ static int gfs2_adjust_quota(struct gfs2_inode *ip, loff_t loc,
 		gfs2_block_map(inode, iblock, bh, 1);
 		if (!buffer_mapped(bh))
 			goto unlock;
+		/* If it's a newly allocated disk block for quota, zero it */
+		if (buffer_new(bh)) {
+			memset(bh->b_data, 0, bh->b_size);
+			set_buffer_uptodate(bh);
+		}
 	}
 
 	if (PageUptodate(page))
@@ -700,18 +717,31 @@ static int gfs2_adjust_quota(struct gfs2_inode *ip, loff_t loc,
 	gfs2_trans_add_bh(ip->i_gl, bh, 0);
 
 	kaddr = kmap_atomic(page, KM_USER0);
-	ptr = kaddr + offset;
-	gfs2_quota_in(&qp, ptr);
-	qp.qu_value += change;
-	value = qp.qu_value;
-	gfs2_quota_out(&qp, ptr);
+	if (offset + sizeof(struct gfs2_quota) > PAGE_CACHE_SIZE)
+		nbytes = PAGE_CACHE_SIZE - offset;
+	memcpy(kaddr + offset, ptr, nbytes);
 	flush_dcache_page(page);
 	kunmap_atomic(kaddr, KM_USER0);
-	err = 0;
+	unlock_page(page);
+	page_cache_release(page);
+
+	/* If quota straddles page boundary, we need to update the rest of the
+	 * quota at the beginning of the next page */
+	if (offset != 0) { /* first page, offset is closer to PAGE_CACHE_SIZE */
+		ptr = ptr + nbytes;
+		nbytes = sizeof(struct gfs2_quota) - nbytes;
+		offset = 0;
+		index++;
+		goto get_a_page;
+	}
+
 	qd->qd_qb.qb_magic = cpu_to_be32(GFS2_MAGIC);
 	qd->qd_qb.qb_value = cpu_to_be64(value);
 	((struct gfs2_quota_lvb*)(qd->qd_gl->gl_lvb))->qb_magic = cpu_to_be32(GFS2_MAGIC);
 	((struct gfs2_quota_lvb*)(qd->qd_gl->gl_lvb))->qb_value = cpu_to_be64(value);
+
+	return 0;
+
 unlock:
 	unlock_page(page);
 	page_cache_release(page);
