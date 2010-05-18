@@ -1362,6 +1362,10 @@ static void i915_get_mem_freq(struct drm_device *dev)
 		dev_priv->mem_freq = 800;
 		break;
 	}
+
+	/* detect pineview DDR3 setting */
+	tmp = I915_READ(CSHRDDR3CTL);
+	dev_priv->is_ddr3 = (tmp & CSHRDDR3CTL_DDR3) ? 1 : 0;
 }
 
 /**
