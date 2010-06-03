@@ -156,7 +156,7 @@ static u32 opcode_table[256] = {
 	ByteOp | DstMem | SrcReg | ModRM | Mov, DstMem | SrcReg | ModRM | Mov,
 	ByteOp | DstReg | SrcMem | ModRM | Mov, DstReg | SrcMem | ModRM | Mov,
 	DstMem | SrcReg | ModRM | Mov, ModRM | DstReg,
-	0, Group | Group1A,
+	DstReg | SrcMem | ModRM | Mov, Group | Group1A,
 	/* 0x90 - 0x97 */
 	DstReg, DstReg, DstReg, DstReg,	DstReg, DstReg, DstReg, DstReg,
 	/* 0x98 - 0x9F */
@@ -200,7 +200,7 @@ static u32 opcode_table[256] = {
 	ByteOp | SrcImmUByte, SrcImmUByte,
 	/* 0xE8 - 0xEF */
 	SrcImm | Stack, SrcImm | ImplicitOps,
-	0, SrcImmByte | ImplicitOps,
+	SrcImmU | Src2Imm16, SrcImmByte | ImplicitOps,
 	SrcNone | ByteOp | ImplicitOps, SrcNone | ImplicitOps,
 	SrcNone | ByteOp | ImplicitOps, SrcNone | ImplicitOps,
 	/* 0xF0 - 0xF7 */
