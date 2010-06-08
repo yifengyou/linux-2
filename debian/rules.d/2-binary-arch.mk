@@ -78,6 +78,17 @@ endif
 		INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$(pkgdir)/ \
 		INSTALL_FW_PATH=$(pkgdir)/lib/firmware/$(abi_release)-$*
 
+	#
+	# Remove all modules not in the inclusion list.
+	#
+	if [ -f $(DEBIAN)/control.d/$(target_flavour).inclusion-list ] ; then \
+		$(DROOT)/scripts/module-inclusion $(pkgdir)/lib/modules/$(abi_release)-$*/kernel \
+			$(DEBIAN)/control.d/$(target_flavour).inclusion-list 2>&1 | \
+				tee $(target_flavour).inclusion-list.log; \
+		/sbin/depmod -b $(pkgdir) -ea -F $(pkgdir)/boot/System.map-$(abi_release)-$* \
+			$(abi_release)-$* 2>&1 |tee $(target_flavour).depmod.log; \
+	fi
+
 ifeq ($(no_dumpfile),)
 	makedumpfile -g $(pkgdir)/boot/vmcoreinfo-$(abi_release)-$* \
 		-x $(builddir)/build-$*/vmlinux
@@ -196,7 +207,7 @@ endif
 		$(pkgdir)/lib/modules/$(abi_release)-$*/_
 	if [ -f $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin ] ; then \
 	    mv $(pkgdir)/lib/modules/$(abi_release)-$*/modules.builtin \
-		$(pkgdir)/lib/modules/$(abi_release)-$*/_modules.builtin; \
+		$(pkgdir)/lib/modules/$(abi_release)-$*/_; \
 	fi
 	rm -f $(pkgdir)/lib/modules/$(abi_release)-$*/modules.*
 	mv $(pkgdir)/lib/modules/$(abi_release)-$*/_/* \

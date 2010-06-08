@@ -90,7 +90,7 @@ open(NEW, "< $abidir/$flavour") or
 	die "Could not open $abidir/$flavour";
 while (<NEW>) {
 	chomp;
-	m/^(EXPORT_.+)\s(.+)\s(0x[0-9a-f]+)\s(.+)$/;
+	m/^(\S+)\s(.+)\s(0x[0-9a-f]+)\s(.+)$/;
 	$symbols{$4}{'type'} = $1;
 	$symbols{$4}{'loc'} = $2;
 	$symbols{$4}{'hash'} = $3;
@@ -107,7 +107,7 @@ open(OLD, "< $prev_abidir/$flavour") or
 	die "Could not open $prev_abidir/$flavour";
 while (<OLD>) {
 	chomp;
-	m/^(EXPORT_.+)\s(.+)\s(0x[0-9a-f]+)\s(.+)$/;
+	m/^(\S+)\s(.+)\s(0x[0-9a-f]+)\s(.+)$/;
 	$symbols{$4}{'old_type'} = $1;
 	$symbols{$4}{'old_loc'} = $2;
 	$symbols{$4}{'old_hash'} = $3;

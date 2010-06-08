@@ -4,6 +4,7 @@
 src_pkg_name=$(shell sed -n '1s/^\(.*\) (.*).*$$/\1/p' $(DEBIAN)/changelog)
 
 # Get some version info
+series := lucid
 release := $(shell sed -n '1s/^$(src_pkg_name).*(\(.*\)-.*).*$$/\1/p' $(DEBIAN)/changelog)
 revisions := $(shell sed -n 's/^$(src_pkg_name)\ .*($(release)-\(.*\)).*$$/\1/p' $(DEBIAN)/changelog | tac)
 revision ?= $(word $(words $(revisions)),$(revisions))
@@ -30,7 +31,7 @@ AUTOBUILD=
 #      LOCAL_ENV_CC="ccache distcc"
 #      LOCAL_ENV_DISTCC_HOSTS="localhost 10.0.2.5 10.0.2.221"
 #
--include $(CURDIR)/../.lucid-env
+-include $(CURDIR)/../.$(series)-env
 
 ifneq ($(AUTOBUILD),)
 skipabi		= true
@@ -53,10 +54,19 @@ endif
 extraversion=$(shell awk '/EXTRAVERSION =/ { print $$3 }' <Makefile)
 
 #
+# full_build -- are we doing a full buildd style build
+#
+ifeq ($(wildcard /CurrentlyBuilding),)
+full_build?=false
+else
+full_build?=true
+endif
+
+#
 # The debug packages are ginormous, so you probably want to skip
 # building them (as a developer).
 #
-ifeq ($(wildcard /CurrentlyBuilding),)
+ifeq ($(full_build),false)
 skipdbg=true
 endif
 
@@ -65,7 +75,7 @@ prev_abinum	:= $(shell echo $(prev_revision) | sed -e 's/\..*//')$(abi_suffix)
 abi_release	:= $(release)-$(abinum)
 
 uploadnum	:= $(shell echo $(revision) | sed -e 's/.*\.//')
-ifneq ($(wildcard /CurrentlyBuilding),)
+ifneq ($(full_build),false)
   uploadnum	:= $(uploadnum)-Ubuntu
 endif
 
@@ -79,7 +89,7 @@ abidir		:= $(CURDIR)/$(DEBIAN)/abi/$(release)-$(revision)/$(arch)
 prev_abidir	:= $(CURDIR)/$(DEBIAN)/abi/$(release)-$(prev_revision)/$(arch)
 commonconfdir	:= $(CURDIR)/$(DEBIAN)/config
 archconfdir	:= $(CURDIR)/$(DEBIAN)/config/$(arch)
-sharedconfdir	:= $(CURDIR)/debian/config
+sharedconfdir	:= $(CURDIR)/debian.master/config
 builddir	:= $(CURDIR)/debian/build
 stampdir	:= $(CURDIR)/debian/stamps
 
@@ -98,7 +108,7 @@ hdrs_pkg_name=linux-headers-$(abi_release)
 # for developer testing (its kind of slow), so only do it if on a buildd.
 do_doc_package=true
 do_doc_package_content=true
-ifeq ($(wildcard /CurrentlyBuilding),)
+ifeq ($(full_build),false)
 do_doc_package_content=false
 endif
 doc_pkg_name=$(src_pkg_name)-doc
@@ -109,7 +119,7 @@ doc_pkg_name=$(src_pkg_name)-doc
 #
 do_source_package=true
 do_source_package_content=true
-ifeq ($(wildcard /CurrentlyBuilding),)
+ifeq ($(full_build),false)
 do_source_package_content=false
 endif
 
@@ -165,7 +175,8 @@ conc_level		= -j$(CONCURRENCY_LEVEL)
 kmake = make ARCH=$(build_arch) \
 	EXTRAVERSION=-$(abinum)-$(target_flavour) \
 	CONFIG_DEBUG_SECTION_MISMATCH=y SUBLEVEL=$(SUBLEVEL) \
-	KBUILD_BUILD_VERSION="$(uploadnum)"
+	KBUILD_BUILD_VERSION="$(uploadnum)" \
+	LOCALVERSION=
 ifneq ($(LOCAL_ENV_CC),)
 kmake += CC=$(LOCAL_ENV_CC) DISTCC_HOSTS=$(LOCAL_ENV_DISTCC_HOSTS)
 endif

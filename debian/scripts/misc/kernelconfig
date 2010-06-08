@@ -22,7 +22,7 @@ case "$mode" in
 esac
 kerneldir="`pwd`"
 confdir="$kerneldir/${DEBIAN}/config"
-sharedconfdir="$kerneldir/debian/config"
+sharedconfdir="$kerneldir/debian.master/config"
 variant="$2"
 
 . $DEBIAN/etc/kernelconfig
@@ -51,9 +51,6 @@ for arch in $archs; do
 		*)	kernarch="$arch"	;;
 	esac
 
-	echo ""
-	echo "***************************************"
-	echo "* Processing $arch ($kernarch) ... "
 	archconfdir=$confdir/$arch
 	flavourconfigs=$(cd $archconfdir && ls config.flavour.*)
 
@@ -96,9 +93,21 @@ for arch in $archs; do
 				make O=`pwd`/build ARCH=$kernarch oldconfig ;;
 			    editconfig)
 				# Interactively edit config parameters
-				echo " * Run menuconfig on $arch/$config... Press a key."
-				read
-				make O=`pwd`/build ARCH=$kernarch menuconfig ;;
+				while : ; do
+					echo -n "Do you want to edit config: $arch/$config? [Y/n] "
+					read choice
+					
+					case "$choice" in
+					y* | Y* | "" )
+						make O=`pwd`/build ARCH=$kernarch menuconfig
+						break ;;
+					n* | N* )
+						break ;;
+					*)
+						echo "Entry not valid"
+					esac
+				done
+				;;
 			    *)  # Bad!
 				exit 1 ;;
 			esac

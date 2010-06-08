@@ -1,7 +1,16 @@
 #!/bin/bash
-version=`uname -r`
-flavour=${version#*-}
-flavour=${flavour#*-}
-version=${version%-$flavour}
+full_version=`uname -r`
 
-exec "perf_$version" "$@"
+# Removing flavour from version i.e. generic or server.
+flavour_abi=${full_version#*-}
+flavour=${flavour_abi#*-}
+version=${full_version%-$flavour}
+perf="perf_$version"
+
+if ! which "$perf" > /dev/null; then
+    echo "$perf not found" >&2
+    echo "You may need to install linux-tools-$version" >&2
+    exit 2
+fi
+
+exec "$perf" "$@"

@@ -19,6 +19,9 @@ do-binary-udebs:
 	  /sbin/depmod -b debian/d-i-${arch} $$i; \
 	done
 
+	# kernel-wedge will error if no modules unless this is touched
+	touch $(CURDIR)/debian/build/no-modules
+
 	touch ignore-dups
 	export SOURCEDIR=$(CURDIR)/debian/d-i-${arch} && \
 	  cd $(builddir) && \
