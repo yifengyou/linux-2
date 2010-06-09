@@ -29,6 +29,7 @@
 #define WLAN_SWITCH_MASK 0
 #define BT_SWITCH_MASK 1
 #define WWAN_SWITCH_MASK 2
+#define HW_SWITCH_SUPPORT 3
 #define HW_SWITCH_MASK 16
 
 /* This structure will be modified by the firmware when we enter
@@ -240,7 +241,8 @@ static int dell_rfkill_set(void *data, bool blocked)
 	int disable = blocked ? 1 : 0;
 	unsigned long radio = (unsigned long)data;
 
-	if (!(hw_switch_status & BIT(radio-1)) || !(hw_switch_status & BIT(HW_SWITCH_MASK))) {
+	if (!(hw_switch_status & BIT(radio-1)) || !(hw_switch_status & BIT(HW_SWITCH_MASK)) || \
+			!(hw_switch_status & BIT(HW_SWITCH_SUPPORT))) {
 		memset(&buffer, 0, sizeof(struct calling_interface_buffer));
 		buffer.input[0] = (1 | (radio<<8) | (disable << 16));
 		dell_send_request(&buffer, 17, 11);
@@ -258,6 +260,7 @@ static void dell_rfkill_query(struct rfkill *rfkill, void *data)
 	dell_send_request(&buffer, 17, 11);
 	status = buffer.output[1];
 
+	hw_switch_status |= (status & BIT(0)) << BIT(HW_SWITCH_SUPPORT);
 	hw_switch_status |= (status & BIT(HW_SWITCH_MASK)) ^ BIT(HW_SWITCH_MASK);
 
 	/* HW switch control not supported
