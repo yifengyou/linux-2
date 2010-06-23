@@ -1606,9 +1606,7 @@ xfs_qm_dqusage_adjust(
 	xfs_ino_t	ino,		/* inode number to get data for */
 	void		__user *buffer,	/* not used */
 	int		ubsize,		/* not used */
-	void		*private_data,	/* not used */
 	int		*ubused,	/* not used */
-	void		*dip,		/* on-disk inode pointer (not used) */
 	int		*res)		/* result code value */
 {
 	xfs_inode_t	*ip;
@@ -1765,12 +1763,13 @@ xfs_qm_quotacheck(
 		 * Iterate thru all the inodes in the file system,
 		 * adjusting the corresponding dquot counters in core.
 		 */
-		if ((error = xfs_bulkstat(mp, &lastino, &count,
-				     xfs_qm_dqusage_adjust, NULL,
-				     structsz, NULL, BULKSTAT_FG_IGET, &done)))
+		error = xfs_bulkstat(mp, &lastino, &count,
+				     xfs_qm_dqusage_adjust,
+				     structsz, NULL, &done);
+		if (error)
 			break;
 
-	} while (! done);
+	} while (!done);
 
 	/*
 	 * We've made all the changes that we need to make incore.
