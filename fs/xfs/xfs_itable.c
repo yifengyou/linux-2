@@ -53,7 +53,6 @@ STATIC int
 xfs_bulkstat_one_iget(
 	xfs_mount_t	*mp,		/* mount point for filesystem */
 	xfs_ino_t	ino,		/* inode number to get data for */
-	xfs_daddr_t	bno,		/* starting bno of inode cluster */
 	xfs_bstat_t	*buf,		/* return buffer */
 	int		*stat)		/* BULKSTAT_RV_... */
 {
@@ -63,7 +62,7 @@ xfs_bulkstat_one_iget(
 	int		error;
 
 	error = xfs_iget(mp, NULL, ino,
-			 XFS_IGET_UNTRUSTED, XFS_ILOCK_SHARED, &ip, bno);
+			 XFS_IGET_UNTRUSTED, XFS_ILOCK_SHARED, &ip);
 	if (error) {
 		*stat = BULKSTAT_RV_NOTHING;
 		return error;
@@ -226,7 +225,6 @@ xfs_bulkstat_one_int(
 	void		__user *buffer,	/* buffer to place output in */
 	int		ubsize,		/* size of buffer */
 	bulkstat_one_fmt_pf formatter,	/* formatter, copy to user */
-	xfs_daddr_t	bno,		/* starting bno of inode cluster */
 	int		*ubused,	/* bytes used by me */
 	void		*dibuff,	/* on-disk inode buffer */
 	int		*stat)		/* BULKSTAT_RV_... */
@@ -247,7 +245,7 @@ xfs_bulkstat_one_int(
 		/* We're not being passed a pointer to a dinode.  This happens
 		 * if BULKSTAT_FG_IGET is selected.  Do the iget.
 		 */
-		error = xfs_bulkstat_one_iget(mp, ino, bno, buf, stat);
+		error = xfs_bulkstat_one_iget(mp, ino, buf, stat);
 		if (error)
 			goto out_free;
 	} else {
@@ -272,13 +270,12 @@ xfs_bulkstat_one(
 	void		__user *buffer,	/* buffer to place output in */
 	int		ubsize,		/* size of buffer */
 	void		*private_data,	/* my private data */
-	xfs_daddr_t	bno,		/* starting bno of inode cluster */
 	int		*ubused,	/* bytes used by me */
 	void		*dibuff,	/* on-disk inode buffer */
 	int		*stat)		/* BULKSTAT_RV_... */
 {
 	return xfs_bulkstat_one_int(mp, ino, buffer, ubsize,
-				    xfs_bulkstat_one_fmt, bno,
+				    xfs_bulkstat_one_fmt,
 				    ubused, dibuff, stat);
 }
 
@@ -684,7 +681,7 @@ xfs_bulkstat(
 				ubused = statstruct_size;
 				error = formatter(mp, ino, ubufp,
 						ubleft, private_data,
-						bno, &ubused, dip, &fmterror);
+						&ubused, dip, &fmterror);
 				if (fmterror == BULKSTAT_RV_NOTHING) {
 					if (error && error != ENOENT &&
 						error != EINVAL) {
@@ -777,7 +774,7 @@ xfs_bulkstat_single(
 
 	ino = (xfs_ino_t)*lastinop;
 	error = xfs_bulkstat_one(mp, ino, buffer, sizeof(xfs_bstat_t),
-				 NULL, 0, NULL, NULL, &res);
+				 NULL, NULL, NULL, &res);
 	if (error) {
 		/*
 		 * Special case way failed, do it the "long" way
