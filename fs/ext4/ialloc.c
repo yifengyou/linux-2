@@ -497,7 +497,7 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent,
 
 	if (S_ISDIR(mode) &&
 	    ((parent == sb->s_root->d_inode) ||
-	     (ext4_test_inode_flag(parent, EXT4_INODE_TOPDIR)))) {
+	     (EXT4_I(parent)->i_flags & EXT4_TOPDIR_FL))) {
 		int best_ndir = inodes_per_group;
 		int ret = -1;
 
@@ -1044,7 +1044,7 @@ got:
 	if (EXT4_HAS_INCOMPAT_FEATURE(sb, EXT4_FEATURE_INCOMPAT_EXTENTS)) {
 		/* set extent flag only for directory, file and normal symlink*/
 		if (S_ISDIR(mode) || S_ISREG(mode) || S_ISLNK(mode)) {
-			ext4_set_inode_flag(inode, EXT4_INODE_EXTENTS);
+			EXT4_I(inode)->i_flags |= EXT4_EXTENTS_FL;
 			ext4_ext_tree_init(handle, inode);
 		}
 	}
