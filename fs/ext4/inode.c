@@ -3010,7 +3010,8 @@ retry:
 out_writepages:
 	if (!no_nrwrite_index_update)
 		wbc->no_nrwrite_index_update = 0;
-	wbc->nr_to_write -= nr_to_writebump;
+	if (wbc->nr_to_write > nr_to_writebump)
+		wbc->nr_to_write -= nr_to_writebump;
 	wbc->range_start = range_start;
 	trace_ext4_da_writepages_result(inode, wbc, ret, pages_written);
 	return ret;
