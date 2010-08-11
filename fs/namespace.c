@@ -33,7 +33,6 @@
 #include <asm/unistd.h>
 #include "pnode.h"
 #include "internal.h"
-#include <linux/fs.h>
 
 #define HASH_SHIFT ilog2(PAGE_SIZE / sizeof(struct list_head))
 #define HASH_SIZE (1UL << HASH_SHIFT)
@@ -1141,12 +1140,6 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
 	retval = -EPERM;
 	if (!capable(CAP_SYS_ADMIN))
 		goto dput_and_out;
-
-	/* Temporary solution to fix long umount periods till
-	 * we find the real fix
-	 */
-	sync_filesystems(0);
-	sync_filesystems(1);
 
 	retval = do_umount(path.mnt, flags);
 dput_and_out:

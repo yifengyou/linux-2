@@ -89,7 +89,7 @@ EXPORT_SYMBOL_GPL(sync_filesystem);
  * flags again, which will cause process A to resync everything.  Fix that with
  * a local mutex.
  */
-void sync_filesystems(int wait)
+static void sync_filesystems(int wait)
 {
 	struct super_block *sb;
 	static DEFINE_MUTEX(mutex);
