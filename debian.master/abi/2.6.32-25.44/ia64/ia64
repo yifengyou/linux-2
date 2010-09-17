@@ -8978,6 +8978,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbf4ebb1d	unregister_jprobe
 EXPORT_SYMBOL_GPL vmlinux 0xbf7462ac	usb_get_urb
 EXPORT_SYMBOL_GPL vmlinux 0xbf74eb20	probe_kernel_write
 EXPORT_SYMBOL_GPL vmlinux 0xbf8efa94	ring_buffer_alloc_read_page
+EXPORT_SYMBOL_GPL vmlinux 0xbffde8ec	compat_alloc_user_space
 EXPORT_SYMBOL_GPL vmlinux 0xc009fa78	ahash_register_instance
 EXPORT_SYMBOL_GPL vmlinux 0xc0454a65	tcp_done
 EXPORT_SYMBOL_GPL vmlinux 0xc045e6b3	relay_subbufs_consumed

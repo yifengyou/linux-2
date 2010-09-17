@@ -9283,6 +9283,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbf76168b	regulator_get_current_limit
 EXPORT_SYMBOL_GPL vmlinux 0xbf812953	vfs_lock_file
 EXPORT_SYMBOL_GPL vmlinux 0xbfac9c47	__ip_route_output_key
 EXPORT_SYMBOL_GPL vmlinux 0xbfc1d73b	ide_init_sg_cmd
+EXPORT_SYMBOL_GPL vmlinux 0xbffde8ec	compat_alloc_user_space
 EXPORT_SYMBOL_GPL vmlinux 0xc0389a98	ide_pad_transfer
 EXPORT_SYMBOL_GPL vmlinux 0xc07d3e74	net_assign_generic
 EXPORT_SYMBOL_GPL vmlinux 0xc099c722	trace_define_common_fields

@@ -8218,6 +8218,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbeea7a2b	srcu_notifier_chain_unregister
 EXPORT_SYMBOL_GPL vmlinux 0xbf036ef2	__inet_hash_nolisten
 EXPORT_SYMBOL_GPL vmlinux 0xbf176d8f	raw_seq_stop
 EXPORT_SYMBOL_GPL vmlinux 0xbf74eb20	probe_kernel_write
+EXPORT_SYMBOL_GPL vmlinux 0xbffde8ec	compat_alloc_user_space
 EXPORT_SYMBOL_GPL vmlinux 0xc0307bd2	sock_prot_inuse_get
 EXPORT_SYMBOL_GPL vmlinux 0xc03aeb10	ring_buffer_resize
 EXPORT_SYMBOL_GPL vmlinux 0xc072e1b8	devm_kfree

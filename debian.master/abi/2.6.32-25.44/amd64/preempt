@@ -9924,6 +9924,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbf8a9d21	regulator_get_exclusive
 EXPORT_SYMBOL_GPL vmlinux 0xbf8e3ff2	dm_rh_mark_nosync
 EXPORT_SYMBOL_GPL vmlinux 0xbfa44053	usb_hub_clear_tt_buffer
 EXPORT_SYMBOL_GPL vmlinux 0xbfd94bb0	bind_virq_to_irqhandler
+EXPORT_SYMBOL_GPL vmlinux 0xbffde8ec	compat_alloc_user_space
 EXPORT_SYMBOL_GPL vmlinux 0xc00f413d	driver_register
 EXPORT_SYMBOL_GPL vmlinux 0xc05a5c23	ring_buffer_record_disable_cpu
 EXPORT_SYMBOL_GPL vmlinux 0xc0a96373	aead_geniv_exit

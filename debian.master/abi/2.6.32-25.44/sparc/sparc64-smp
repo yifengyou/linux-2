@@ -8258,6 +8258,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbf4410ae	regulator_get_voltage
 EXPORT_SYMBOL_GPL vmlinux 0xbf74eb20	probe_kernel_write
 EXPORT_SYMBOL_GPL vmlinux 0xbfad4578	unregister_pernet_gen_device
 EXPORT_SYMBOL_GPL vmlinux 0xbff97ca1	br_fdb_test_addr_hook
+EXPORT_SYMBOL_GPL vmlinux 0xbffde8ec	compat_alloc_user_space
 EXPORT_SYMBOL_GPL vmlinux 0xc0391fde	vfs_lock_file
 EXPORT_SYMBOL_GPL vmlinux 0xc11f6037	inet_csk_search_req
 EXPORT_SYMBOL_GPL vmlinux 0xc126e890	klist_del
