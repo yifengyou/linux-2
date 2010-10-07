@@ -13565,6 +13565,25 @@ static struct alc_config_preset alc269_presets[] = {
 	},
 };
 
+enum {
+	ALC269_FIXUP_SONY_VAIO,
+};
+
+static const struct alc_fixup alc269_fixups[] = {
+	[ALC269_FIXUP_SONY_VAIO] = {
+		.verbs = (const struct hda_verb[]) {
+			{0x19, AC_VERB_SET_PIN_WIDGET_CONTROL, PIN_VREFGRD},
+			{}
+		}
+	},
+};
+
+static struct snd_pci_quirk alc269_fixup_tbl[] = {
+	SND_PCI_QUIRK_VENDOR(0x104d, "Sony VAIO", ALC269_FIXUP_SONY_VAIO),
+	{}
+};
+
+
 static int patch_alc269(struct hda_codec *codec)
 {
 	struct alc_spec *spec;
@@ -13631,6 +13650,9 @@ static int patch_alc269(struct hda_codec *codec)
 	if (!spec->cap_mixer)
 		set_capture_mixer(codec);
 	set_beep_amp(spec, 0x0b, 0x04, HDA_INPUT);
+
+	if (board_config == ALC269_AUTO)
+		alc_pick_fixup(codec, alc269_fixup_tbl, alc269_fixups);
 
 	spec->vmaster_nid = 0x02;
 
