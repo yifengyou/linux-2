@@ -11,12 +11,12 @@ linux (2.6.32-26.46) lucid-proposed; urgency=low
   [ Brad Figg ]
 
   * SAUCE: ALSA: HDA: Enable internal mic on Dell E6410 and Dell E6510
-    - LP: #605047, #628961
+    - See: #605047, #628961
 
   [ Tim Gardner ]
 
   * [Config] Added be2net, be2scsi to udebs
-    - LP: #628776
+    - See: #628776
 
   [ Upstream Kernel Changes ]
 
@@ -499,10 +499,10 @@ linux (2.6.32-26.46) lucid-proposed; urgency=low
     - LP: #655456
   * (ore-stable) ALSA: hda - Apply ALC269 VAIO fix-up to all Sony laptops
     with ALC269
-    - LP: #546769, #598938, #637291, #642892, #648871, #655386
+    - See: #546769, #598938, #637291, #642892, #648871, #655386
   * (pre-stable) ALSA: HDA: Correctly apply position_fix quirks for ATI and
     VIA controllers
-    - LP: #465942, #580749, #587546
+    - See: #465942, #580749, #587546
   * (pre-stable) ACPI: enable repeated PCIEXP wakeup by clearing
     PCIEXP_WAKE_STS on resume
     - LP: #613381
@@ -908,11 +908,11 @@ linux (2.6.32-25.44) lucid-proposed; urgency=low
     path
     - LP: #607824
   * ALSA: hda: Use LPIB for an ASUS device
-    - LP: #465942, #607824
+    - See: #465942, #607824
   * ALSA: hda: Use mb31 quirk for an iMac model
     - LP: #542550, #607824
   * ALSA: hda: Use LPIB for another mainboard
-    - LP: #580749, #607824
+    - See: #580749, #607824
   * ALSA: hda: Use LPIB for ASUS M2V
     - LP: #587546, #607824
   * Staging: comedi - correct parameter gainlkup for DAQCard-6024E in
