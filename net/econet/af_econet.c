@@ -354,6 +354,10 @@ static int econet_sendmsg(struct kiocb *iocb, struct socket *sock,
 		eb = (struct ec_cb *)&skb->cb;
 
 		/* BUG: saddr may be NULL */
+		if (!saddr) {
+			err = -EINVAL;
+			goto out_free;
+		}
 		eb->cookie = saddr->cookie;
 		eb->sec = *saddr;
 		eb->sent = ec_tx_done;
