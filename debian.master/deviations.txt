@@ -1,0 +1,36 @@
+DRM SUBSYSTEM
+L:	kernel-team@lists.ubuntu.com
+T:	git://git.kernel.org/pub/scm/linux/kernel/git/smb/linux-2.6.32.y-drm33.z.git
+F:	drivers/gpu/drm/*
+F:	include/drm/*
+
+	Graphics bugs were claimed to be not fixable in 2.6.32. All upstream
+	had moved to 2.6.33 and abandoned 2.6.32.
+	The combined 2.6.32.y/DRM33.z tree is maintained as an upstream source
+	for Ubuntu and Debian.
+
+SFC DRIVER
+L:	kernel-team@lists.ubuntu.com
+T:	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-2.6.33.y.git
+F:	drivers/net/sfc/*
+
+	Was requested in order to support newer servers and driver had changed
+	beyond a point to SRU it later.
+
+THINKPAD-ACPI DRIVER
+L:	kernel-team@lists.ubuntu.com
+T:	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-2.6.34.y.git
+F:	drivers/platform/x86/thinkpad_acpi.c
+
+	Only the selected driver supported the alsa representation of the
+	hardware mixer which would be a requisite to handle volume events
+	correctly. 
+
+HID-NTRIG DRIVER
+L:	kernel-team@lists.ubuntu.com
+T:	git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-2.6.34.y.git
+F:	drivers/hid/hid-ntrig.c
+
+	In order to be a development ground for multi-touch, this driver was
+	needed.
+
