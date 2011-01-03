@@ -20,15 +20,15 @@
 #include <linux/sysctl.h>
 #include <linux/delayacct.h>
 
-int delayacct_on __read_mostly = 1;	/* Delay accounting turned on/off */
+int delayacct_on __read_mostly = 0;	/* Delay accounting turned on/off */
 struct kmem_cache *delayacct_cache;
 
-static int __init delayacct_setup_disable(char *str)
+static int __init delayacct_setup_enable(char *str)
 {
-	delayacct_on = 0;
+	delayacct_on = 1;
 	return 1;
 }
-__setup("nodelayacct", delayacct_setup_disable);
+__setup("delayacct", delayacct_setup_enable);
 
 void delayacct_init(void)
 {
