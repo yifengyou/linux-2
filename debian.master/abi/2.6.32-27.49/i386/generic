@@ -9073,7 +9073,6 @@ EXPORT_SYMBOL_GPL vmlinux 0x32d5e7fc	xfrm_aalg_get_byid
 EXPORT_SYMBOL_GPL vmlinux 0x32f17454	ring_buffer_event_data
 EXPORT_SYMBOL_GPL vmlinux 0x331c67c3	xfrm_output_resume
 EXPORT_SYMBOL_GPL vmlinux 0x333da16b	pci_find_next_capability
-EXPORT_SYMBOL_GPL vmlinux 0x33607d36	smp_ops
 EXPORT_SYMBOL_GPL vmlinux 0x336b7806	crypto_unregister_alg
 EXPORT_SYMBOL_GPL vmlinux 0x3384b886	debugfs_create_bool
 EXPORT_SYMBOL_GPL vmlinux 0x33b84061	pm_runtime_suspend
@@ -9911,6 +9910,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xb0eedea9	usb_wait_anchor_empty_timeout
 EXPORT_SYMBOL_GPL vmlinux 0xb10d55bc	cn_netlink_send
 EXPORT_SYMBOL_GPL vmlinux 0xb154db9f	hvc_alloc
 EXPORT_SYMBOL_GPL vmlinux 0xb18429eb	suspend_device_irqs
+EXPORT_SYMBOL_GPL vmlinux 0xb18506b9	smp_ops
 EXPORT_SYMBOL_GPL vmlinux 0xb187bed1	tcp_twsk_destructor
 EXPORT_SYMBOL_GPL vmlinux 0xb1acbcce	rcu_barrier_sched
 EXPORT_SYMBOL_GPL vmlinux 0xb2002701	inotify_find_update_watch

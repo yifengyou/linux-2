@@ -9911,6 +9911,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xbe12e32c	debugfs_create_x8
 EXPORT_SYMBOL_GPL vmlinux 0xbe182382	inet6_destroy_sock
 EXPORT_SYMBOL_GPL vmlinux 0xbe1887e4	ata_unpack_xfermask
 EXPORT_SYMBOL_GPL vmlinux 0xbe24b7a3	ata_sff_data_xfer_noirq
+EXPORT_SYMBOL_GPL vmlinux 0xbe608951	smp_ops
 EXPORT_SYMBOL_GPL vmlinux 0xbeb4cb93	bus_for_each_drv
 EXPORT_SYMBOL_GPL vmlinux 0xbeda71b4	crypto_alloc_instance
 EXPORT_SYMBOL_GPL vmlinux 0xbef8a262	pcie_port_bus_type
@@ -9949,7 +9950,6 @@ EXPORT_SYMBOL_GPL vmlinux 0xc399468f	scsi_nl_remove_driver
 EXPORT_SYMBOL_GPL vmlinux 0xc3c46d03	ata_sff_qc_prep
 EXPORT_SYMBOL_GPL vmlinux 0xc3d1d3e7	ata_do_eh
 EXPORT_SYMBOL_GPL vmlinux 0xc3d2fd9c	aead_geniv_alloc
-EXPORT_SYMBOL_GPL vmlinux 0xc3e5f29b	smp_ops
 EXPORT_SYMBOL_GPL vmlinux 0xc4034caa	enable_kprobe
 EXPORT_SYMBOL_GPL vmlinux 0xc428068d	sata_deb_timing_long
 EXPORT_SYMBOL_GPL vmlinux 0xc42f2f94	xenbus_read_driver_state
