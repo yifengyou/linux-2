@@ -1,3 +1,11 @@
+linux (2.6.32-28.51) lucid-proposed; urgency=low
+
+  [ Steve Conklin ]
+
+  - LP: #697952
+
+ -- Steve Conklin <sconklin@canonical.com>  Wed, 05 Jan 2011 21:01:00 -0600
+
 linux (2.6.32-28.50) lucid-proposed; urgency=low
 
   [ Tim Gardner ]
