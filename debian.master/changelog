@@ -1,8 +1,16 @@
+linux (2.6.32-28.53) lucid-proposed; urgency=low
+
+  * Another version bump because of upload failure
+  * Tracking Bug
+    - LP: #699885
+
+ -- Steve Conklin <sconklin@canonical.com>  Thu, 06 Jan 2011 21:08:00 -0600
+
 linux (2.6.32-28.52) lucid-proposed; urgency=low
 
   [ Steve Conklin ]
 
-  - LP: #697952
+  * (removed old tracking bug link)
 
  -- Steve Conklin <sconklin@canonical.com>  Thu, 06 Jan 2011 15:37:00 -0600
 
