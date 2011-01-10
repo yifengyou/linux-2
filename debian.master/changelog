@@ -1,8 +1,14 @@
+linux (2.6.32-28.55) lucid-proposed; urgency=low
+
+  * Another version bump because of abi check failure
+  * Tracking Bug
+    - LP: #699885
+
+ -- Steve Conklin <sconklin@canonical.com>  Mon, 10 Jan 2011 14:51:10 -0600
+
 linux (2.6.32-28.54) lucid-proposed; urgency=low
 
   * Another version bump because of upload failure
-  * Tracking Bug
-    - LP: #699885
 
  -- Steve Conklin <sconklin@canonical.com>  Mon, 10 Jan 2011 10:31:00 -0600
 
