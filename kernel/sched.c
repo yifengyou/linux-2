@@ -3945,7 +3945,9 @@ static inline void update_sg_lb_stats(struct sched_domain *sd,
 	}
 
 	/* Adjust by relative CPU power of the group */
-	sgs->avg_load = (sgs->group_load * SCHED_LOAD_SCALE) / group->cpu_power;
+	sgs->avg_load = (sgs->group_load * SCHED_LOAD_SCALE);
+	if (group->cpu_power)
+		sgs->avg_load /= group->cpu_power;
 
 	/*
 	 * Consider the group unbalanced when the imbalance is larger
@@ -4247,7 +4249,7 @@ find_busiest_group(struct sched_domain *sd, int this_cpu,
 	if (balance && !(*balance))
 		goto ret;
 
-	if (!sds.busiest || sds.busiest_nr_running == 0)
+	if (!sds.busiest || sds.busiest_nr_running == 0 || sds.total_pwr == 0)
 		goto out_balanced;
 
 	/*  SD_BALANCE_NEWIDLE trumps SMP nice when underutilized */
@@ -4336,7 +4338,9 @@ find_busiest_queue(struct sched_group *group, enum cpu_idle_type idle,
 		 * the load can be moved away from the cpu that is potentially
 		 * running at a lower capacity.
 		 */
-		wl = (wl * SCHED_LOAD_SCALE) / power;
+		wl = (wl * SCHED_LOAD_SCALE);
+		if (power)
+			wl /= power;
 
 		if (wl > max_load) {
 			max_load = wl;
