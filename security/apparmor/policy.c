@@ -922,6 +922,7 @@ ssize_t aa_interface_replace_profiles(void *udata, size_t size, bool add_only)
 	new_profile = aa_unpack(udata, size, &sa);
 	if (IS_ERR(new_profile)) {
 		sa.base.error = PTR_ERR(new_profile);
+		new_profile = NULL;
 		goto fail;
 	}
 
