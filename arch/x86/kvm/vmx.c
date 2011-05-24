@@ -699,7 +699,7 @@ static void __vmx_load_host_state(struct vcpu_vmx *vmx)
 	if (vmx->host_state.gs_ldt_reload_needed) {
 		kvm_load_ldt(vmx->host_state.ldt_sel);
 #ifdef CONFIG_X86_64
-		wrmsrl(MSR_KERNEL_GS_BASE, current->thread.gs);
+		load_gs_index(vmx->host_state.gs_sel);
 #else
 		loadsegment(gs, vmx->host_state.gs_sel);
 #endif
