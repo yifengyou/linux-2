@@ -55,7 +55,6 @@ struct rpc_task {
 	struct rpc_message	tk_msg;		/* RPC call info */
 	__u8			tk_garb_retry;
 	__u8			tk_cred_retry;
-	__u8			tk_rebind_retry;
 
 	/*
 	 * callback	to be executed after waking up
@@ -85,7 +84,8 @@ struct rpc_task {
 	long			tk_rtt;		/* round-trip time (jiffies) */
 
 	pid_t			tk_owner;	/* Process id for batching tasks */
-	unsigned char		tk_priority : 2;/* Task priority */
+	unsigned char		tk_priority : 2,/* Task priority */
+				tk_rebind_retry : 2;
 
 #ifdef RPC_DEBUG
 	unsigned short		tk_pid;		/* debugging aid */
