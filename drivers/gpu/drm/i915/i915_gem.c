@@ -1862,9 +1862,16 @@ i915_gem_retire_work_handler(struct work_struct *work)
 
 	mutex_lock(&dev->struct_mutex);
 	i915_gem_retire_requests(dev);
+
+	if (!list_empty(&dev_priv->mm.gpu_write_list)) {
+		i915_gem_flush(dev, 0, I915_GEM_GPU_DOMAINS);
+		i915_add_request(dev, NULL, I915_GEM_GPU_DOMAINS);
+	}
+
 	if (!dev_priv->mm.suspended &&
 	    !list_empty(&dev_priv->mm.request_list))
 		queue_delayed_work(dev_priv->wq, &dev_priv->mm.retire_work, HZ);
+
 	mutex_unlock(&dev->struct_mutex);
 }
 
