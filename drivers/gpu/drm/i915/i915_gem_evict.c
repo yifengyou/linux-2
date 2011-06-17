@@ -134,9 +134,15 @@ i915_gem_evict_something(struct drm_device *dev, int min_size, unsigned alignmen
 	}
 
 	/* Nothing found, clean up and bail out! */
-	list_for_each_entry(obj_priv, &unwind_list, evict_list) {
+	while (!list_empty(&unwind_list)) {
+		obj_priv = list_first_entry(&unwind_list,
+					    struct drm_i915_gem_object,
+					    evict_list);
+
 		ret = drm_mm_scan_remove_block(obj_priv->gtt_space);
 		BUG_ON(ret);
+
+		list_del_init(&obj_priv->evict_list);
 	}
 
 	/* We expect the caller to unpin, evict all and try again, or give up.
@@ -145,26 +151,28 @@ i915_gem_evict_something(struct drm_device *dev, int min_size, unsigned alignmen
 	return -ENOSPC;
 
 found:
+	/* drm_mm doesn't allow any other other operations while
+	 * scanning, therefore store to be evicted objects on a
+	 * temporary list. */
 	INIT_LIST_HEAD(&eviction_list);
 	list_for_each_entry_safe(obj_priv, tmp_obj_priv,
 				 &unwind_list, evict_list) {
 		if (drm_mm_scan_remove_block(obj_priv->gtt_space)) {
-			/* drm_mm doesn't allow any other other operations while
-			 * scanning, therefore store to be evicted objects on a
-			 * temporary list. */
 			list_move(&obj_priv->evict_list, &eviction_list);
+			continue;
 		}
+		list_del_init(&obj_priv->evict_list);
 	}
 
 	/* Unbinding will emit any required flushes */
-	list_for_each_entry_safe(obj_priv, tmp_obj_priv,
-				 &eviction_list, evict_list) {
-#if WATCH_LRU
-		DRM_INFO("%s: evicting %p\n", __func__, obj);
-#endif
-		ret = i915_gem_object_unbind(obj_priv->obj);
-		if (ret)
-			return ret;
+	while (!list_empty(&eviction_list)) {
+		obj_priv = list_first_entry(&eviction_list,
+					    struct drm_i915_gem_object,
+					    evict_list);
+		if (ret == 0)
+			ret = i915_gem_object_unbind(obj_priv->obj);
+
+		list_del_init(&obj_priv->evict_list);
 	}
 
 	/* The just created free hole should be on the top of the free stack
