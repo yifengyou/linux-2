@@ -34,8 +34,6 @@
 #include <linux/swap.h>
 #include <linux/pci.h>
 
-#define I915_GEM_GPU_DOMAINS	(~(I915_GEM_DOMAIN_CPU | I915_GEM_DOMAIN_GTT))
-
 static uint32_t i915_gem_get_gtt_alignment(struct drm_gem_object *obj);
 static void i915_gem_object_flush_gpu_write_domain(struct drm_gem_object *obj);
 static void i915_gem_object_flush_gtt_write_domain(struct drm_gem_object *obj);
@@ -50,9 +48,6 @@ static int i915_gem_object_wait_rendering(struct drm_gem_object *obj);
 static int i915_gem_object_bind_to_gtt(struct drm_gem_object *obj,
 					   unsigned alignment);
 static void i915_gem_clear_fence_reg(struct drm_gem_object *obj);
-static int i915_gem_evict_something(struct drm_device *dev, int min_size,
-				    unsigned alignment);
-static int i915_gem_evict_from_inactive_list(struct drm_device *dev);
 static int i915_gem_phys_pwrite(struct drm_device *dev, struct drm_gem_object *obj,
 				struct drm_i915_gem_pwrite *args,
 				struct drm_file *file_priv);
@@ -1927,7 +1922,7 @@ i915_wait_request(struct drm_device *dev, uint32_t seqno)
 	return i915_do_wait_request(dev, seqno, 1);
 }
 
-static void
+void
 i915_gem_flush(struct drm_device *dev,
 	       uint32_t invalidate_domains,
 	       uint32_t flush_domains)
@@ -2103,179 +2098,6 @@ i915_gem_object_unbind(struct drm_gem_object *obj)
 	trace_i915_gem_object_unbind(obj);
 
 	return 0;
-}
-
-static int
-i915_gem_scan_inactive_list_and_evict(struct drm_device *dev, int min_size,
-				      unsigned alignment, int *found)
-{
-	drm_i915_private_t *dev_priv = dev->dev_private;
-	struct drm_gem_object *obj;
-	struct drm_i915_gem_object *obj_priv;
-	struct drm_gem_object *best = NULL;
-	struct drm_gem_object *first = NULL;
-
-	/* Try to find the smallest clean object */
-	list_for_each_entry(obj_priv, &dev_priv->mm.inactive_list, list) {
-		struct drm_gem_object *obj = obj_priv->obj;
-		if (obj->size >= min_size) {
-			if ((!obj_priv->dirty ||
-			     i915_gem_object_is_purgeable(obj_priv)) &&
-			    (!best || obj->size < best->size)) {
-				best = obj;
-				if (best->size == min_size)
-					break;
-			}
-			if (!first)
-			    first = obj;
-		}
-	}
-
-	obj = best ? best : first;
-
-	if (!obj) {
-		*found = 0;
-		return 0;
-	}
-
-	*found = 1;
-
-#if WATCH_LRU
-	DRM_INFO("%s: evicting %p\n", __func__, obj);
-#endif
-	obj_priv = obj->driver_private;
-	BUG_ON(obj_priv->pin_count != 0);
-	BUG_ON(obj_priv->active);
-
-	/* Wait on the rendering and unbind the buffer. */
-	return i915_gem_object_unbind(obj);
-}
-
-static int
-i915_gem_evict_everything(struct drm_device *dev)
-{
-	drm_i915_private_t *dev_priv = dev->dev_private;
-	int ret;
-	uint32_t seqno;
-	bool lists_empty;
-
-	spin_lock(&dev_priv->mm.active_list_lock);
-	lists_empty = (list_empty(&dev_priv->mm.inactive_list) &&
-		       list_empty(&dev_priv->mm.flushing_list) &&
-		       list_empty(&dev_priv->mm.active_list));
-	spin_unlock(&dev_priv->mm.active_list_lock);
-
-	if (lists_empty)
-		return -ENOSPC;
-
-	/* Flush everything (on to the inactive lists) and evict */
-	i915_gem_flush(dev, I915_GEM_GPU_DOMAINS, I915_GEM_GPU_DOMAINS);
-	seqno = i915_add_request(dev, NULL, I915_GEM_GPU_DOMAINS);
-	if (seqno == 0)
-		return -ENOMEM;
-
-	ret = i915_wait_request(dev, seqno);
-	if (ret)
-		return ret;
-
-	BUG_ON(!list_empty(&dev_priv->mm.flushing_list));
-
-	ret = i915_gem_evict_from_inactive_list(dev);
-	if (ret)
-		return ret;
-
-	spin_lock(&dev_priv->mm.active_list_lock);
-	lists_empty = (list_empty(&dev_priv->mm.inactive_list) &&
-		       list_empty(&dev_priv->mm.flushing_list) &&
-		       list_empty(&dev_priv->mm.active_list));
-	spin_unlock(&dev_priv->mm.active_list_lock);
-	BUG_ON(!lists_empty);
-
-	return 0;
-}
-
-static int
-i915_gem_evict_something(struct drm_device *dev,
-			 int min_size, unsigned alignment)
-{
-	drm_i915_private_t *dev_priv = dev->dev_private;
-	int ret, found;
-
-	for (;;) {
-		i915_gem_retire_requests(dev);
-
-		/* If there's an inactive buffer available now, grab it
-		 * and be done.
-		 */
-		ret = i915_gem_scan_inactive_list_and_evict(dev, min_size,
-							    alignment,
-							    &found);
-		if (found)
-			return ret;
-
-		/* If we didn't get anything, but the ring is still processing
-		 * things, wait for the next to finish and hopefully leave us
-		 * a buffer to evict.
-		 */
-		if (!list_empty(&dev_priv->mm.request_list)) {
-			struct drm_i915_gem_request *request;
-
-			request = list_first_entry(&dev_priv->mm.request_list,
-						   struct drm_i915_gem_request,
-						   list);
-
-			ret = i915_wait_request(dev, request->seqno);
-			if (ret)
-				return ret;
-
-			continue;
-		}
-
-		/* If we didn't have anything on the request list but there
-		 * are buffers awaiting a flush, emit one and try again.
-		 * When we wait on it, those buffers waiting for that flush
-		 * will get moved to inactive.
-		 */
-		if (!list_empty(&dev_priv->mm.flushing_list)) {
-			struct drm_gem_object *obj = NULL;
-			struct drm_i915_gem_object *obj_priv;
-
-			/* Find an object that we can immediately reuse */
-			list_for_each_entry(obj_priv, &dev_priv->mm.flushing_list, list) {
-				obj = obj_priv->obj;
-				if (obj->size >= min_size)
-					break;
-
-				obj = NULL;
-			}
-
-			if (obj != NULL) {
-				uint32_t seqno;
-
-				i915_gem_flush(dev,
-					       obj->write_domain,
-					       obj->write_domain);
-				seqno = i915_add_request(dev, NULL, obj->write_domain);
-				if (seqno == 0)
-					return -ENOMEM;
-
-				ret = i915_wait_request(dev, seqno);
-				if (ret)
-					return ret;
-
-				continue;
-			}
-		}
-
-		/* If we didn't do any of the above, there's no single buffer
-		 * large enough to swap out for the new one, so just evict
-		 * everything and start again. (This should be rare.)
-		 */
-		if (!list_empty (&dev_priv->mm.inactive_list))
-			return i915_gem_evict_from_inactive_list(dev);
-		else
-			return i915_gem_evict_everything(dev);
-	}
 }
 
 int
@@ -4510,30 +4332,6 @@ void i915_gem_free_object(struct drm_gem_object *obj)
 	kfree(obj->driver_private);
 }
 
-/** Unbinds all inactive objects. */
-static int
-i915_gem_evict_from_inactive_list(struct drm_device *dev)
-{
-	drm_i915_private_t *dev_priv = dev->dev_private;
-
-	while (!list_empty(&dev_priv->mm.inactive_list)) {
-		struct drm_gem_object *obj;
-		int ret;
-
-		obj = list_first_entry(&dev_priv->mm.inactive_list,
-				       struct drm_i915_gem_object,
-				       list)->obj;
-
-		ret = i915_gem_object_unbind(obj);
-		if (ret != 0) {
-			DRM_ERROR("Error unbinding object: %d\n", ret);
-			return ret;
-		}
-	}
-
-	return 0;
-}
-
 int
 i915_gem_idle(struct drm_device *dev)
 {
@@ -4647,7 +4445,7 @@ i915_gem_idle(struct drm_device *dev)
 
 
 	/* Move all inactive buffers out of the GTT. */
-	ret = i915_gem_evict_from_inactive_list(dev);
+	ret = i915_gem_evict_inactive(dev);
 	WARN_ON(!list_empty(&dev_priv->mm.inactive_list));
 	if (ret) {
 		mutex_unlock(&dev->struct_mutex);
