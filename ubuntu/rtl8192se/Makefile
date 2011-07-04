@@ -4,7 +4,7 @@ CC = gcc
 KVER  := $(shell uname -r)
 MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
 
-ifeq ($(shell uname -r|cut -d. -f1,2), 2.6)
+ifeq (1,1)
 ###################### KERNEL 2.6 ################################
 ifeq ($(NIC_SELECT),RTL8192CE)
 sub_folder = rtl8192c
