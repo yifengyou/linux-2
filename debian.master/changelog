@@ -1,3 +1,17 @@
+linux (2.6.32-33.70) lucid-proposed; urgency=low
+
+  [Steve Conklin]
+
+  * Release Tracking Bug
+    - LP: #807175
+
+  [ Upstream Kernel Changes ]
+
+  * Revert "x86: Flush TLB if PGD entry is changed in i386 PAE mode"
+    - LP: #805209
+
+ -- Steve Conklin <sconklin@canonical.com>  Thu, 07 Jul 2011 14:08:13 -0500
+
 linux (2.6.32-33.69) lucid-proposed; urgency=low
 
   [Steve Conklin]
