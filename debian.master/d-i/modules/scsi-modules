@@ -38,6 +38,7 @@ aic7xxx_old ?
 ips ?
 fd_mcs ?
 fdomain ?
+fnic ?
 in2000 ?
 g_NCR5380 ?
 g_NCR5380_mmio ?
