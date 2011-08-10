@@ -318,9 +318,14 @@ static void scsi_device_dev_release_usercontext(struct work_struct *work)
 		kfree(evt);
 	}
 
-	blk_put_queue(sdev->request_queue);
-	/* NULL queue means the device can't be used */
-	sdev->request_queue = NULL;
+	if (sdev->request_queue) {
+		sdev->request_queue->queuedata = NULL;
+		/* user context needed to free queue */
+		scsi_free_queue(sdev->request_queue);
+		/* temporary expedient, try to catch use of queue lock
+		 * after free of sdev */
+		sdev->request_queue = NULL;
+	}
 
 	scsi_target_reap(scsi_target(sdev));
 
