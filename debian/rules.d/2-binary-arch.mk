@@ -43,7 +43,7 @@ install-%: dbgpkgdir = $(CURDIR)/debian/$(bin_pkg_name)-$*-dbgsym
 install-%: basepkg = $(hdrs_pkg_name)
 install-%: hdrdir = $(CURDIR)/debian/$(basepkg)-$*/usr/src/$(basepkg)-$*
 install-%: target_flavour = $*
-install-%: $(stampdir)/stamp-build-% checks-%
+install-%: checks-%
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(bin_pkg_name)-$*
