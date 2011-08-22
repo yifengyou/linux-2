@@ -232,7 +232,7 @@ install-arch-headers:
 	  -e 's/.*CONFIG_LOCALVERSION_AUTO.*/# CONFIG_LOCALVERSION_AUTO is not set/' \
 	  $(headers_tmp)/.config.old > $(headers_tmp)/.config
 	$(hmake) silentoldconfig
-	$(hmake) headers_install
+	$(hmake) $(conc_level) headers_install
 
 	( cd $(headers_tmp)/install/include/ && \
 		find . -name '.' -o -name '.*' -prune -o -print | \
