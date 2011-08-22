@@ -30,8 +30,7 @@ build-%: $(stampdir)/stamp-build-%
 $(stampdir)/stamp-build-%: target_flavour = $*
 $(stampdir)/stamp-build-%: $(stampdir)/stamp-prepare-%
 	@echo "Building $*..."
-	$(build_cd) $(kmake) $(build_O) $(conc_level) $(build_image)
-	$(build_cd) $(kmake) $(build_O) $(conc_level) modules
+	$(build_cd) $(kmake) $(build_O) $(conc_level) $(build_image) modules
 	@touch $@
 
 # Install the finished build
