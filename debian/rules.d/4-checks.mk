@@ -26,5 +26,3 @@ config-prepare-check-%: $(stampdir)/stamp-prepare-tree-%
 	@perl -f $(DROOT)/scripts/config-check \
 		$(builddir)/build-$*/.config "$(arch)" "$*" "$(sharedconfdir)" "$(skipconfig)"
 
-prepare-checks-%: config-prepare-check-%
-	@# Will be calling more stuff later

@@ -10,9 +10,7 @@ build_cd =
 build_O  = O=$(builddir)/build-$*
 endif
 
-prepare-%: $(stampdir)/stamp-prepare-%
-	@# Empty for make to be happy
-$(stampdir)/stamp-prepare-%: $(stampdir)/stamp-prepare-tree-% prepare-checks-%
+$(stampdir)/stamp-prepare-%: config-prepare-check-%
 	@touch $@
 $(stampdir)/stamp-prepare-tree-%: target_flavour = $*
 $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(archconfdir)/config.common.$(arch) $(archconfdir)/config.flavour.%
@@ -30,7 +28,7 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 build-%: $(stampdir)/stamp-build-%
 	@# Empty for make to be happy
 $(stampdir)/stamp-build-%: target_flavour = $*
-$(stampdir)/stamp-build-%: prepare-%
+$(stampdir)/stamp-build-%: $(stampdir)/stamp-prepare-%
 	@echo "Building $*..."
 	$(build_cd) $(kmake) $(build_O) $(conc_level) $(build_image)
 	$(build_cd) $(kmake) $(build_O) $(conc_level) modules
