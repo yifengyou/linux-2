@@ -379,9 +379,10 @@ binary-debs: binary-perarch $(stampdir)/stamp-flavours $(addprefix binary-,$(fla
 
 build-arch:  $(addprefix build-,$(flavours))
 
-binary-arch-deps = binary-debs
 ifeq ($(AUTOBUILD),)
 binary-arch-deps += binary-udebs
+else
+binary-arch-deps = binary-debs
 endif
 ifeq ($(do_libc_dev_package),true)
 binary-arch-deps += binary-arch-headers
