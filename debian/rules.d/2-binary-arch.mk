@@ -71,7 +71,7 @@ ifeq ($(no_dumpfile),)
 		-x $(builddir)/build-$*/vmlinux
 endif
 
-	$(build_cd) $(kmake) $(build_O) modules_install \
+	$(build_cd) $(kmake) $(build_O) $(conc_level) modules_install \
 		INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=$(pkgdir)/ \
 		INSTALL_FW_PATH=$(pkgdir)/lib/firmware/$(abi_release)-$*
 
@@ -156,7 +156,7 @@ endif
 		sed -e 's/.*CONFIG_DEBUG_INFO=.*/# CONFIG_DEBUG_INFO is not set/g' > \
 		$(hdrdir)/.config
 	chmod 644 $(hdrdir)/.config
-	$(kmake) O=$(hdrdir) silentoldconfig prepare scripts
+	$(kmake) O=$(hdrdir) -j1 silentoldconfig prepare scripts
 	# We'll symlink this stuff
 	rm -f $(hdrdir)/Makefile
 	rm -rf $(hdrdir)/include2
