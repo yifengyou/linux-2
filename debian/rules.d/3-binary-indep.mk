@@ -2,7 +2,8 @@ build-indep:
 
 docpkg = $(doc_pkg_name)
 docdir = $(CURDIR)/debian/$(docpkg)/usr/share/doc/$(docpkg)
-install-doc:
+install-doc: install-headers
+ifeq ($(do_doc_package),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(docpkg)
@@ -22,10 +23,12 @@ endif
 	cp -a Documentation/* $(docdir)
 	rm -rf $(docdir)/DocBook
 	find $(docdir) -name .gitignore | xargs rm -f
+endif
 
 indep_hdrpkg = $(hdrs_pkg_name)
 indep_hdrdir = $(CURDIR)/debian/$(indep_hdrpkg)/usr/src/$(indep_hdrpkg)
 install-headers:
+ifeq ($(do_flavour_header_package),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(indep_hdrpkg)
@@ -44,10 +47,12 @@ install-headers:
 	(find arch -name include -type d -print | \
 		xargs -n1 -i: find : -type f) | \
 		cpio -pd --preserve-modification-time $(indep_hdrdir)
+endif
 
 srcpkg = $(src_pkg_name)-source-$(release)
 srcdir = $(CURDIR)/debian/$(srcpkg)/usr/src/$(srcpkg)
-install-source:
+install-source: install-doc
+ifeq ($(do_source_package),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(srcpkg)
@@ -61,11 +66,13 @@ ifeq ($(do_source_package_content),true)
 		$(srcdir).tar.bz2
 	rm -rf $(srcdir)
 endif
+endif
 
 install-tools: toolspkg = $(tools_common_pkg_name)
 install-tools: toolsbin = $(CURDIR)/debian/$(toolspkg)/usr/bin
 install-tools: toolsman = $(CURDIR)/debian/$(toolspkg)/usr/share/man
-install-tools:
+install-tools: install-source
+ifeq ($(do_tools),true)
 	dh_testdir
 	dh_testroot
 	dh_clean -k -p$(toolspkg)
@@ -83,21 +90,9 @@ install-tools:
 	cd $(builddir)/tools/tools/perf && make man
 	install -m644 $(builddir)/tools/tools/perf/Documentation/*.1 \
 		$(toolsman)/man1
+endif
 
-install-indep-deps =
-ifeq ($(do_common_headers_indep),true)
-install-indep-deps += install-headers
-endif
-ifeq ($(do_doc_package),true)
-install-indep-deps += install-doc
-endif
-ifeq ($(do_source_package),true)
-install-indep-deps += install-source
-endif
-ifeq ($(do_tools),true)
-install-indep-deps += install-tools
-endif
-install-indep: $(install-indep-deps)
+install-indep: install-tools
 
 # This is just to make it easy to call manually. Normally done in
 # binary-indep target during builds.
