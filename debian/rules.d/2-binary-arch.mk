@@ -23,7 +23,7 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 		rsync -a --exclude debian --exclude debian.master --exclude $(DEBIAN) * $(builddir)/build-$*
 	cat $^ | sed -e 's/.*CONFIG_VERSION_SIGNATURE.*/CONFIG_VERSION_SIGNATURE="Ubuntu $(release)-$(revision)-$* $(release)$(extraversion)"/' > $(builddir)/build-$*/.config
 	find $(builddir)/build-$* -name "*.ko" | xargs rm -f
-	$(build_cd) $(kmake) $(build_O) silentoldconfig prepare scripts
+	$(build_cd) $(kmake) $(build_O) -j1 silentoldconfig prepare scripts
 	touch $@
 
 # Do the actual build, including image and modules
