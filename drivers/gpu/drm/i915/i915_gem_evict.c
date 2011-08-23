@@ -175,13 +175,6 @@ found:
 		list_del_init(&obj_priv->evict_list);
 	}
 
-	/* The just created free hole should be on the top of the free stack
-	 * maintained by drm_mm, so this BUG_ON actually executes in O(1).
-	 * Furthermore all accessed data has just recently been used, so it
-	 * should be really fast, too. */
-	BUG_ON(!drm_mm_search_free(&dev_priv->mm.gtt_space, min_size,
-				   alignment, 0));
-
 	return 0;
 }
 
