@@ -24,6 +24,10 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 	$(build_cd) $(kmake) $(build_O) -j1 silentoldconfig prepare scripts
 	touch $@
 
+# Used by developers as a shortcut to prepare a tree for compilation.
+prepare-%: $(stampdir)/stamp-prepare-%
+	@echo Prepared $* for $(arch)
+
 # Do the actual build, including image and modules
 $(stampdir)/stamp-build-%: target_flavour = $*
 $(stampdir)/stamp-build-%: $(stampdir)/stamp-prepare-%
