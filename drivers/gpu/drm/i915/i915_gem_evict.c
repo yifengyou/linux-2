@@ -52,6 +52,7 @@ mark_free(struct drm_i915_gem_object *obj_priv,
 	   struct list_head *unwind)
 {
 	list_add(&obj_priv->evict_list, unwind);
+	drm_gem_object_reference(obj_priv->obj);
 	return drm_mm_scan_add_block(obj_priv->gtt_space);
 }
 
@@ -143,6 +144,7 @@ i915_gem_evict_something(struct drm_device *dev, int min_size, unsigned alignmen
 		BUG_ON(ret);
 
 		list_del_init(&obj_priv->evict_list);
+		drm_gem_object_unreference(obj_priv->obj);
 	}
 
 	/* We expect the caller to unpin, evict all and try again, or give up.
@@ -162,6 +164,7 @@ found:
 			continue;
 		}
 		list_del_init(&obj_priv->evict_list);
+		drm_gem_object_unreference(obj_priv->obj);
 	}
 
 	/* Unbinding will emit any required flushes */
@@ -173,6 +176,7 @@ found:
 			ret = i915_gem_object_unbind(obj_priv->obj);
 
 		list_del_init(&obj_priv->evict_list);
+		drm_gem_object_unreference(obj_priv->obj);
 	}
 
 	return 0;
