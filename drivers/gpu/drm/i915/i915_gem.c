@@ -36,7 +36,6 @@
 
 #define I915_GEM_GPU_DOMAINS	(~(I915_GEM_DOMAIN_CPU | I915_GEM_DOMAIN_GTT))
 
-static uint32_t i915_gem_get_gtt_alignment(struct drm_gem_object *obj);
 static void i915_gem_object_flush_gpu_write_domain(struct drm_gem_object *obj);
 static void i915_gem_object_flush_gtt_write_domain(struct drm_gem_object *obj);
 static void i915_gem_object_flush_cpu_write_domain(struct drm_gem_object *obj);
@@ -50,8 +49,7 @@ static int i915_gem_object_wait_rendering(struct drm_gem_object *obj);
 static int i915_gem_object_bind_to_gtt(struct drm_gem_object *obj,
 					   unsigned alignment);
 static void i915_gem_clear_fence_reg(struct drm_gem_object *obj);
-static int i915_gem_evict_something(struct drm_device *dev, int min_size,
-				    unsigned alignment);
+static int i915_gem_evict_something(struct drm_device *dev, int min_size);
 static int i915_gem_evict_from_inactive_list(struct drm_device *dev);
 static int i915_gem_phys_pwrite(struct drm_device *dev, struct drm_gem_object *obj,
 				struct drm_i915_gem_pwrite *args,
@@ -336,8 +334,7 @@ i915_gem_object_get_pages_or_evict(struct drm_gem_object *obj)
 	if (ret == -ENOMEM) {
 		struct drm_device *dev = obj->dev;
 
-		ret = i915_gem_evict_something(dev, obj->size,
-					       i915_gem_get_gtt_alignment(obj));
+		ret = i915_gem_evict_something(dev, obj->size);
 		if (ret)
 			return ret;
 
@@ -2105,12 +2102,10 @@ i915_gem_object_unbind(struct drm_gem_object *obj)
 	return 0;
 }
 
-static int
-i915_gem_scan_inactive_list_and_evict(struct drm_device *dev, int min_size,
-				      unsigned alignment, int *found)
+static struct drm_gem_object *
+i915_gem_find_inactive_object(struct drm_device *dev, int min_size)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
-	struct drm_gem_object *obj;
 	struct drm_i915_gem_object *obj_priv;
 	struct drm_gem_object *best = NULL;
 	struct drm_gem_object *first = NULL;
@@ -2124,31 +2119,14 @@ i915_gem_scan_inactive_list_and_evict(struct drm_device *dev, int min_size,
 			    (!best || obj->size < best->size)) {
 				best = obj;
 				if (best->size == min_size)
-					break;
+					return best;
 			}
 			if (!first)
 			    first = obj;
 		}
 	}
 
-	obj = best ? best : first;
-
-	if (!obj) {
-		*found = 0;
-		return 0;
-	}
-
-	*found = 1;
-
-#if WATCH_LRU
-	DRM_INFO("%s: evicting %p\n", __func__, obj);
-#endif
-	obj_priv = obj->driver_private;
-	BUG_ON(obj_priv->pin_count != 0);
-	BUG_ON(obj_priv->active);
-
-	/* Wait on the rendering and unbind the buffer. */
-	return i915_gem_object_unbind(obj);
+	return best ? best : first;
 }
 
 static int
@@ -2195,11 +2173,11 @@ i915_gem_evict_everything(struct drm_device *dev)
 }
 
 static int
-i915_gem_evict_something(struct drm_device *dev,
-			 int min_size, unsigned alignment)
+i915_gem_evict_something(struct drm_device *dev, int min_size)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
-	int ret, found;
+	struct drm_gem_object *obj;
+	int ret;
 
 	for (;;) {
 		i915_gem_retire_requests(dev);
@@ -2207,11 +2185,20 @@ i915_gem_evict_something(struct drm_device *dev,
 		/* If there's an inactive buffer available now, grab it
 		 * and be done.
 		 */
-		ret = i915_gem_scan_inactive_list_and_evict(dev, min_size,
-							    alignment,
-							    &found);
-		if (found)
-			return ret;
+		obj = i915_gem_find_inactive_object(dev, min_size);
+		if (obj) {
+			struct drm_i915_gem_object *obj_priv;
+
+#if WATCH_LRU
+			DRM_INFO("%s: evicting %p\n", __func__, obj);
+#endif
+			obj_priv = obj->driver_private;
+			BUG_ON(obj_priv->pin_count != 0);
+			BUG_ON(obj_priv->active);
+
+			/* Wait on the rendering and unbind the buffer. */
+			return i915_gem_object_unbind(obj);
+		}
 
 		/* If we didn't get anything, but the ring is still processing
 		 * things, wait for the next to finish and hopefully leave us
@@ -2237,7 +2224,6 @@ i915_gem_evict_something(struct drm_device *dev,
 		 * will get moved to inactive.
 		 */
 		if (!list_empty(&dev_priv->mm.flushing_list)) {
-			struct drm_gem_object *obj = NULL;
 			struct drm_i915_gem_object *obj_priv;
 
 			/* Find an object that we can immediately reuse */
@@ -2686,7 +2672,7 @@ i915_gem_object_bind_to_gtt(struct drm_gem_object *obj, unsigned alignment)
 #if WATCH_LRU
 		DRM_INFO("%s: GTT full, evicting something\n", __func__);
 #endif
-		ret = i915_gem_evict_something(dev, obj->size, alignment);
+		ret = i915_gem_evict_something(dev, obj->size);
 		if (ret)
 			return ret;
 
@@ -2704,8 +2690,7 @@ i915_gem_object_bind_to_gtt(struct drm_gem_object *obj, unsigned alignment)
 
 		if (ret == -ENOMEM) {
 			/* first try to clear up some space from the GTT */
-			ret = i915_gem_evict_something(dev, obj->size,
-						       alignment);
+			ret = i915_gem_evict_something(dev, obj->size);
 			if (ret) {
 				/* now try to shrink everyone else */
 				if (gfpmask) {
@@ -2735,7 +2720,7 @@ i915_gem_object_bind_to_gtt(struct drm_gem_object *obj, unsigned alignment)
 		drm_mm_put_block(obj_priv->gtt_space);
 		obj_priv->gtt_space = NULL;
 
-		ret = i915_gem_evict_something(dev, obj->size, alignment);
+		ret = i915_gem_evict_something(dev, obj->size);
 		if (ret)
 			return ret;
 
