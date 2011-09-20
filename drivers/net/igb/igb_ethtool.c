@@ -1992,6 +1992,7 @@ static void igb_get_ethtool_stats(struct net_device *netdev,
 	int i, j, k;
 	char *p;
 
+	spin_lock(&adapter->stats_lock);
 	igb_update_stats(adapter);
 
 	for (i = 0; i < IGB_GLOBAL_STATS_LEN; i++) {
@@ -2014,6 +2015,7 @@ static void igb_get_ethtool_stats(struct net_device *netdev,
 		for (k = 0; k < IGB_RX_QUEUE_STATS_LEN; k++, i++)
 			data[i] = queue_stat[k];
 	}
+	spin_unlock(&adapter->stats_lock);
 }
 
 static void igb_get_strings(struct net_device *netdev, u32 stringset, u8 *data)

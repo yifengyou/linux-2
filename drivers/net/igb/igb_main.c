@@ -1191,7 +1191,9 @@ void igb_down(struct igb_adapter *adapter)
 	netif_carrier_off(netdev);
 
 	/* record the stats before reset*/
+	spin_lock(&adapter->stats_lock);
 	igb_update_stats(adapter);
+	spin_unlock(&adapter->stats_lock);
 
 	adapter->link_speed = 0;
 	adapter->link_duplex = 0;
@@ -1533,6 +1535,8 @@ static int __devinit igb_probe(struct pci_dev *pdev,
 		err = -EIO;
 		goto err_eeprom;
 	}
+
+	spin_lock_init(&adapter->stats_lock);
 
 	setup_timer(&adapter->watchdog_timer, &igb_watchdog,
 	            (unsigned long) adapter);
@@ -3120,7 +3124,10 @@ static void igb_watchdog_task(struct work_struct *work)
 		}
 	}
 
+	spin_lock(&adapter->stats_lock);
 	igb_update_stats(adapter);
+	spin_unlock(&adapter->stats_lock);
+
 	igb_update_adaptive(hw);
 
 	for (i = 0; i < adapter->num_tx_queues; i++) {
@@ -3856,7 +3863,12 @@ static void igb_reset_task(struct work_struct *work)
  **/
 static struct net_device_stats *igb_get_stats(struct net_device *netdev)
 {
-	/* only return the current stats */
+	struct igb_adapter *adapter = netdev_priv(netdev);
+
+	spin_lock(&adapter->stats_lock);
+	igb_update_stats(adapter);
+	spin_unlock(&adapter->stats_lock);
+
 	return &netdev->stats;
 }
 
@@ -3930,7 +3942,7 @@ static int igb_change_mtu(struct net_device *netdev, int new_mtu)
 
 void igb_update_stats(struct igb_adapter *adapter)
 {
-	struct net_device_stats *net_stats = igb_get_stats(adapter->netdev);
+	struct net_device_stats *net_stats = &adapter->netdev->stats;
 	struct e1000_hw *hw = &adapter->hw;
 	struct pci_dev *pdev = adapter->pdev;
 	u32 rnbc;
