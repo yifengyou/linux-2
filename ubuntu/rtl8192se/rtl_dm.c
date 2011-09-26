@@ -3804,7 +3804,7 @@ u8 RfOnOffDetect(struct net_device *dev)
 	if(priv->pwrdown)
 	{
 		u1Tmp = read_nic_byte(dev, 0x06);
-		printk("pwrdown, 0x6(BIT6)=%02x\n", u1Tmp);
+		dev_dbg(&dev->dev, "pwrdown, 0x6(BIT6)=%02x\n", u1Tmp);
 		retval = (u1Tmp & BIT6) ? eRfOn: eRfOff;
 	}
 	else
