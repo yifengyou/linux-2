@@ -330,21 +330,21 @@ void drm_mm_put_block(struct drm_mm_node *cur)
 
 EXPORT_SYMBOL(drm_mm_put_block);
 
-static int check_free_mm_node(struct drm_mm_node *entry, unsigned long size,
-			      unsigned alignment)
+static int check_free_hole(unsigned long start, unsigned long end,
+			   unsigned long size, unsigned alignment)
 {
 	unsigned wasted = 0;
 
-	if (entry->size < size)
+	if (end - start < size)
 		return 0;
 
 	if (alignment) {
-		register unsigned tmp = entry->start % alignment;
+		unsigned tmp = start % alignment;
 		if (tmp)
 			wasted = alignment - tmp;
 	}
 
-	if (entry->size >= size + wasted) {
+	if (end >= start + size + wasted) {
 		return 1;
 	}
 
@@ -369,7 +369,8 @@ struct drm_mm_node *drm_mm_search_free(const struct drm_mm *mm,
 	list_for_each(list, free_stack) {
 		entry = list_entry(list, struct drm_mm_node, fl_entry);
 
-		if (!check_free_mm_node(entry, size, alignment))
+		if (!check_free_hole(entry->start, entry->start + entry->size,
+				     size, alignment))
 			continue;
 
 		if (!best_match)
@@ -392,7 +393,6 @@ struct drm_mm_node *drm_mm_search_free_in_range(const struct drm_mm *mm,
 						unsigned long end,
 						int best_match)
 {
-	struct list_head *list;
 	const struct list_head *free_stack = &mm->fl_entry;
 	struct drm_mm_node *entry;
 	struct drm_mm_node *best;
@@ -403,13 +403,13 @@ struct drm_mm_node *drm_mm_search_free_in_range(const struct drm_mm *mm,
 	best = NULL;
 	best_size = ~0UL;
 
-	list_for_each(list, free_stack) {
-		entry = list_entry(list, struct drm_mm_node, fl_entry);
+	list_for_each_entry(entry, free_stack, fl_entry) {
+		unsigned long adj_start = entry->start < start ?
+			start : entry->start;
+		unsigned long adj_end = entry->start + entry->size > end ?
+			end : entry->start + entry->size;
 
-		if (entry->start > end || (entry->start+entry->size) < start)
-			continue;
-
-		if (!check_free_mm_node(entry, size, alignment))
+		if (!check_free_hole(adj_start, adj_end, size, alignment))
 			continue;
 
 		if (!best_match)
@@ -502,7 +502,8 @@ int drm_mm_scan_add_block(struct drm_mm_node *node)
 	node->fl_entry.prev = prev_free;
 	node->fl_entry.next = next_free;
 
-	if (check_free_mm_node(node, mm->scan_size, mm->scan_alignment)) {
+	if (check_free_hole(node->start, node->start + node->size,
+			    mm->scan_size, mm->scan_alignment)) {
 		mm->scan_hit_start = node->start;
 		mm->scan_hit_size = node->size;
 
