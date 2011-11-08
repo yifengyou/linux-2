@@ -3978,6 +3978,7 @@ EXPORT_SYMBOL vmlinux 0x620efe87	register_tcf_proto_ops
 EXPORT_SYMBOL vmlinux 0x621fdc55	scsi_get_command
 EXPORT_SYMBOL vmlinux 0x6220b988	_spin_lock_irq
 EXPORT_SYMBOL vmlinux 0x62213951	pcim_iounmap_regions
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x62492331	submit_bh
 EXPORT_SYMBOL vmlinux 0x6254071f	vfs_quota_disable
 EXPORT_SYMBOL vmlinux 0x625a7d77	tr_type_trans
@@ -5589,6 +5590,7 @@ EXPORT_SYMBOL vmlinux 0xe1761617	security_inet_conn_request
 EXPORT_SYMBOL vmlinux 0xe1a0d44c	pci_disable_msix
 EXPORT_SYMBOL vmlinux 0xe1cbe048	of_device_is_available
 EXPORT_SYMBOL vmlinux 0xe200b03f	__dev_remove_pack
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe20c63e7	_lv1_unmap_device_mmio_region
 EXPORT_SYMBOL vmlinux 0xe220ceb8	__debugger_sstep
 EXPORT_SYMBOL vmlinux 0xe229c178	tcf_em_tree_dump

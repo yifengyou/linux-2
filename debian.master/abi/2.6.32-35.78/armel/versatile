@@ -3180,6 +3180,7 @@ EXPORT_SYMBOL vmlinux 0x61bfa972	inet_ioctl
 EXPORT_SYMBOL vmlinux 0x61ce558c	vc_resize
 EXPORT_SYMBOL vmlinux 0x621102f1	bdput
 EXPORT_SYMBOL vmlinux 0x62235e08	release_firmware
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x62283f90	scsi_free_command
 EXPORT_SYMBOL vmlinux 0x62378d6c	i2c_add_adapter
 EXPORT_SYMBOL vmlinux 0x624770bd	delayed_slow_work_enqueue
@@ -4689,6 +4690,7 @@ EXPORT_SYMBOL vmlinux 0xe1c9dd8d	ps2_begin_command
 EXPORT_SYMBOL vmlinux 0xe1d8ca2a	tcp_rcv_established
 EXPORT_SYMBOL vmlinux 0xe1dc2dfb	__serio_register_port
 EXPORT_SYMBOL vmlinux 0xe1ec3f99	bitmap_cond_end_sync
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe204aa1b	pci_target_state
 EXPORT_SYMBOL vmlinux 0xe217cab9	__lookup_one_len
 EXPORT_SYMBOL vmlinux 0xe23728e6	tty_port_hangup

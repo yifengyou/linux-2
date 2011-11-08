@@ -3992,6 +3992,7 @@ EXPORT_SYMBOL vmlinux 0x620060ec	mod_timer
 EXPORT_SYMBOL vmlinux 0x620d5cb7	security_sb_clone_mnt_opts
 EXPORT_SYMBOL vmlinux 0x620f97aa	km_policy_notify
 EXPORT_SYMBOL vmlinux 0x6220b988	_spin_lock_irq
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x62337e80	nf_unregister_hooks
 EXPORT_SYMBOL vmlinux 0x623a3a3c	idr_remove_all
 EXPORT_SYMBOL vmlinux 0x623d7182	_chrp_type
@@ -5576,6 +5577,7 @@ EXPORT_SYMBOL vmlinux 0xe1ae6594	read_cache_page_gfp
 EXPORT_SYMBOL vmlinux 0xe1bdbbce	set_security_override
 EXPORT_SYMBOL vmlinux 0xe1e56248	__blk_run_queue
 EXPORT_SYMBOL vmlinux 0xe1fcfebf	dev_mc_add
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe20e2640	pci_dev_put
 EXPORT_SYMBOL vmlinux 0xe2304303	mac_map_monitor_sense
 EXPORT_SYMBOL vmlinux 0xe23259e7	matroxfb_g450_setclk

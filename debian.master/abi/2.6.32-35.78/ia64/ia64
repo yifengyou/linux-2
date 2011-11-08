@@ -4031,6 +4031,7 @@ EXPORT_SYMBOL vmlinux 0x61bdb814	flock_lock_file_wait
 EXPORT_SYMBOL vmlinux 0x61cb8f37	bio_put
 EXPORT_SYMBOL vmlinux 0x62049256	acpi_disable
 EXPORT_SYMBOL vmlinux 0x6205846c	matroxfb_unregister_driver
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x622b67cb	unw_init_frame_info
 EXPORT_SYMBOL vmlinux 0x6237a757	sg_miter_start
 EXPORT_SYMBOL vmlinux 0x6237f6b5	acpi_enable_event

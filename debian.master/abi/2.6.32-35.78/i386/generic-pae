@@ -4536,6 +4536,7 @@ EXPORT_SYMBOL vmlinux 0x61c78197	blk_queue_start_tag
 EXPORT_SYMBOL vmlinux 0x61d00906	generic_write_checks
 EXPORT_SYMBOL vmlinux 0x62049256	acpi_disable
 EXPORT_SYMBOL vmlinux 0x62113dba	jbd2_journal_extend
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x6237f6b5	acpi_enable_event
 EXPORT_SYMBOL vmlinux 0x623b8f3c	nlmsg_notify
 EXPORT_SYMBOL vmlinux 0x6241a2ab	__copy_from_user_ll_nocache
@@ -6237,6 +6238,7 @@ EXPORT_SYMBOL vmlinux 0xe1761617	security_inet_conn_request
 EXPORT_SYMBOL vmlinux 0xe18c6036	clear_page_dirty_for_io
 EXPORT_SYMBOL vmlinux 0xe1a81c3a	icmpv6msg_statistics
 EXPORT_SYMBOL vmlinux 0xe1b93017	__alloc_skb
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe20b3f89	mmc_request_done
 EXPORT_SYMBOL vmlinux 0xe2200f29	tty_chars_in_buffer
 EXPORT_SYMBOL vmlinux 0xe23ae481	blk_iopoll_complete

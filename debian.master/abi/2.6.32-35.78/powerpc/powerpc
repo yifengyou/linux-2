@@ -3995,6 +3995,7 @@ EXPORT_SYMBOL vmlinux 0x6152bf0f	kill_litter_super
 EXPORT_SYMBOL vmlinux 0x618d8299	set_notify_swap_entry_free
 EXPORT_SYMBOL vmlinux 0x61b7b126	simple_strtoull
 EXPORT_SYMBOL vmlinux 0x61eef2c9	_insb
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x622bfc0a	journal_clear_err
 EXPORT_SYMBOL vmlinux 0x623d7182	_chrp_type
 EXPORT_SYMBOL vmlinux 0x62737e1d	sock_unregister
@@ -5530,6 +5531,7 @@ EXPORT_SYMBOL vmlinux 0xe1b6cc47	filemap_write_and_wait_range
 EXPORT_SYMBOL vmlinux 0xe1c30f1f	unlock_super
 EXPORT_SYMBOL vmlinux 0xe1ef07fa	get_sb_pseudo
 EXPORT_SYMBOL vmlinux 0xe1f16d9a	pci_unregister_driver
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe21abe6e	page_symlink
 EXPORT_SYMBOL vmlinux 0xe2262dbe	inode_setattr
 EXPORT_SYMBOL vmlinux 0xe22f2182	tcf_hash_check

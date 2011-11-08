@@ -3416,6 +3416,7 @@ EXPORT_SYMBOL vmlinux 0x61ac35ac	ida_destroy
 EXPORT_SYMBOL vmlinux 0x61b7b126	simple_strtoull
 EXPORT_SYMBOL vmlinux 0x61d20038	netlink_ack
 EXPORT_SYMBOL vmlinux 0x61f337f2	dm_table_unplug_all
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x6226efbb	neigh_parms_alloc
 EXPORT_SYMBOL vmlinux 0x62380a26	xfrm_user_policy
 EXPORT_SYMBOL vmlinux 0x626f3349	neigh_parms_release
@@ -4930,6 +4931,7 @@ EXPORT_SYMBOL vmlinux 0xe197e76f	mb_cache_shrink
 EXPORT_SYMBOL vmlinux 0xe1bde553	netdev_rx_csum_fault
 EXPORT_SYMBOL vmlinux 0xe1d345ec	pci_map_sg
 EXPORT_SYMBOL vmlinux 0xe1f03f44	follow_down
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe207dd50	of_getintprop_default
 EXPORT_SYMBOL vmlinux 0xe216f4ec	drm_connector_property_get_value
 EXPORT_SYMBOL vmlinux 0xe227d368	mpage_readpage

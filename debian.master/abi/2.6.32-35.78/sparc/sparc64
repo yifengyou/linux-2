@@ -3332,6 +3332,7 @@ EXPORT_SYMBOL vmlinux 0x61864f8a	invalidate_mapping_pages
 EXPORT_SYMBOL vmlinux 0x618d8299	set_notify_swap_entry_free
 EXPORT_SYMBOL vmlinux 0x6194253f	dev_disable_lro
 EXPORT_SYMBOL vmlinux 0x61b7b126	simple_strtoull
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x625c3e76	inet_frags_fini
 EXPORT_SYMBOL vmlinux 0x62737e1d	sock_unregister
 EXPORT_SYMBOL vmlinux 0x6278025e	per_cpu__ftrace_event_seq
@@ -4867,6 +4868,7 @@ EXPORT_SYMBOL vmlinux 0xe17a58e0	kmem_cache_shrink
 EXPORT_SYMBOL vmlinux 0xe1838f84	skb_dequeue
 EXPORT_SYMBOL vmlinux 0xe1cc4610	inet_stream_connect
 EXPORT_SYMBOL vmlinux 0xe1dd3055	inet_unregister_protosw
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe2254ae0	filemap_write_and_wait_range
 EXPORT_SYMBOL vmlinux 0xe22b5f7b	filemap_fdatawrite_range
 EXPORT_SYMBOL vmlinux 0xe2304303	mac_map_monitor_sense

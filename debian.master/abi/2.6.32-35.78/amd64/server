@@ -4407,6 +4407,7 @@ EXPORT_SYMBOL vmlinux 0x62049256	acpi_disable
 EXPORT_SYMBOL vmlinux 0x62067d67	xfrm_state_update
 EXPORT_SYMBOL vmlinux 0x620ae6c0	pv_cpu_ops
 EXPORT_SYMBOL vmlinux 0x621de89e	__scsi_iterate_devices
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x6237f6b5	acpi_enable_event
 EXPORT_SYMBOL vmlinux 0x62447f77	seq_open
 EXPORT_SYMBOL vmlinux 0x6246e134	pci_get_bus_and_slot
@@ -6093,6 +6094,7 @@ EXPORT_SYMBOL vmlinux 0xe1b7f532	dquot_claim_space
 EXPORT_SYMBOL vmlinux 0xe1d6dcb2	__bread
 EXPORT_SYMBOL vmlinux 0xe1ddf621	inet_release
 EXPORT_SYMBOL vmlinux 0xe1ebb496	key_put
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe210ac7c	tcp_recvmsg
 EXPORT_SYMBOL vmlinux 0xe2303b47	udp_lib_get_port
 EXPORT_SYMBOL vmlinux 0xe23ae481	blk_iopoll_complete

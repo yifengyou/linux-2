@@ -4538,6 +4538,7 @@ EXPORT_SYMBOL vmlinux 0x62049256	acpi_disable
 EXPORT_SYMBOL vmlinux 0x620af9e3	__netdev_alloc_page
 EXPORT_SYMBOL vmlinux 0x62193598	pnp_range_reserved
 EXPORT_SYMBOL vmlinux 0x62202f63	scsi_register
+EXPORT_SYMBOL vmlinux 0x6225637e	md5_transform
 EXPORT_SYMBOL vmlinux 0x6237f6b5	acpi_enable_event
 EXPORT_SYMBOL vmlinux 0x623fc9cb	simple_fill_super
 EXPORT_SYMBOL vmlinux 0x6241a2ab	__copy_from_user_ll_nocache
@@ -6230,6 +6231,7 @@ EXPORT_SYMBOL vmlinux 0xe1a81c3a	icmpv6msg_statistics
 EXPORT_SYMBOL vmlinux 0xe1dd9288	pcim_iomap_regions_request_all
 EXPORT_SYMBOL vmlinux 0xe1f043cb	sk_stream_wait_close
 EXPORT_SYMBOL vmlinux 0xe1fbc30d	scsi_remove_target
+EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number
 EXPORT_SYMBOL vmlinux 0xe20269d6	pskb_copy
 EXPORT_SYMBOL vmlinux 0xe22b346f	follow_down
 EXPORT_SYMBOL vmlinux 0xe23ae481	blk_iopoll_complete
