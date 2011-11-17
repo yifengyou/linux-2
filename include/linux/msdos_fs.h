@@ -47,6 +47,7 @@
 #define DELETED_FLAG	0xe5	/* marks file as deleted when in name[0] */
 #define IS_FREE(n)	(!*(n) || *(n) == DELETED_FLAG)
 
+#define FAT_LFN_LEN	255	/* maximum long name length */
 #define MSDOS_NAME	11	/* maximum name length */
 #define MSDOS_LONGNAME	256	/* maximum name length */
 #define MSDOS_SLOTS	21	/* max # of slots for short and long names */
