@@ -1620,4 +1620,8 @@ extern int sysctl_optmem_max;
 extern __u32 sysctl_wmem_default;
 extern __u32 sysctl_rmem_default;
 
+#ifdef CONFIG_NET_NS
+extern int max_netns_count;
+#endif
+
 #endif	/* _SOCK_H */

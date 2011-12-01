@@ -89,6 +89,16 @@ static struct ctl_table net_core_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec
 	},
+#ifdef CONFIG_NET_NS
+	{
+		.ctl_name       = CTL_UNNUMBERED,
+		.procname       = "netns_max",
+		.data           = &max_netns_count,
+		.maxlen         = sizeof(int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif
 #endif /* CONFIG_NET */
 	{
 		.ctl_name	= NET_CORE_BUDGET,

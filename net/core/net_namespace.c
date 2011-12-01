@@ -81,11 +81,21 @@ static struct net_generic *net_alloc_generic(void)
 #ifdef CONFIG_NET_NS
 static struct kmem_cache *net_cachep;
 static struct workqueue_struct *netns_wq;
+static atomic_t used_netns_count = ATOMIC_INIT(0);
+unsigned int max_netns_count = 1024;
 
 static struct net *net_alloc(void)
 {
 	struct net *net = NULL;
 	struct net_generic *ng;
+
+	atomic_inc(&used_netns_count);
+	if (atomic_read(&used_netns_count) >= max_netns_count) {
+		printk_once(KERN_WARNING
+			"net_alloc: Exceeded maximum (%d) net namespace allocations.\n",
+			max_netns_count);
+		goto out;
+	}
 
 	ng = net_alloc_generic();
 	if (!ng)
@@ -96,7 +106,9 @@ static struct net *net_alloc(void)
 		goto out_free;
 
 	rcu_assign_pointer(net->gen, ng);
+	return net;
 out:
+	atomic_dec(&used_netns_count);
 	return net;
 
 out_free:
@@ -115,6 +127,7 @@ static void net_free(struct net *net)
 #endif
 	kfree(net->gen);
 	kmem_cache_free(net_cachep, net);
+	atomic_dec(&used_netns_count);
 }
 
 static struct net *net_create(void)
