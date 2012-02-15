@@ -496,6 +496,7 @@ out:
 }
 
 struct kmem_cache *ecryptfs_sb_info_cache;
+static struct file_system_type ecryptfs_fs_type;
 
 /**
  * ecryptfs_fill_super
@@ -570,6 +571,13 @@ static int ecryptfs_read_super(struct super_block *sb, const char *dev_name,
 	if (rc) {
 		ecryptfs_printk(KERN_WARNING, "path_lookup() failed\n");
 		goto out;
+	}
+	if (path.dentry->d_sb->s_type == &ecryptfs_fs_type) {
+		rc = -EINVAL;
+		printk(KERN_ERR "Mount on filesystem of type "
+			"eCryptfs explicitly disallowed due to "
+			"known incompatibilities\n");
+		goto out_free;
 	}
 
 	if (check_ruid && path.dentry->d_inode->i_uid != current_uid()) {
