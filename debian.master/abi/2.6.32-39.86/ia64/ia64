@@ -4242,6 +4242,7 @@ EXPORT_SYMBOL vmlinux 0x729fa476	tty_port_init
 EXPORT_SYMBOL vmlinux 0x72c09215	set_security_override_from_ctx
 EXPORT_SYMBOL vmlinux 0x72c3b03c	compat_sock_get_timestamp
 EXPORT_SYMBOL vmlinux 0x72c3be87	param_set_byte
+EXPORT_SYMBOL vmlinux 0x7308f8dd	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x7315e7ce	dev_unicast_sync
 EXPORT_SYMBOL vmlinux 0x734be028	eth_header_cache_update
 EXPORT_SYMBOL vmlinux 0x735bb3e5	tty_wait_until_sent
@@ -4361,6 +4362,7 @@ EXPORT_SYMBOL vmlinux 0x7ca86d8d	tty_insert_flip_string_flags
 EXPORT_SYMBOL vmlinux 0x7cb1ae69	cpu_down
 EXPORT_SYMBOL vmlinux 0x7cc559fb	pci_setup_cardbus
 EXPORT_SYMBOL vmlinux 0x7ccb165b	filemap_fdatawrite
+EXPORT_SYMBOL vmlinux 0x7cdf920a	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x7cef7f98	__task_pid_nr_ns
 EXPORT_SYMBOL vmlinux 0x7cf29a3f	sync_dirty_buffer
 EXPORT_SYMBOL vmlinux 0x7d11c268	jiffies

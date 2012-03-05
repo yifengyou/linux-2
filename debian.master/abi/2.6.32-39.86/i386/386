@@ -3667,6 +3667,7 @@ EXPORT_SYMBOL vmlinux 0x2075a81d	mb_cache_entry_release
 EXPORT_SYMBOL vmlinux 0x208739f6	acpi_load_table
 EXPORT_SYMBOL vmlinux 0x20a3f3d4	simple_transaction_release
 EXPORT_SYMBOL vmlinux 0x20b0b0d7	xfrm_policy_register_afinfo
+EXPORT_SYMBOL vmlinux 0x20cbb958	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x20fa4436	clear_inode
 EXPORT_SYMBOL vmlinux 0x210514ae	serio_unregister_driver
 EXPORT_SYMBOL vmlinux 0x2121cd66	netlink_broadcast
@@ -4336,6 +4337,7 @@ EXPORT_SYMBOL vmlinux 0x54aaee95	ppp_channel_index
 EXPORT_SYMBOL vmlinux 0x54e6fcdd	net_enable_timestamp
 EXPORT_SYMBOL vmlinux 0x5548fdbf	journal_wipe
 EXPORT_SYMBOL vmlinux 0x555c3b94	cdrom_ioctl
+EXPORT_SYMBOL vmlinux 0x55612ad8	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x557814fe	rfkill_get_led_trigger_name
 EXPORT_SYMBOL vmlinux 0x5594be03	bitmap_remap
 EXPORT_SYMBOL vmlinux 0x5596e07c	scsi_scan_target

@@ -3442,6 +3442,7 @@ EXPORT_SYMBOL vmlinux 0x65408378	zlib_inflate_blob
 EXPORT_SYMBOL vmlinux 0x65414e67	dev_valid_name
 EXPORT_SYMBOL vmlinux 0x6575fe51	find_inode_number
 EXPORT_SYMBOL vmlinux 0x659585e7	textsearch_find_continuous
+EXPORT_SYMBOL vmlinux 0x659bff6a	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x659c0d4c	__vlan_hwaccel_rx
 EXPORT_SYMBOL vmlinux 0x659ef057	kmem_cache_name
 EXPORT_SYMBOL vmlinux 0x65b0a97e	_PAGE_IE
@@ -5313,6 +5314,7 @@ EXPORT_SYMBOL vmlinux 0xff964b25	param_set_int
 EXPORT_SYMBOL vmlinux 0xff9ca065	fb_edid_to_monspecs
 EXPORT_SYMBOL vmlinux 0xffd5a395	default_wake_function
 EXPORT_SYMBOL vmlinux 0xffdfcc36	input_unregister_handler
+EXPORT_SYMBOL vmlinux 0xffe2849a	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xffe711b3	register_filesystem
 EXPORT_SYMBOL vmlinux 0xfffb6692	mdio_bus_type
 EXPORT_SYMBOL_GPL crypto/aes_generic 0x0cc1e40f	crypto_it_tab

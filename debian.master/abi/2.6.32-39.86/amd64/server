@@ -6124,6 +6124,7 @@ EXPORT_SYMBOL vmlinux 0xe3b0192b	vscnprintf
 EXPORT_SYMBOL vmlinux 0xe3d9336f	call_usermodehelper_setcleanup
 EXPORT_SYMBOL vmlinux 0xe3e12008	__first_cpu
 EXPORT_SYMBOL vmlinux 0xe3fbe148	acpi_install_table_handler
+EXPORT_SYMBOL vmlinux 0xe3fd8560	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xe3ff438e	tcp_proc_unregister
 EXPORT_SYMBOL vmlinux 0xe41c2992	generic_file_aio_write
 EXPORT_SYMBOL vmlinux 0xe43617f7	acpi_gbl_FADT
@@ -6298,6 +6299,7 @@ EXPORT_SYMBOL vmlinux 0xf1e82ecc	fb_firmware_edid
 EXPORT_SYMBOL vmlinux 0xf1e98c74	avenrun
 EXPORT_SYMBOL vmlinux 0xf20dabd8	free_irq
 EXPORT_SYMBOL vmlinux 0xf20e73c9	single_open
+EXPORT_SYMBOL vmlinux 0xf20e771c	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xf21c6ccd	agp_generic_free_by_type
 EXPORT_SYMBOL vmlinux 0xf221b71e	free_mdio_bitbang
 EXPORT_SYMBOL vmlinux 0xf231258b	__xfrm_state_destroy

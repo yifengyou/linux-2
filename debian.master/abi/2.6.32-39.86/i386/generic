@@ -4260,6 +4260,7 @@ EXPORT_SYMBOL vmlinux 0x4f6fa67d	console_stop
 EXPORT_SYMBOL vmlinux 0x4f783f30	acpi_read
 EXPORT_SYMBOL vmlinux 0x4f99f93a	tcp_rcv_state_process
 EXPORT_SYMBOL vmlinux 0x4fa9bd7f	sock_no_shutdown
+EXPORT_SYMBOL vmlinux 0x4fcc2ead	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x4fd1289c	bio_integrity_get_tag
 EXPORT_SYMBOL vmlinux 0x4fd481d1	__dev_get_by_name
 EXPORT_SYMBOL vmlinux 0x4fdee897	i8042_command
@@ -6344,6 +6345,7 @@ EXPORT_SYMBOL vmlinux 0xea10212a	int_to_scsilun
 EXPORT_SYMBOL vmlinux 0xea10655a	__bitmap_intersects
 EXPORT_SYMBOL vmlinux 0xea2d33a2	radix_tree_gang_lookup_slot
 EXPORT_SYMBOL vmlinux 0xea705442	hippi_neigh_setup_dev
+EXPORT_SYMBOL vmlinux 0xea769dcf	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xea7987f1	key_update
 EXPORT_SYMBOL vmlinux 0xea7c05e5	dev_getfirstbyhwtype
 EXPORT_SYMBOL vmlinux 0xea852925	rwsem_downgrade_wake

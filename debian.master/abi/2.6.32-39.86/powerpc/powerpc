@@ -3907,6 +3907,7 @@ EXPORT_SYMBOL vmlinux 0x5b5abdf5	of_find_matching_node
 EXPORT_SYMBOL vmlinux 0x5b6285e4	dm_table_get
 EXPORT_SYMBOL vmlinux 0x5b6e7014	inode_sub_bytes
 EXPORT_SYMBOL vmlinux 0x5b9c4bd6	key_link
+EXPORT_SYMBOL vmlinux 0x5bb0a9f2	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x5bc2f234	is_bad_inode
 EXPORT_SYMBOL vmlinux 0x5bf5b9df	pci_dev_driver
 EXPORT_SYMBOL vmlinux 0x5c4cefa4	inet_stream_connect
@@ -5517,6 +5518,7 @@ EXPORT_SYMBOL vmlinux 0xe001e342	abort_creds
 EXPORT_SYMBOL vmlinux 0xe011f8b5	tcp_initialize_rcv_mss
 EXPORT_SYMBOL vmlinux 0xe04d94f3	of_parse_phandles_with_args
 EXPORT_SYMBOL vmlinux 0xe075d6eb	iter_div_u64_rem
+EXPORT_SYMBOL vmlinux 0xe0a38010	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xe0b13336	argv_free
 EXPORT_SYMBOL vmlinux 0xe0b49843	macio_request_resources
 EXPORT_SYMBOL vmlinux 0xe0bc24a1	param_set_ushort

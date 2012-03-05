@@ -3948,6 +3948,7 @@ EXPORT_SYMBOL vmlinux 0x5ec650e0	kobject_put
 EXPORT_SYMBOL vmlinux 0x5ed040b0	pm_set_vt_switch
 EXPORT_SYMBOL vmlinux 0x5edd0762	bin2bcd
 EXPORT_SYMBOL vmlinux 0x5eee7dad	scsi_prep_state_check
+EXPORT_SYMBOL vmlinux 0x5ef2c370	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x5f0f7ca8	block_truncate_page
 EXPORT_SYMBOL vmlinux 0x5f4229ac	pci_disable_device
 EXPORT_SYMBOL vmlinux 0x5f4ad8d6	init_net
@@ -5924,6 +5925,7 @@ EXPORT_SYMBOL vmlinux 0xfd0b963f	simple_dir_operations
 EXPORT_SYMBOL vmlinux 0xfd0c5038	adb_unregister
 EXPORT_SYMBOL vmlinux 0xfd4fd58b	nf_hook_slow
 EXPORT_SYMBOL vmlinux 0xfda85a7d	request_threaded_irq
+EXPORT_SYMBOL vmlinux 0xfdae6b8c	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xfdb9b629	ioread32be
 EXPORT_SYMBOL vmlinux 0xfded48ed	enable_kernel_fp
 EXPORT_SYMBOL vmlinux 0xfdfc0b3b	fiemap_fill_next_extent

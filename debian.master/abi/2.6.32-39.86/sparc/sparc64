@@ -3050,6 +3050,7 @@ EXPORT_SYMBOL vmlinux 0x4859b8bb	rtc_year_days
 EXPORT_SYMBOL vmlinux 0x4860d755	pci_clear_master
 EXPORT_SYMBOL vmlinux 0x486b6407	hweight64
 EXPORT_SYMBOL vmlinux 0x48735a96	shrink_dcache_sb
+EXPORT_SYMBOL vmlinux 0x487856a0	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x487dde50	alloc_disk_node
 EXPORT_SYMBOL vmlinux 0x489c3b71	mod_timer_pinned
 EXPORT_SYMBOL vmlinux 0x48c1d080	tcp_parse_md5sig_option
@@ -4960,6 +4961,7 @@ EXPORT_SYMBOL vmlinux 0xe7f66aff	release_firmware
 EXPORT_SYMBOL vmlinux 0xe824ccfb	do_munmap
 EXPORT_SYMBOL vmlinux 0xe8292e41	textsearch_register
 EXPORT_SYMBOL vmlinux 0xe83cdb0f	elv_queue_empty
+EXPORT_SYMBOL vmlinux 0xe8547c9d	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xe85ebcb7	dqput
 EXPORT_SYMBOL vmlinux 0xe8600435	netpoll_print_options
 EXPORT_SYMBOL vmlinux 0xe86e5fc1	downgrade_write

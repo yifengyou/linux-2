@@ -3888,6 +3888,7 @@ EXPORT_SYMBOL vmlinux 0x3079abf7	input_register_device
 EXPORT_SYMBOL vmlinux 0x307f7776	timecompare_offset
 EXPORT_SYMBOL vmlinux 0x30882815	pcim_pin_device
 EXPORT_SYMBOL vmlinux 0x308b7ee2	scsi_put_command
+EXPORT_SYMBOL vmlinux 0x30ac6cdb	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x30c71d1b	dst_release
 EXPORT_SYMBOL vmlinux 0x30e74134	tty_termios_copy_hw
 EXPORT_SYMBOL vmlinux 0x310917fe	sort
@@ -3908,6 +3909,7 @@ EXPORT_SYMBOL vmlinux 0x31e76b57	recalibrate_cpu_khz
 EXPORT_SYMBOL vmlinux 0x32080822	set_trace_device
 EXPORT_SYMBOL vmlinux 0x320bf8eb	pci_save_state
 EXPORT_SYMBOL vmlinux 0x324afdee	rt6_lookup
+EXPORT_SYMBOL vmlinux 0x326d6614	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x326df9e1	vfs_stat
 EXPORT_SYMBOL vmlinux 0x3283dfa3	vfs_unlink
 EXPORT_SYMBOL vmlinux 0x3285cc48	param_set_uint

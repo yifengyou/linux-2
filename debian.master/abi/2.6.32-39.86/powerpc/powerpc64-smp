@@ -4458,6 +4458,7 @@ EXPORT_SYMBOL vmlinux 0x864fcf91	fget
 EXPORT_SYMBOL vmlinux 0x8656592b	bioset_create
 EXPORT_SYMBOL vmlinux 0x8664f62e	cpufreq_update_policy
 EXPORT_SYMBOL vmlinux 0x866e93aa	sock_i_ino
+EXPORT_SYMBOL vmlinux 0x86816caa	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x868acba5	get_options
 EXPORT_SYMBOL vmlinux 0x86c81a43	down_trylock
 EXPORT_SYMBOL vmlinux 0x86ca282c	vfs_rmdir
@@ -5418,6 +5419,7 @@ EXPORT_SYMBOL vmlinux 0xd251d7b0	security_socket_getpeersec_dgram
 EXPORT_SYMBOL vmlinux 0xd2555f19	jiffies_64_to_clock_t
 EXPORT_SYMBOL vmlinux 0xd25d4f74	console_blank_hook
 EXPORT_SYMBOL vmlinux 0xd260ac05	seq_write
+EXPORT_SYMBOL vmlinux 0xd27a35b0	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xd2892f9c	blk_queue_segment_boundary
 EXPORT_SYMBOL vmlinux 0xd2965f6f	kthread_should_stop
 EXPORT_SYMBOL vmlinux 0xd2b7b295	matroxfb_DAC_in

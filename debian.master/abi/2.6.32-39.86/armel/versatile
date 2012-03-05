@@ -2910,6 +2910,7 @@ EXPORT_SYMBOL vmlinux 0x4b17dffa	wait_on_page_bit
 EXPORT_SYMBOL vmlinux 0x4b204d5d	sync_mapping_buffers
 EXPORT_SYMBOL vmlinux 0x4b34fbf5	block_all_signals
 EXPORT_SYMBOL vmlinux 0x4b3bbaf4	rfkill_pause_polling
+EXPORT_SYMBOL vmlinux 0x4b47e227	scsi_cmd_blk_ioctl
 EXPORT_SYMBOL vmlinux 0x4b4d3ed0	netif_carrier_on
 EXPORT_SYMBOL vmlinux 0x4b5fae97	simple_write_end
 EXPORT_SYMBOL vmlinux 0x4b79975a	save_time_delta
@@ -4582,6 +4583,7 @@ EXPORT_SYMBOL vmlinux 0xd7ba52fd	pci_request_regions_exclusive
 EXPORT_SYMBOL vmlinux 0xd7c26379	consume_skb
 EXPORT_SYMBOL vmlinux 0xd7e6f987	sk_stream_kill_queues
 EXPORT_SYMBOL vmlinux 0xd7e7ebd5	truncate_inode_pages
+EXPORT_SYMBOL vmlinux 0xd7ed80ea	scsi_verify_blk_ioctl
 EXPORT_SYMBOL vmlinux 0xd81ab64d	dev_getfirstbyhwtype
 EXPORT_SYMBOL vmlinux 0xd81f0de3	qdisc_calculate_pkt_len
 EXPORT_SYMBOL vmlinux 0xd8282ff0	posix_acl_equiv_mode
