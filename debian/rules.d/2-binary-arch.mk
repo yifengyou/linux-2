@@ -27,6 +27,9 @@ $(stampdir)/stamp-prepare-tree-%: $(commonconfdir)/config.common.$(family) $(arc
 # Used by developers as a shortcut to prepare a tree for compilation.
 prepare-%: $(stampdir)/stamp-prepare-%
 	@echo Prepared $* for $(arch)
+# Used by developers to allow efficient pre-building without fakeroot.
+build-%: $(stampdir)/stamp-build-%
+	@echo Built $* for $(arch)
 
 # Do the actual build, including image and modules
 $(stampdir)/stamp-build-%: target_flavour = $*
