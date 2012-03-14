@@ -30,6 +30,8 @@
 #include <linux/smp_lock.h>
 #include <linux/file.h>
 #include <linux/crypto.h>
+#include <linux/statfs.h>
+#include <linux/magic.h>
 #include "ecryptfs_kernel.h"
 
 struct kmem_cache *ecryptfs_inode_info_cache;
@@ -137,7 +139,21 @@ static void ecryptfs_put_super(struct super_block *sb)
  */
 static int ecryptfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 {
-	return vfs_statfs(ecryptfs_dentry_to_lower(dentry), buf);
+	struct dentry *lower_dentry = ecryptfs_dentry_to_lower(dentry);
+	int rc;
+
+	if (!lower_dentry->d_sb->s_op->statfs)
+		return -ENOSYS;
+
+	rc = lower_dentry->d_sb->s_op->statfs(lower_dentry, buf);
+	if (rc)
+		return rc;
+
+	buf->f_type = ECRYPTFS_SUPER_MAGIC;
+	rc = ecryptfs_set_f_namelen(&buf->f_namelen, buf->f_namelen,
+	       &ecryptfs_superblock_to_private(dentry->d_sb)->mount_crypt_stat);
+
+	return rc;
 }
 
 /**
