@@ -1840,7 +1840,7 @@ void tomoyo_load_policy(const char *filename)
 	envp[0] = "HOME=/";
 	envp[1] = "PATH=/sbin:/bin:/usr/sbin:/usr/bin";
 	envp[2] = NULL;
-	call_usermodehelper(argv[0], argv, envp, 1);
+	call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
 
 	printk(KERN_INFO "TOMOYO: 2.2.0   2009/04/01\n");
 	printk(KERN_INFO "Mandatory Access Control activated.\n");
