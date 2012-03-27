@@ -222,11 +222,11 @@ static inline void do_ipw2100_loading(int state)
   if (state == RADIO_ON) {
     char *argv[] = { "/sbin/modprobe", "-s", "-k", "ipw2100", NULL };
     mode = "loading";
-    status = call_usermodehelper(argv[0], argv, envp, 1);
+    status = call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
   } else {
     char *argv[] = { "/sbin/rmmod", "ipw2100", NULL };
     mode = "removing";
-    status = call_usermodehelper(argv[0], argv, envp, 1);
+    status = call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
   }
   DEBUG_OUT2("%s of ipw2100 module %s\n", mode, status == 0 ? "successful" : "FAILED");
 }

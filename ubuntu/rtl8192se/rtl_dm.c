@@ -427,7 +427,7 @@ void dm_check_ac_dc_power(struct net_device *dev)
 	if(priv->rtllib->state != RTLLIB_LINKED) {
 		return;
 	}
-	call_usermodehelper(ac_dc_check_script_path,argv,envp,1);
+	call_usermodehelper(ac_dc_check_script_path,argv,envp,UMH_WAIT_PROC);
 
 	return;
 };
@@ -3612,7 +3612,7 @@ extern	void	dm_CheckRfCtrlGPIO(void *data)
 
 				argv[0] = RadioPowerPath;
 				argv[2] = NULL;
-				call_usermodehelper(RadioPowerPath,argv,envp,1);
+				call_usermodehelper(RadioPowerPath,argv,envp,UMH_WAIT_PROC);
 			}
 
 		}
@@ -3997,7 +3997,7 @@ extern void dm_CheckRfCtrlGPIO(void *data)
 
 			argv[0] = RadioPowerPath;
 			argv[2] = NULL;
-			call_usermodehelper(RadioPowerPath,argv,envp,1);
+			call_usermodehelper(RadioPowerPath,argv,envp,UMH_WAIT_PROC);
 
 #endif			
 		}
