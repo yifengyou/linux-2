@@ -3076,6 +3076,7 @@ EXPORT_SYMBOL vmlinux 0x1b4c28ad	pci_dev_put
 EXPORT_SYMBOL vmlinux 0x1b626805	bdget
 EXPORT_SYMBOL vmlinux 0x1b6314fd	in_aton
 EXPORT_SYMBOL vmlinux 0x1b67461e	get_user_pages
+EXPORT_SYMBOL vmlinux 0x1b691d8f	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0x1b81b1f7	register_key_type
 EXPORT_SYMBOL vmlinux 0x1b8b95ad	i8042_unlock_chip
 EXPORT_SYMBOL vmlinux 0x1b9981cc	set_irq_wake

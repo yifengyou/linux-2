@@ -4329,6 +4329,7 @@ EXPORT_SYMBOL vmlinux 0xc090ce11	gen_pool_alloc
 EXPORT_SYMBOL vmlinux 0xc09a0af5	spi_display_xfer_agreement
 EXPORT_SYMBOL vmlinux 0xc0bf6ead	timecounter_cyc2time
 EXPORT_SYMBOL vmlinux 0xc0cb394a	vga_put
+EXPORT_SYMBOL vmlinux 0xc0d2faae	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0xc0edbff5	__register_chrdev
 EXPORT_SYMBOL vmlinux 0xc11bdc95	mii_check_link
 EXPORT_SYMBOL vmlinux 0xc11d8093	iov_shorten

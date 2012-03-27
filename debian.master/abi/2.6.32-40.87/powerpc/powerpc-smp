@@ -5078,6 +5078,7 @@ EXPORT_SYMBOL vmlinux 0xb883870f	pci_set_dma_seg_boundary
 EXPORT_SYMBOL vmlinux 0xb8870648	registered_fb
 EXPORT_SYMBOL vmlinux 0xb8956b77	arp_find
 EXPORT_SYMBOL vmlinux 0xb89af9bf	srandom32
+EXPORT_SYMBOL vmlinux 0xb8a77ef8	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0xb8aa2342	__check_region
 EXPORT_SYMBOL vmlinux 0xb8b2b020	misc_deregister
 EXPORT_SYMBOL vmlinux 0xb8de939c	of_device_get_modalias

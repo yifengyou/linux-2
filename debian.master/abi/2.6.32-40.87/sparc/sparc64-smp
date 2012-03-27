@@ -4625,6 +4625,7 @@ EXPORT_SYMBOL vmlinux 0xc7ec28b0	memcmp
 EXPORT_SYMBOL vmlinux 0xc82e7045	dma_set_mask
 EXPORT_SYMBOL vmlinux 0xc841e4a0	read_cache_page_async
 EXPORT_SYMBOL vmlinux 0xc84e818c	of_parse_phandles_with_args
+EXPORT_SYMBOL vmlinux 0xc8636c7b	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0xc864acc6	xfrm_policy_insert
 EXPORT_SYMBOL vmlinux 0xc87bd6e2	pci_bus_find_capability
 EXPORT_SYMBOL vmlinux 0xc8911c8a	mark_page_accessed

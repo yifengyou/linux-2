@@ -4503,6 +4503,7 @@ EXPORT_SYMBOL vmlinux 0x876dafc3	ec_write
 EXPORT_SYMBOL vmlinux 0x8771460d	xfrm_register_km
 EXPORT_SYMBOL vmlinux 0x878ab3ce	sysctl_tcp_adv_win_scale
 EXPORT_SYMBOL vmlinux 0x879ad472	blk_queue_resize_tags
+EXPORT_SYMBOL vmlinux 0x87fb71a7	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0x881039d0	zlib_inflate
 EXPORT_SYMBOL vmlinux 0x881e703a	blk_queue_update_dma_alignment
 EXPORT_SYMBOL vmlinux 0x883fd946	machvec_dma_sync_single

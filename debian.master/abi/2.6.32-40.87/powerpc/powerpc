@@ -4911,6 +4911,7 @@ EXPORT_SYMBOL vmlinux 0xaeb8a531	of_find_node_by_phandle
 EXPORT_SYMBOL vmlinux 0xaec0969e	textsearch_prepare
 EXPORT_SYMBOL vmlinux 0xaec655c7	alloc_pages_exact
 EXPORT_SYMBOL vmlinux 0xaed013b9	posix_acl_valid
+EXPORT_SYMBOL vmlinux 0xaede8a8a	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0xaefc6fc7	matroxfb_DAC_in
 EXPORT_SYMBOL vmlinux 0xaf153350	phy_connect_direct
 EXPORT_SYMBOL vmlinux 0xaf3dd7dc	scsi_logging_level

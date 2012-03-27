@@ -4861,6 +4861,7 @@ EXPORT_SYMBOL vmlinux 0xe03a37c0	tcp_splice_read
 EXPORT_SYMBOL vmlinux 0xe06c374f	pskb_expand_head
 EXPORT_SYMBOL vmlinux 0xe075d6eb	iter_div_u64_rem
 EXPORT_SYMBOL vmlinux 0xe08ef106	drm_idlelock_release
+EXPORT_SYMBOL vmlinux 0xe08f13da	sock_queue_err_skb
 EXPORT_SYMBOL vmlinux 0xe0a67f33	tcp_v4_conn_request
 EXPORT_SYMBOL vmlinux 0xe0aa174c	request_key_with_auxdata
 EXPORT_SYMBOL vmlinux 0xe0ac34de	neigh_create
