@@ -73,6 +73,7 @@ include $(DROOT)/rules.d/3-binary-indep.mk
 include $(DROOT)/rules.d/4-checks.mk
 
 # Misc stuff
+.PHONY: $(DEBIAN)/control.stub
 $(DEBIAN)/control.stub: $(DEBIAN)/d-i/kernel-versions.in	\
 		$(DROOT)/scripts/control-create		\
 		$(DEBIAN)/control.stub.in			\
