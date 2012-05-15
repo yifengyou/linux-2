@@ -334,19 +334,21 @@ endif
 #
 # per-architecture packages
 #
+builddirpa = $(builddir)/tools-perarch
+
 $(stampdir)/stamp-prepare-perarch:
 	@echo "Preparing perarch ..."
 ifeq ($(do_tools),true)
-	install -d $(builddir)/tools-$*
-	for i in *; do ln -s $(CURDIR)/$$i $(builddir)/tools-$*/; done
-	rm $(builddir)/tools-$*/tools
-	rsync -a tools/ $(builddir)/tools-$*/tools/
+	install -d $(builddirpa)/tools-$*
+	for i in *; do ln -s $(CURDIR)/$$i $(builddirpa)/tools-$*/; done
+	rm $(builddirpa)/tools-$*/tools
+	rsync -a tools/ $(builddirpa)/tools-$*/tools/
 endif
 	touch $@
 
 $(stampdir)/stamp-build-perarch: $(stampdir)/stamp-prepare-perarch
 ifeq ($(do_tools),true)
-	cd $(builddir)/tools-$*/tools/perf && make HAVE_CPLUS_DEMANGLE=1 $(conc_level)
+	cd $(builddirpa)/tools-$*/tools/perf && make HAVE_CPLUS_DEMANGLE=1 $(conc_level)
 endif
 	@touch $@
 
@@ -355,7 +357,7 @@ install-perarch: $(stampdir)/stamp-build-perarch
 	# Add the tools.
 ifeq ($(do_tools),true)
 	install -d $(toolspkgdir)/usr/bin
-	install -s -m755 $(builddir)/tools-$*/tools/perf/perf \
+	install -s -m755 $(builddirpa)/tools-$*/tools/perf/perf \
 		$(toolspkgdir)/usr/bin/perf_$(abi_release)
 endif
 
