@@ -589,6 +589,15 @@ static int ecryptfs_read_super(struct super_block *sb, const char *dev_name,
 	}
 
 	ecryptfs_set_superblock_lower(sb, path.dentry->d_sb);
+
+	/**
+	 * Set the POSIX ACL flag based on whether they're enabled in the lower
+	 * mount. Force a read-only eCryptfs mount if the lower mount is ro.
+	 * Allow a ro eCryptfs mount even when the lower mount is rw.
+	 */
+	sb->s_flags &= ~MS_POSIXACL;
+	sb->s_flags |= path.dentry->d_sb->s_flags & (MS_RDONLY | MS_POSIXACL);
+
 	sb->s_maxbytes = path.dentry->d_sb->s_maxbytes;
 	sb->s_blocksize = path.dentry->d_sb->s_blocksize;
 	ecryptfs_set_dentry_lower(sb->s_root, path.dentry);
