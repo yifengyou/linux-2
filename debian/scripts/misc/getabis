@@ -1,10 +1,12 @@
 #!/bin/bash
 
-. debian/debian.env
-
 if [ "$#" != "2" ]; then
 	echo "Usage: $0 <release> <revision>" 1>&2
 	exit 1
+fi
+
+if [ "$DEBIAN" = "" ]; then
+	. debian/debian.env
 fi
 
 ver=$1
@@ -14,7 +16,7 @@ abi=$(echo $revision | awk -F. '{print $1}')
 verabi=$ver-$abi
 verfull=$ver-$revision
 
-WGET="wget --quiet -c"
+WGET="wget --tries=1 --timeout=10 --quiet -c"
 
 abidir="`pwd`/$DEBIAN/abi/$verfull"
 tmpdir="`pwd`/abi-tmp-$verfull"
@@ -33,7 +35,7 @@ getall() {
 			echo "Exists: $sub"
 			continue
 		fi
-		echo -n "Fetching $sub..."
+		echo -n "Fetching $sub($arch)..."
 		filename=linux-image-${verabi}-${sub}_${verfull}_${arch}.deb
 		cd $tmpdir
 		for r in "${repo_list[@]}"
