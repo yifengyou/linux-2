@@ -479,7 +479,7 @@ int rds_ib_xmit(struct rds_connection *conn, struct rds_message *rm,
 	int ret;
 	int flow_controlled = 0;
 
-	BUG_ON(off % RDS_FRAG_SIZE);
+	BUG_ON(!conn->c_loopback && off % RDS_FRAG_SIZE);
 	BUG_ON(hdr_off != 0 && hdr_off != sizeof(struct rds_header));
 
 	/* FIXME we may overallocate here */
