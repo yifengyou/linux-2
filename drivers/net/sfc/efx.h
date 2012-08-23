@@ -24,6 +24,10 @@
 /* Solarstorm controllers use BAR 0 for I/O space and BAR 2(&3) for memory */
 #define EFX_MEM_BAR 2
 
+#define EFX_MAX_DMAQ_SIZE 4096UL
+#define EFX_DEFAULT_DMAQ_SIZE 1024UL
+#define EFX_MIN_DMAQ_SIZE 512UL
+
 /* TX */
 extern int efx_probe_tx_queue(struct efx_tx_queue *tx_queue);
 extern void efx_remove_tx_queue(struct efx_tx_queue *tx_queue);
@@ -35,9 +39,10 @@ efx_hard_start_xmit(struct sk_buff *skb, struct net_device *net_dev);
 extern netdev_tx_t
 efx_enqueue_skb(struct efx_tx_queue *tx_queue, struct sk_buff *skb);
 extern void efx_xmit_done(struct efx_tx_queue *tx_queue, unsigned int index);
+extern unsigned int efx_tx_max_skb_descs(struct efx_nic *efx);
 extern void efx_stop_queue(struct efx_nic *efx);
 extern void efx_wake_queue(struct efx_nic *efx);
-#define EFX_TXQ_SIZE 1024
+#define EFX_TXQ_SIZE EFX_DEFAULT_DMAQ_SIZE
 #define EFX_TXQ_MASK (EFX_TXQ_SIZE - 1)
 
 /* RX */
@@ -53,13 +58,23 @@ extern void __efx_rx_packet(struct efx_channel *channel,
 extern void efx_rx_packet(struct efx_rx_queue *rx_queue, unsigned int index,
 			  unsigned int len, bool checksummed, bool discard);
 extern void efx_schedule_slow_fill(struct efx_rx_queue *rx_queue, int delay);
-#define EFX_RXQ_SIZE 1024
+#define EFX_RXQ_SIZE EFX_DEFAULT_DMAQ_SIZE
 #define EFX_RXQ_MASK (EFX_RXQ_SIZE - 1)
 
 /* Channels */
 extern void efx_process_channel_now(struct efx_channel *channel);
 #define EFX_EVQ_SIZE 4096
 #define EFX_EVQ_MASK (EFX_EVQ_SIZE - 1)
+
+/* Maximum number of TCP segments we support for soft-TSO */
+#define EFX_TSO_MAX_SEGS	100
+
+/* The smallest [rt]xq_entries that the driver supports.  RX minimum
+ * is a bit arbitrary.  For TX, we must have space for at least 2
+ * TSO skbs.
+ */
+#define EFX_RXQ_MIN_ENT		128U
+#define EFX_TXQ_MIN_ENT(efx)	(2 * efx_tx_max_skb_descs(efx))
 
 /* Ports */
 extern int efx_reconfigure_port(struct efx_nic *efx);
