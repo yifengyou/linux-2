@@ -907,6 +907,8 @@ struct net_device
 	/* for setting kernel sock attribute on TCP connection setup */
 #define GSO_MAX_SIZE		65536
 	unsigned int		gso_max_size;
+#define GSO_MAX_SEGS		65535
+	u16			gso_max_segs;
 
 #ifdef CONFIG_DCB
 	/* Data Center Bridging netlink ops */
@@ -1933,10 +1935,10 @@ static inline int skb_gso_ok(struct sk_buff *skb, int features)
 	       (!skb_has_frags(skb) || (features & NETIF_F_FRAGLIST));
 }
 
-static inline int netif_needs_gso(struct net_device *dev, struct sk_buff *skb)
+static inline int netif_needs_gso(struct sk_buff *skb, int features)
 {
 	return skb_is_gso(skb) &&
-	       (!skb_gso_ok(skb, dev->features) ||
+	       (!skb_gso_ok(skb, features) ||
 		unlikely(skb->ip_summed != CHECKSUM_PARTIAL));
 }
 
@@ -1954,6 +1956,16 @@ static inline void skb_bond_set_mac_by_master(struct sk_buff *skb,
 
 		memcpy(dest, master->dev_addr, ETH_ALEN);
 	}
+}
+
+static inline int netif_skb_features(struct net_device *dev, struct sk_buff *skb)
+{
+	int features = dev->features;
+
+	if (skb_shinfo(skb)->gso_segs > skb->dev->gso_max_segs)
+		features &= ~NETIF_F_GSO_MASK;
+
+	return features;
 }
 
 /* On bonding slaves other than the currently active slave, suppress
