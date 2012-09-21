@@ -1140,12 +1140,6 @@ static int efx_probe_all(struct efx_nic *efx)
 		goto fail2;
 	}
 
-	BUILD_BUG_ON(EFX_DEFAULT_DMAQ_SIZE < EFX_RXQ_MIN_ENT);
-	if (WARN_ON(EFX_DEFAULT_DMAQ_SIZE < EFX_TXQ_MIN_ENT(efx))) {
-		rc = -EINVAL;
-		goto fail_ports;
-	}
-
 	/* Create channels */
 	efx_for_each_channel(channel, efx) {
 		rc = efx_probe_channel(channel);
@@ -1162,7 +1156,6 @@ static int efx_probe_all(struct efx_nic *efx)
  fail3:
 	efx_for_each_channel(channel, efx)
 		efx_remove_channel(channel);
- fail_ports:
 	efx_remove_port(efx);
  fail2:
 	efx_remove_nic(efx);
@@ -1698,7 +1691,6 @@ static int efx_register_netdev(struct efx_nic *efx)
 	net_dev->netdev_ops = &efx_netdev_ops;
 	SET_NETDEV_DEV(net_dev, &efx->pci_dev->dev);
 	SET_ETHTOOL_OPS(net_dev, &efx_ethtool_ops);
-	net_dev->gso_max_segs = EFX_TSO_MAX_SEGS;
 
 	/* Clear MAC statistics */
 	efx->mac_op->update_stats(efx);
