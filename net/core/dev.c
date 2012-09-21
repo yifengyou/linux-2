@@ -1682,12 +1682,13 @@ static void dev_gso_skb_destructor(struct sk_buff *skb)
  *	This function segments the given skb and stores the list of segments
  *	in skb->next.
  */
-static int dev_gso_segment(struct sk_buff *skb, int features)
+static int dev_gso_segment(struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dev;
 	struct sk_buff *segs;
+	int features = dev->features & ~(illegal_highdma(dev, skb) ?
+					 NETIF_F_SG : 0);
 
-	features &= ~(illegal_highdma(dev, skb) ? NETIF_F_SG : 0);
 	segs = skb_gso_segment(skb, features);
 
 	/* Verifying header integrity only. */
@@ -1711,15 +1712,11 @@ int dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev,
 	int rc;
 
 	if (likely(!skb->next)) {
-		int features;
-
 		if (!list_empty(&ptype_all))
 			dev_queue_xmit_nit(skb, dev);
 
-		features = netif_skb_features(dev, skb);
-
-		if (netif_needs_gso(skb, features)) {
-			if (unlikely(dev_gso_segment(skb, features)))
+		if (netif_needs_gso(dev, skb)) {
+			if (unlikely(dev_gso_segment(skb)))
 				goto out_kfree_skb;
 			if (skb->next)
 				goto gso;
@@ -1890,7 +1887,7 @@ int dev_queue_xmit(struct sk_buff *skb)
 	int rc = -ENOMEM;
 
 	/* GSO will handle the following emulations directly. */
-	if (netif_needs_gso(skb, netif_skb_features(dev, skb)))
+	if (netif_needs_gso(dev, skb))
 		goto gso;
 
 	if (skb_has_frags(skb) &&
@@ -5198,7 +5195,6 @@ struct net_device *alloc_netdev_mq(int sizeof_priv, const char *name,
 	dev->real_num_tx_queues = queue_count;
 
 	dev->gso_max_size = GSO_MAX_SIZE;
-	dev->gso_max_segs = GSO_MAX_SEGS;
 
 	netdev_init_queues(dev);
 
