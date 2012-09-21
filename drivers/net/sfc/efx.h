@@ -40,6 +40,9 @@ extern void efx_wake_queue(struct efx_nic *efx);
 #define EFX_TXQ_SIZE 1024
 #define EFX_TXQ_MASK (EFX_TXQ_SIZE - 1)
 
+/* Maximum number of TCP segments we support for soft-TSO */
+#define EFX_TSO_MAX_SEGS	100
+
 /* RX */
 extern int efx_probe_rx_queue(struct efx_rx_queue *rx_queue);
 extern void efx_remove_rx_queue(struct efx_rx_queue *rx_queue);
