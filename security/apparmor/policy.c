@@ -659,6 +659,8 @@ fail:
  */
 static void aa_free_profile(struct aa_profile *profile)
 {
+	struct aa_profile *p;
+
 	AA_DEBUG("%s(%p)\n", __func__, profile);
 
 	if (!profile)
@@ -685,8 +687,28 @@ static void aa_free_profile(struct aa_profile *profile)
 	aa_free_sid(profile->sid);
 	aa_put_dfa(profile->xmatch);
 
-	if (profile->replacedby)
-		aa_put_profile(profile->replacedby);
+	/* put the profile reference, but not via put_profile/kref_put
+	 * replacedby can form a long chain that can result in cascading
+	 * frees that blows the stack lp#1056078. The long chain creation
+	 * should be addressed in profile replacement.
+	 * This just addresses recursion of free_profile causing the
+	 * stack to blow.
+	 */
+	for (p = profile->replacedby; p; ) {
+		if (atomic_dec_and_test(&p->base.count.refcount)) {
+			/* no more refs on p, grab its replacedby */
+			struct aa_profile *next = p->replacedby;
+			/* break the chain */
+			p->replacedby = NULL;
+			/* now free p, chain is broken */
+			aa_put_profile(p);
+
+			/* follow up with next profile in the chain */
+			p = next;
+		} else
+			break;
+	}
+	
 
 	kzfree(profile);
 }
