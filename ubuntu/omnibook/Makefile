@@ -156,6 +156,10 @@ endif
 
 endif
 
+ifeq ($(PWD),)
+PWD = $(shell pwd)
+endif
+
 EXTRA_CFLAGS += -DOMNIBOOK_MODULE_NAME='"$(MODULE_NAME)"'
 #EXTRA_LDFLAGS +=  $(src)/sections.lds
 EXTRA_LDFLAGS += $(PWD)/ubuntu/omnibook/sections.lds
