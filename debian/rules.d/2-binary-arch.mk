@@ -164,7 +164,7 @@ endif
 	$(kmake) O=$(hdrdir) -j1 silentoldconfig prepare scripts
 	# We'll symlink this stuff
 	rm -f $(hdrdir)/Makefile
-	rm -rf $(hdrdir)/include2
+	rm -rf $(hdrdir)/include2 $(hdrdir)/source
 	# powerpc seems to need some .o files for external module linking. Add them in.
 ifeq ($(arch),powerpc)
 	mkdir -p $(hdrdir)/arch/powerpc/lib
