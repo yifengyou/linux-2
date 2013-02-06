@@ -6068,6 +6068,7 @@ EXPORT_SYMBOL vmlinux 0xe127d82f	bh_submit_read
 EXPORT_SYMBOL vmlinux 0xe13cd8a7	dmi_name_in_vendors
 EXPORT_SYMBOL vmlinux 0xe14c959b	dev_open
 EXPORT_SYMBOL vmlinux 0xe1575bb2	udp_poll
+EXPORT_SYMBOL vmlinux 0xe1595505	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0xe16e2e60	dm_kcopyd_copy
 EXPORT_SYMBOL vmlinux 0xe1761617	security_inet_conn_request
 EXPORT_SYMBOL vmlinux 0xe179201d	fb_get_mode

@@ -4332,6 +4332,7 @@ EXPORT_SYMBOL vmlinux 0x4e830a3e	strnicmp
 EXPORT_SYMBOL vmlinux 0x4e90f967	seq_escape
 EXPORT_SYMBOL vmlinux 0x4ea3c2e4	bioset_create
 EXPORT_SYMBOL vmlinux 0x4ea70de0	dev_kfree_skb_any
+EXPORT_SYMBOL vmlinux 0x4eb424ca	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x4edc3e26	pci_bus_read_config_dword
 EXPORT_SYMBOL vmlinux 0x4ee76065	cpufreq_get_policy
 EXPORT_SYMBOL vmlinux 0x4f0b4218	netlink_rcv_skb

@@ -3655,6 +3655,7 @@ EXPORT_SYMBOL vmlinux 0x20750ce9	unregister_nls
 EXPORT_SYMBOL vmlinux 0x208739f6	acpi_load_table
 EXPORT_SYMBOL vmlinux 0x209aceaa	inet_twsk_deschedule
 EXPORT_SYMBOL vmlinux 0x20a1c74d	netdev_rx_csum_fault
+EXPORT_SYMBOL vmlinux 0x21218db8	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x213509b5	mb_cache_create
 EXPORT_SYMBOL vmlinux 0x2141192e	sock_no_getsockopt
 EXPORT_SYMBOL vmlinux 0x214d983b	scsi_test_unit_ready

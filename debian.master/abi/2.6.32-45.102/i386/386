@@ -6311,6 +6311,7 @@ EXPORT_SYMBOL vmlinux 0xe70ef967	clocksource_unregister
 EXPORT_SYMBOL vmlinux 0xe71389a3	alloc_etherdev_mq
 EXPORT_SYMBOL vmlinux 0xe714375c	__tasklet_hi_schedule_first
 EXPORT_SYMBOL vmlinux 0xe716baed	acpi_unregister_ioapic
+EXPORT_SYMBOL vmlinux 0xe71fd5ac	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0xe7278d65	dm_exception_store_type_register
 EXPORT_SYMBOL vmlinux 0xe72d2bc8	xfrm_user_policy
 EXPORT_SYMBOL vmlinux 0xe72e926c	vga_tryget

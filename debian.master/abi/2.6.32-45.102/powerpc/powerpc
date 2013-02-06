@@ -4434,6 +4434,7 @@ EXPORT_SYMBOL vmlinux 0x886aa274	posix_acl_create_masq
 EXPORT_SYMBOL vmlinux 0x8873b9fa	inet_sk_rebuild_header
 EXPORT_SYMBOL vmlinux 0x88969aa4	swiotlb_dma_mapping_error
 EXPORT_SYMBOL vmlinux 0x8899a0a1	llc_add_pack
+EXPORT_SYMBOL vmlinux 0x88b10d5e	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x88eeeb8f	sysctl_jiffies
 EXPORT_SYMBOL vmlinux 0x89066497	__register_binfmt
 EXPORT_SYMBOL vmlinux 0x8909667c	register_key_type

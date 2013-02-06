@@ -2532,6 +2532,7 @@ EXPORT_SYMBOL vmlinux 0x19faf60f	input_unregister_device
 EXPORT_SYMBOL vmlinux 0x19fbd74b	tcp_create_openreq_child
 EXPORT_SYMBOL vmlinux 0x1a12e5b6	ip_route_input
 EXPORT_SYMBOL vmlinux 0x1a35bcbc	VISenter
+EXPORT_SYMBOL vmlinux 0x1a4687f7	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x1a972d8b	drm_vblank_off
 EXPORT_SYMBOL vmlinux 0x1aa759d0	ns_to_timeval
 EXPORT_SYMBOL vmlinux 0x1aaad75f	bio_integrity_split

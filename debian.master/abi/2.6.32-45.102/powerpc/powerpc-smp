@@ -5313,6 +5313,7 @@ EXPORT_SYMBOL vmlinux 0xcbc6bc89	skb_insert
 EXPORT_SYMBOL vmlinux 0xcbcf8aca	journal_check_used_features
 EXPORT_SYMBOL vmlinux 0xcbeb00c6	elv_dispatch_sort
 EXPORT_SYMBOL vmlinux 0xcc0a1812	do_splice_from
+EXPORT_SYMBOL vmlinux 0xcc27ad46	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0xcc36f32e	fb_unregister_client
 EXPORT_SYMBOL vmlinux 0xcc3dbb59	sock_get_timestampns
 EXPORT_SYMBOL vmlinux 0xcc466872	alloc_buffer_head

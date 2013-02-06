@@ -5210,6 +5210,7 @@ EXPORT_SYMBOL vmlinux 0xbed467c3	of_find_node_by_name
 EXPORT_SYMBOL vmlinux 0xbed80340	netpoll_cleanup
 EXPORT_SYMBOL vmlinux 0xbef43296	console_conditional_schedule
 EXPORT_SYMBOL vmlinux 0xbf3d4b87	mb_cache_entry_alloc
+EXPORT_SYMBOL vmlinux 0xbf4b83f9	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0xbf7fd2f5	schedule_timeout_killable
 EXPORT_SYMBOL vmlinux 0xbf82ea61	wait_for_completion_interruptible_timeout
 EXPORT_SYMBOL vmlinux 0xbf8c6bfa	iw_handler_get_spy

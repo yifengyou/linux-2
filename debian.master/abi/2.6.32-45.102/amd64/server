@@ -4900,6 +4900,7 @@ EXPORT_SYMBOL vmlinux 0x8abbdb5b	__devm_request_region
 EXPORT_SYMBOL vmlinux 0x8ac40297	iommu_area_free
 EXPORT_SYMBOL vmlinux 0x8adb434a	kmem_cache_free
 EXPORT_SYMBOL vmlinux 0x8af16337	dquot_commit_info
+EXPORT_SYMBOL vmlinux 0x8af41638	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x8af95eeb	inet_stream_ops
 EXPORT_SYMBOL vmlinux 0x8b02a375	inet_csk_destroy_sock
 EXPORT_SYMBOL vmlinux 0x8b05a9b4	ip_ct_attach

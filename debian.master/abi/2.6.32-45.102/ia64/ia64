@@ -3623,6 +3623,7 @@ EXPORT_SYMBOL vmlinux 0x3cd26709	matroxfb_unregister_driver
 EXPORT_SYMBOL vmlinux 0x3cdb2f4d	pid_task
 EXPORT_SYMBOL vmlinux 0x3cdde3b7	ia64_ivt
 EXPORT_SYMBOL vmlinux 0x3ce4ca6f	disable_irq
+EXPORT_SYMBOL vmlinux 0x3cf9536d	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x3d109675	__insert_inode_hash
 EXPORT_SYMBOL vmlinux 0x3d18763c	_read_lock_irqsave
 EXPORT_SYMBOL vmlinux 0x3d1f67c6	xfrm_register_km

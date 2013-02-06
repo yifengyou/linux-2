@@ -2752,6 +2752,7 @@ EXPORT_SYMBOL vmlinux 0x2b9dfc0f	cpu_core_map
 EXPORT_SYMBOL vmlinux 0x2ba707a8	sysctl_tcp_low_latency
 EXPORT_SYMBOL vmlinux 0x2bab6138	__page_cache_alloc
 EXPORT_SYMBOL vmlinux 0x2bac3f4f	i2c_register_driver
+EXPORT_SYMBOL vmlinux 0x2bd53c37	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0x2bec8367	____pagevec_lru_add
 EXPORT_SYMBOL vmlinux 0x2c0c396e	of_get_property
 EXPORT_SYMBOL vmlinux 0x2c1cdd7d	genphy_config_advert

@@ -4110,6 +4110,7 @@ EXPORT_SYMBOL vmlinux 0xb0b847ac	__bitmap_full
 EXPORT_SYMBOL vmlinux 0xb0e10781	get_option
 EXPORT_SYMBOL vmlinux 0xb10b0cd4	bio_integrity_free
 EXPORT_SYMBOL vmlinux 0xb121390a	probe_irq_on
+EXPORT_SYMBOL vmlinux 0xb12169cf	bprm_change_interp
 EXPORT_SYMBOL vmlinux 0xb1280e3e	blk_rq_map_user
 EXPORT_SYMBOL vmlinux 0xb1553bbd	nf_reinject
 EXPORT_SYMBOL vmlinux 0xb177b55e	netif_napi_del
