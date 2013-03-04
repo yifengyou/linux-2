@@ -4159,7 +4159,6 @@ EXPORT_SYMBOL vmlinux 0x454a616f	mmc_wait_for_req
 EXPORT_SYMBOL vmlinux 0x454fc211	jbd2_journal_init_dev
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
 EXPORT_SYMBOL vmlinux 0x4571f7e9	vmap
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x45785de3	input_unregister_device
 EXPORT_SYMBOL vmlinux 0x458dd4c1	mddev_congested
 EXPORT_SYMBOL vmlinux 0x4591e428	generic_error_remove_page
@@ -5423,6 +5422,7 @@ EXPORT_SYMBOL vmlinux 0xa5f6691f	find_get_pages_contig
 EXPORT_SYMBOL vmlinux 0xa5febf30	dquot_mark_dquot_dirty
 EXPORT_SYMBOL vmlinux 0xa624ab9b	phy_disable_interrupts
 EXPORT_SYMBOL vmlinux 0xa63d85ab	slhc_remember
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa67aed71	tty_insert_flip_string_flags
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

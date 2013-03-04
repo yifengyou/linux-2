@@ -3640,7 +3640,6 @@ EXPORT_SYMBOL vmlinux 0x44c214d1	__wake_up_bit
 EXPORT_SYMBOL vmlinux 0x44dadabc	sock_release
 EXPORT_SYMBOL vmlinux 0x44e9a829	match_token
 EXPORT_SYMBOL vmlinux 0x453c8403	pci_msi_enabled
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x45766f9e	soft_cursor
 EXPORT_SYMBOL vmlinux 0x458be7f4	tty_unregister_driver
 EXPORT_SYMBOL vmlinux 0x458d8d73	__xfrm_state_delete
@@ -4827,6 +4826,7 @@ EXPORT_SYMBOL vmlinux 0xa62ea3d7	pci_request_region_exclusive
 EXPORT_SYMBOL vmlinux 0xa63405ce	pipe_unlock
 EXPORT_SYMBOL vmlinux 0xa65972b8	_memcpy_toio
 EXPORT_SYMBOL vmlinux 0xa65f90bd	pcim_iounmap_regions
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa67b975f	xfrm_state_alloc
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

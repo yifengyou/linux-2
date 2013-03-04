@@ -3605,7 +3605,6 @@ EXPORT_SYMBOL vmlinux 0x4544a331	mnt_pin
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
 EXPORT_SYMBOL vmlinux 0x4564459b	_lv1_set_virtual_uart_param
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
 EXPORT_SYMBOL vmlinux 0x45a55ec8	__iounmap
 EXPORT_SYMBOL vmlinux 0x45cfe80b	pasemi_dma_free_flag
@@ -4889,6 +4888,7 @@ EXPORT_SYMBOL vmlinux 0xa610a80a	skb_gso_segment
 EXPORT_SYMBOL vmlinux 0xa6312b36	i2c_smbus_read_word_data
 EXPORT_SYMBOL vmlinux 0xa63cbc93	xfrm_state_lookup_byaddr
 EXPORT_SYMBOL vmlinux 0xa65972b8	_memcpy_toio
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa680c849	xfrm_state_unregister_afinfo
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

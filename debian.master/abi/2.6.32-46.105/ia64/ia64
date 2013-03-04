@@ -3746,7 +3746,6 @@ EXPORT_SYMBOL vmlinux 0x453c8403	pci_msi_enabled
 EXPORT_SYMBOL vmlinux 0x454fb519	ioremap
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x45771196	generic_file_aio_read
 EXPORT_SYMBOL vmlinux 0x457eba13	qdisc_destroy
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
@@ -4884,6 +4883,7 @@ EXPORT_SYMBOL vmlinux 0xa5cebfed	dev_base_lock
 EXPORT_SYMBOL vmlinux 0xa5e6b578	unw_access_gr
 EXPORT_SYMBOL vmlinux 0xa5faba0d	mempool_alloc
 EXPORT_SYMBOL vmlinux 0xa62e6cfc	dev_getfirstbyhwtype
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid
 EXPORT_SYMBOL vmlinux 0xa687b612	netif_napi_add
 EXPORT_SYMBOL vmlinux 0xa6966a70	search_binary_handler

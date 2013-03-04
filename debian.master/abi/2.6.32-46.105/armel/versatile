@@ -2808,7 +2808,6 @@ EXPORT_SYMBOL vmlinux 0x44e9a829	match_token
 EXPORT_SYMBOL vmlinux 0x44ec5245	send_sig
 EXPORT_SYMBOL vmlinux 0x45304713	blk_plug_device
 EXPORT_SYMBOL vmlinux 0x4568728d	phy_register_fixup
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x457928be	ip_mc_dec_group
 EXPORT_SYMBOL vmlinux 0x4587d0de	inet6_register_protosw
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
@@ -3984,6 +3983,7 @@ EXPORT_SYMBOL vmlinux 0xa5f4ade3	jbd2_journal_load
 EXPORT_SYMBOL vmlinux 0xa63d85ab	slhc_remember
 EXPORT_SYMBOL vmlinux 0xa65854ef	udp_flush_pending_frames
 EXPORT_SYMBOL vmlinux 0xa66078a1	input_unregister_device
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa67a0e0f	blkdev_get
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

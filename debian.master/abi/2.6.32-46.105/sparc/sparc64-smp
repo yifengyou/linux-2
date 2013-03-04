@@ -3056,7 +3056,6 @@ EXPORT_SYMBOL vmlinux 0x454cbd8e	mdesc_release
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
 EXPORT_SYMBOL vmlinux 0x455937dd	security_inode_readlink
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x458bb5de	log_wait_commit
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
 EXPORT_SYMBOL vmlinux 0x45ae6e92	register_filesystem
@@ -4203,6 +4202,7 @@ EXPORT_SYMBOL vmlinux 0xa64a867a	key_put
 EXPORT_SYMBOL vmlinux 0xa65a78e0	ldc_bind
 EXPORT_SYMBOL vmlinux 0xa660f7a9	call_usermodehelper_setkeys
 EXPORT_SYMBOL vmlinux 0xa6667f5b	jbd2_journal_restart
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681ea2e	bdget
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

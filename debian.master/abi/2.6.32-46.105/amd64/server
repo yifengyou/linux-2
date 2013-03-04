@@ -3981,7 +3981,6 @@ EXPORT_SYMBOL vmlinux 0x4560aae5	lock_may_read
 EXPORT_SYMBOL vmlinux 0x45652042	loop_register_transfer
 EXPORT_SYMBOL vmlinux 0x456f5e33	ipv6_dev_get_saddr
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x45771a5d	find_get_pages_contig
 EXPORT_SYMBOL vmlinux 0x458a63d5	jbd2_journal_file_inode
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
@@ -5306,6 +5305,7 @@ EXPORT_SYMBOL vmlinux 0xa62a5b04	deactivate_locked_super
 EXPORT_SYMBOL vmlinux 0xa63d85ab	slhc_remember
 EXPORT_SYMBOL vmlinux 0xa646928b	journal_wipe
 EXPORT_SYMBOL vmlinux 0xa66864f0	vfs_rename
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid
 EXPORT_SYMBOL vmlinux 0xa6b7dffb	skb_gro_reset_offset

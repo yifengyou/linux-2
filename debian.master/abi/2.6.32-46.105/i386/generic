@@ -4214,7 +4214,6 @@ EXPORT_SYMBOL vmlinux 0x4534710a	scsi_is_target_device
 EXPORT_SYMBOL vmlinux 0x453c8403	pci_msi_enabled
 EXPORT_SYMBOL vmlinux 0x45450063	mod_timer
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x457a59f8	elv_rb_latter_request
 EXPORT_SYMBOL vmlinux 0x457f23ed	dm_table_unplug_all
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
@@ -5476,6 +5475,7 @@ EXPORT_SYMBOL vmlinux 0xa63c84f5	acpi_unlock_ac_dir
 EXPORT_SYMBOL vmlinux 0xa63d85ab	slhc_remember
 EXPORT_SYMBOL vmlinux 0xa65d41aa	splice_from_pipe_next
 EXPORT_SYMBOL vmlinux 0xa6637000	rfkill_set_states
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid
 EXPORT_SYMBOL vmlinux 0xa68c7457	journal_get_undo_access

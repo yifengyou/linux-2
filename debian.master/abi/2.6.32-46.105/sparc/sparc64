@@ -3081,7 +3081,6 @@ EXPORT_SYMBOL vmlinux 0x455b7cb3	bfifo_qdisc_ops
 EXPORT_SYMBOL vmlinux 0x455f1a5f	skb_insert
 EXPORT_SYMBOL vmlinux 0x45672aed	tty_check_change
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x4575b644	pci_lost_interrupt
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
 EXPORT_SYMBOL vmlinux 0x459cd128	__blk_end_request_all
@@ -4233,6 +4232,7 @@ EXPORT_SYMBOL vmlinux 0xa5d0bf70	elv_abort_queue
 EXPORT_SYMBOL vmlinux 0xa5e68673	tlb_type
 EXPORT_SYMBOL vmlinux 0xa5f55c3f	__rta_fill
 EXPORT_SYMBOL vmlinux 0xa64a6fd5	udp_lib_get_port
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa677155b	lro_vlan_hwaccel_receive_skb
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid

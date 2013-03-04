@@ -3984,7 +3984,6 @@ EXPORT_SYMBOL vmlinux 0x455f4f99	pci_scan_slot
 EXPORT_SYMBOL vmlinux 0x456298c9	dev_get_flags
 EXPORT_SYMBOL vmlinux 0x45704798	print_hex_dump_bytes
 EXPORT_SYMBOL vmlinux 0x4570955b	i2c_smbus_write_byte_data
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x458a8e3f	devm_ioremap
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
 EXPORT_SYMBOL vmlinux 0x45bf6f9e	blk_rq_map_user_iov
@@ -5305,6 +5304,7 @@ EXPORT_SYMBOL vmlinux 0xa61055ce	dma_find_channel
 EXPORT_SYMBOL vmlinux 0xa63d85ab	slhc_remember
 EXPORT_SYMBOL vmlinux 0xa6652a7b	noop_qdisc
 EXPORT_SYMBOL vmlinux 0xa6677f72	arch_acpi_processor_cleanup_pdc
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid
 EXPORT_SYMBOL vmlinux 0xa6ac4d1c	check_disk_change

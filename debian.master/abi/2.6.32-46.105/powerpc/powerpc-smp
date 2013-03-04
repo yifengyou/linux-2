@@ -3630,7 +3630,6 @@ EXPORT_SYMBOL vmlinux 0x45490f49	pci_bus_find_capability
 EXPORT_SYMBOL vmlinux 0x4550ba8a	register_cpu_notifier
 EXPORT_SYMBOL vmlinux 0x455633d5	netpoll_cleanup
 EXPORT_SYMBOL vmlinux 0x45606c20	phy_ethtool_sset
-EXPORT_SYMBOL vmlinux 0x4575315d	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0x457857ec	journal_get_create_access
 EXPORT_SYMBOL vmlinux 0x45947727	param_array_set
 EXPORT_SYMBOL vmlinux 0x4596db6a	sys_sigreturn
@@ -4876,6 +4875,7 @@ EXPORT_SYMBOL vmlinux 0xa5d7663b	do_SAK
 EXPORT_SYMBOL vmlinux 0xa6105235	swiotlb_dma_mapping_error
 EXPORT_SYMBOL vmlinux 0xa6490576	fifo_create_dflt
 EXPORT_SYMBOL vmlinux 0xa65972b8	_memcpy_toio
+EXPORT_SYMBOL vmlinux 0xa675804c	utf8s_to_utf16s
 EXPORT_SYMBOL vmlinux 0xa68124fa	hweight8
 EXPORT_SYMBOL vmlinux 0xa681fe88	generate_random_uuid
 EXPORT_SYMBOL vmlinux 0xa6855523	generic_file_open
