@@ -1,0 +1,10 @@
+evtchn
+fb_sys_fops
+syscopyarea
+sysfillrect
+sysimgblt
+xen-blkfront
+xen-fbfront
+xenfs
+xen-kbdfront
+xen-netfront
