@@ -2194,9 +2194,6 @@ EXPORT_SYMBOL drivers/video/svgalib 0xef774f5d	svga_compute_pll
 EXPORT_SYMBOL drivers/video/svgalib 0xf8afdd71	svga_get_tilemax
 EXPORT_SYMBOL drivers/video/svgalib 0xfc24d542	svga_settile
 EXPORT_SYMBOL drivers/video/svgalib 0xfd38f6cf	svga_tilecopy
-EXPORT_SYMBOL drivers/video/syscopyarea 0xf1bd0bda	sys_copyarea
-EXPORT_SYMBOL drivers/video/sysfillrect 0x17c8bb03	sys_fillrect
-EXPORT_SYMBOL drivers/video/sysimgblt 0x8c547ee4	sys_imageblit
 EXPORT_SYMBOL drivers/video/vgastate 0x686de290	restore_vga
 EXPORT_SYMBOL drivers/video/vgastate 0xe7a2620e	save_vga
 EXPORT_SYMBOL drivers/w1/slaves/w1_bq27000 0x71ed0080	w1_bq27000_write
@@ -3535,6 +3532,7 @@ EXPORT_SYMBOL vmlinux 0x1710ca1f	register_sysrq_key
 EXPORT_SYMBOL vmlinux 0x173734f9	kthread_create
 EXPORT_SYMBOL vmlinux 0x175844f1	neigh_table_init
 EXPORT_SYMBOL vmlinux 0x1780bcab	seq_puts
+EXPORT_SYMBOL vmlinux 0x17c8bb03	sys_fillrect
 EXPORT_SYMBOL vmlinux 0x17df17bc	sysctl_tcp_ecn
 EXPORT_SYMBOL vmlinux 0x17f341a0	i8042_lock_chip
 EXPORT_SYMBOL vmlinux 0x1805732d	default_llseek
@@ -5076,6 +5074,7 @@ EXPORT_SYMBOL vmlinux 0x8bfc01d6	fifo_create_dflt
 EXPORT_SYMBOL vmlinux 0x8c183cbe	iowrite16
 EXPORT_SYMBOL vmlinux 0x8c35d41f	blk_queue_dma_pad
 EXPORT_SYMBOL vmlinux 0x8c39ad6c	genphy_restart_aneg
+EXPORT_SYMBOL vmlinux 0x8c547ee4	sys_imageblit
 EXPORT_SYMBOL vmlinux 0x8c785ed7	i2c_smbus_write_word_data
 EXPORT_SYMBOL vmlinux 0x8cc79cab	iowrite16_rep
 EXPORT_SYMBOL vmlinux 0x8cd66f55	pci_bus_write_config_dword
@@ -6463,6 +6462,7 @@ EXPORT_SYMBOL vmlinux 0xf193a8b8	bdi_set_max_ratio
 EXPORT_SYMBOL vmlinux 0xf195c682	fb_invert_cmaps
 EXPORT_SYMBOL vmlinux 0xf1a3ef68	pci_unmap_rom
 EXPORT_SYMBOL vmlinux 0xf1a81984	input_register_device
+EXPORT_SYMBOL vmlinux 0xf1bd0bda	sys_copyarea
 EXPORT_SYMBOL vmlinux 0xf1bd3328	rtnetlink_put_metrics
 EXPORT_SYMBOL vmlinux 0xf1d64416	gen_new_estimator
 EXPORT_SYMBOL vmlinux 0xf1db1704	nla_memcpy
@@ -7903,8 +7903,6 @@ EXPORT_SYMBOL_GPL drivers/video/backlight/ili9320 0x8c9909e8	ili9320_suspend
 EXPORT_SYMBOL_GPL drivers/video/backlight/ili9320 0xcc9c21da	ili9320_shutdown
 EXPORT_SYMBOL_GPL drivers/video/backlight/ili9320 0xe9792dbe	ili9320_resume
 EXPORT_SYMBOL_GPL drivers/video/fb_ddc 0x64bab9b1	fb_ddc_read
-EXPORT_SYMBOL_GPL drivers/video/fb_sys_fops 0x8fa9591b	fb_sys_write
-EXPORT_SYMBOL_GPL drivers/video/fb_sys_fops 0xb746fa2b	fb_sys_read
 EXPORT_SYMBOL_GPL drivers/video/sis/sisfb 0x84f9efdb	sis_malloc_new
 EXPORT_SYMBOL_GPL drivers/video/sis/sisfb 0xf1f36bec	sis_free_new
 EXPORT_SYMBOL_GPL drivers/video/vermilion/vmlfb 0x016e6c20	vmlfb_unregister_subsys
@@ -9739,6 +9737,7 @@ EXPORT_SYMBOL_GPL vmlinux 0x8f648874	shash_ahash_digest
 EXPORT_SYMBOL_GPL vmlinux 0x8f6cee77	__round_jiffies_relative
 EXPORT_SYMBOL_GPL vmlinux 0x8f97b57b	skb_tstamp_tx
 EXPORT_SYMBOL_GPL vmlinux 0x8fa74514	sysdev_suspend
+EXPORT_SYMBOL_GPL vmlinux 0x8fa9591b	fb_sys_write
 EXPORT_SYMBOL_GPL vmlinux 0x8fab8831	map_vm_area
 EXPORT_SYMBOL_GPL vmlinux 0x8fdd125d	ring_buffer_swap_cpu
 EXPORT_SYMBOL_GPL vmlinux 0x8fe0245c	__inet_lookup_established
@@ -10024,6 +10023,7 @@ EXPORT_SYMBOL_GPL vmlinux 0xb6e5b91b	usb_ifnum_to_if
 EXPORT_SYMBOL_GPL vmlinux 0xb6e67e71	regulator_get_drvdata
 EXPORT_SYMBOL_GPL vmlinux 0xb718f2f9	sfi_table_parse
 EXPORT_SYMBOL_GPL vmlinux 0xb744fa43	xfrm_ealg_get_byname
+EXPORT_SYMBOL_GPL vmlinux 0xb746fa2b	fb_sys_read
 EXPORT_SYMBOL_GPL vmlinux 0xb7d7c12e	hpet_set_alarm_time
 EXPORT_SYMBOL_GPL vmlinux 0xb7e2eb91	mce_cpu_specific_poll
 EXPORT_SYMBOL_GPL vmlinux 0xb7fdd0df	eventfd_ctx_put
