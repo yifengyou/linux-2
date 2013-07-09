@@ -23,7 +23,7 @@ linux (2.6.32-50.112) lucid; urgency=low
     - LP: #1198296
     - CVE-2013-2237
 
- -- Brad Figg <brad.figg@canonical.com>  Tue, 09 Jul 2013 13:10:40 -0700
+ -- Brad Figg <brad.figg@canonical.com>  Tue, 09 Jul 2013 12:22:54 -0700
 
 linux (2.6.32-49.111) lucid; urgency=low
 
