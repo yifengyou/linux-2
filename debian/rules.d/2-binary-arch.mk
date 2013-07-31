@@ -348,7 +348,7 @@ endif
 
 $(stampdir)/stamp-build-perarch: $(stampdir)/stamp-prepare-perarch
 ifeq ($(do_tools),true)
-	cd $(builddirpa)/tools-$*/tools/perf && make HAVE_CPLUS_DEMANGLE=1 $(conc_level)
+	cd $(builddirpa)/tools-$*/tools/perf && make prefix=/usr HAVE_CPLUS_DEMANGLE=1 $(conc_level)
 endif
 	@touch $@
 
