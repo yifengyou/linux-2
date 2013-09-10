@@ -3656,6 +3656,7 @@ EXPORT_SYMBOL vmlinux 0x744c0c68	param_get_byte
 EXPORT_SYMBOL vmlinux 0x74607418	drm_mode_config_init
 EXPORT_SYMBOL vmlinux 0x7466516f	sock_no_setsockopt
 EXPORT_SYMBOL vmlinux 0x746ffcbe	dquot_free_space
+EXPORT_SYMBOL vmlinux 0x747639f7	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x747cd23b	tcp_initialize_rcv_mss
 EXPORT_SYMBOL vmlinux 0x7485e15e	unregister_chrdev_region
 EXPORT_SYMBOL vmlinux 0x74954462	timecounter_read

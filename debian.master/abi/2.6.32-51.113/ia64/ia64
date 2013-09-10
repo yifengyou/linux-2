@@ -5464,6 +5464,7 @@ EXPORT_SYMBOL vmlinux 0xd7ef1694	per_cpu__local_per_cpu_offset
 EXPORT_SYMBOL vmlinux 0xd7f7118e	skb_copy_and_csum_bits
 EXPORT_SYMBOL vmlinux 0xd8036f0d	inet_proto_csum_replace4
 EXPORT_SYMBOL vmlinux 0xd8127758	journal_force_commit_nested
+EXPORT_SYMBOL vmlinux 0xd813dd37	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0xd83791bc	nf_conntrack_destroy
 EXPORT_SYMBOL vmlinux 0xd863da93	dev_mc_add
 EXPORT_SYMBOL vmlinux 0xd86725bb	set_page_dirty_lock

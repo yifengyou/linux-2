@@ -3730,6 +3730,7 @@ EXPORT_SYMBOL vmlinux 0x4d3c153f	sigprocmask
 EXPORT_SYMBOL vmlinux 0x4d70d522	netif_receive_skb
 EXPORT_SYMBOL vmlinux 0x4d9d69e8	pcie_port_service_unregister
 EXPORT_SYMBOL vmlinux 0x4d9d7a0a	bio_sector_offset
+EXPORT_SYMBOL vmlinux 0x4db2d8fd	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x4dc45be9	nf_log_unbind_pf
 EXPORT_SYMBOL vmlinux 0x4de5bfd2	serio_close
 EXPORT_SYMBOL vmlinux 0x4dec6038	memscan

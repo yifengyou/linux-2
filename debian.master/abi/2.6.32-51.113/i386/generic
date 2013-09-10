@@ -4861,6 +4861,7 @@ EXPORT_SYMBOL vmlinux 0x760a0f4f	yield
 EXPORT_SYMBOL vmlinux 0x760b437a	unregister_inetaddr_notifier
 EXPORT_SYMBOL vmlinux 0x7640da36	dentry_unhash
 EXPORT_SYMBOL vmlinux 0x764288de	__find_get_block
+EXPORT_SYMBOL vmlinux 0x766b7658	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x767ddb02	set_memory_wc
 EXPORT_SYMBOL vmlinux 0x76853b4f	pci_set_dma_max_seg_size
 EXPORT_SYMBOL vmlinux 0x76865ea8	dev_alloc_name

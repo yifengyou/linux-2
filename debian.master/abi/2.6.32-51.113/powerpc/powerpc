@@ -3757,6 +3757,7 @@ EXPORT_SYMBOL vmlinux 0x4e830a3e	strnicmp
 EXPORT_SYMBOL vmlinux 0x4e9dffb5	ip_fast_csum
 EXPORT_SYMBOL vmlinux 0x4ea8fcde	dev_queue_xmit
 EXPORT_SYMBOL vmlinux 0x4ec227dd	sk_stream_error
+EXPORT_SYMBOL vmlinux 0x4ec75ad5	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x4ed181c5	pci_dev_driver
 EXPORT_SYMBOL vmlinux 0x4ee3d082	arp_create
 EXPORT_SYMBOL vmlinux 0x4ee4f9d7	seq_bitmap

@@ -5694,6 +5694,7 @@ EXPORT_SYMBOL vmlinux 0xc2e587d1	reset_devices
 EXPORT_SYMBOL vmlinux 0xc316b98c	jiffies_to_clock_t
 EXPORT_SYMBOL vmlinux 0xc31e4052	tcp_md5_hash_header
 EXPORT_SYMBOL vmlinux 0xc33f6f4c	on_each_cpu
+EXPORT_SYMBOL vmlinux 0xc347c732	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0xc35213ef	devcgroup_inode_permission
 EXPORT_SYMBOL vmlinux 0xc36bb4b5	sys_fillrect
 EXPORT_SYMBOL vmlinux 0xc373c277	scsi_adjust_queue_depth

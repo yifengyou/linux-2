@@ -6337,6 +6337,7 @@ EXPORT_SYMBOL vmlinux 0xf51ae235	touch_nmi_watchdog
 EXPORT_SYMBOL vmlinux 0xf53d4c26	qdisc_class_hash_destroy
 EXPORT_SYMBOL vmlinux 0xf57682c8	acpi_get_object_info
 EXPORT_SYMBOL vmlinux 0xf5846a5c	lease_get_mtime
+EXPORT_SYMBOL vmlinux 0xf5ae6845	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0xf5c9012e	timespec_trunc
 EXPORT_SYMBOL vmlinux 0xf5eb86ea	blk_verify_command
 EXPORT_SYMBOL vmlinux 0xf60ce136	lock_may_read

@@ -3777,6 +3777,7 @@ EXPORT_SYMBOL vmlinux 0x9697232e	may_umount_tree
 EXPORT_SYMBOL vmlinux 0x96a07eee	mdiobus_read
 EXPORT_SYMBOL vmlinux 0x96cd2b04	scsi_sense_key_string
 EXPORT_SYMBOL vmlinux 0x96f0fba7	inet_bind
+EXPORT_SYMBOL vmlinux 0x971f95ad	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x97255bdf	strlen
 EXPORT_SYMBOL vmlinux 0x9754ec10	radix_tree_preload
 EXPORT_SYMBOL vmlinux 0x9755b3b4	inet_csk_accept

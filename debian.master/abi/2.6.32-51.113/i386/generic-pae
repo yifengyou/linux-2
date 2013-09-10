@@ -5213,6 +5213,7 @@ EXPORT_SYMBOL vmlinux 0x972eb171	ppp_register_channel
 EXPORT_SYMBOL vmlinux 0x9735a190	kthread_stop
 EXPORT_SYMBOL vmlinux 0x973804db	sync_inode
 EXPORT_SYMBOL vmlinux 0x973873ab	_spin_lock
+EXPORT_SYMBOL vmlinux 0x973a18f6	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x973b4ae7	seq_open
 EXPORT_SYMBOL vmlinux 0x9754ec10	radix_tree_preload
 EXPORT_SYMBOL vmlinux 0x97622a3f	splice_from_pipe_begin

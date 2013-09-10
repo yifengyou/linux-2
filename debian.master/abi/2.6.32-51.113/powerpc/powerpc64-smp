@@ -5625,6 +5625,7 @@ EXPORT_SYMBOL vmlinux 0xe14f533f	tcp_shutdown
 EXPORT_SYMBOL vmlinux 0xe155757b	make_EII_client
 EXPORT_SYMBOL vmlinux 0xe1761617	security_inet_conn_request
 EXPORT_SYMBOL vmlinux 0xe1a3ab95	tcp_connect
+EXPORT_SYMBOL vmlinux 0xe1e3ef20	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0xe1e654a6	kernel_sock_shutdown
 EXPORT_SYMBOL vmlinux 0xe1ee2bb3	dentry_unhash
 EXPORT_SYMBOL vmlinux 0xe200f872	secure_dccpv6_sequence_number

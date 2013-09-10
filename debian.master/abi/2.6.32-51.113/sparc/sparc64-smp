@@ -5137,6 +5137,7 @@ EXPORT_SYMBOL vmlinux 0xf39ef360	clocksource_register
 EXPORT_SYMBOL vmlinux 0xf3bf0bce	__bitmap_complement
 EXPORT_SYMBOL vmlinux 0xf3d0253b	__netdev_alloc_skb
 EXPORT_SYMBOL vmlinux 0xf3d87279	journal_init_inode
+EXPORT_SYMBOL vmlinux 0xf3e7d2ba	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0xf3fe0f77	setup_arg_pages
 EXPORT_SYMBOL vmlinux 0xf41e34b5	dquot_commit_info
 EXPORT_SYMBOL vmlinux 0xf41e7b6c	keyring_search

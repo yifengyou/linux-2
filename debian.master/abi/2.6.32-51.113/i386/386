@@ -4353,6 +4353,7 @@ EXPORT_SYMBOL vmlinux 0x54a6d074	atomic64_dec
 EXPORT_SYMBOL vmlinux 0x54c7bd0f	vfs_dq_transfer
 EXPORT_SYMBOL vmlinux 0x54e6fcdd	net_enable_timestamp
 EXPORT_SYMBOL vmlinux 0x54ffa4ec	register_console
+EXPORT_SYMBOL vmlinux 0x55047f69	udp_push_pending_frames
 EXPORT_SYMBOL vmlinux 0x5508babb	tty_port_lower_dtr_rts
 EXPORT_SYMBOL vmlinux 0x5561cd9a	ppp_unit_number
 EXPORT_SYMBOL vmlinux 0x55636db2	rtnl_create_link
