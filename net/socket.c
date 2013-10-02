@@ -1865,6 +1865,16 @@ SYSCALL_DEFINE2(shutdown, int, fd, int, how)
 #define COMPAT_NAMELEN(msg)	COMPAT_MSG(msg, msg_namelen)
 #define COMPAT_FLAGS(msg)	COMPAT_MSG(msg, msg_flags)
 
+static int copy_msghdr_from_user(struct msghdr *kmsg,
+                                 struct msghdr __user *umsg)
+{
+	if (copy_from_user(kmsg, umsg, sizeof(struct msghdr)))
+		return -EFAULT;
+	if (kmsg->msg_namelen > sizeof(struct sockaddr_storage))
+		return -EINVAL;
+	return 0;
+}
+
 /*
  *	BSD sendmsg interface
  */
@@ -1889,8 +1899,11 @@ SYSCALL_DEFINE3(sendmsg, int, fd, struct msghdr __user *, msg, unsigned, flags)
 		if (get_compat_msghdr(&msg_sys, msg_compat))
 			return -EFAULT;
 	}
-	else if (copy_from_user(&msg_sys, msg, sizeof(struct msghdr)))
-		return -EFAULT;
+	else {
+		err = copy_msghdr_from_user(&msg_sys, msg);
+		if (err)
+			return err;
+	}
 
 	sock = sockfd_lookup_light(fd, &err, &fput_needed);
 	if (!sock)
@@ -1999,8 +2012,11 @@ SYSCALL_DEFINE3(recvmsg, int, fd, struct msghdr __user *, msg,
 		if (get_compat_msghdr(&msg_sys, msg_compat))
 			return -EFAULT;
 	}
-	else if (copy_from_user(&msg_sys, msg, sizeof(struct msghdr)))
-		return -EFAULT;
+	else {
+		err = copy_msghdr_from_user(&msg_sys, msg);
+		if (err)
+			return err;
+	}
 
 	sock = sockfd_lookup_light(fd, &err, &fput_needed);
 	if (!sock)
