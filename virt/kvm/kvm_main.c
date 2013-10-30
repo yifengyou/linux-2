@@ -1338,6 +1338,12 @@ skip_lpage:
 		goto out_free;
 	}
 
+#ifdef CONFIG_DMAR
+	/* unmap the pages in iommu page table */
+	if (!npages)
+		kvm_iommu_unmap_pages(kvm, &old);
+#endif
+
 	kvm_free_physmem_slot(&old, npages ? &new : NULL);
 	/* Slot deletion case: we have to update the current slot */
 	spin_lock(&kvm->mmu_lock);
