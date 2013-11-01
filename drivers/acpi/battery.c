@@ -930,7 +930,7 @@ static struct acpi_driver acpi_battery_driver = {
 static int __init acpi_battery_init(void)
 {
 	if (acpi_disabled)
-		return;
+		return -ENODEV;
 #ifdef CONFIG_ACPI_PROCFS_POWER
 	acpi_battery_dir = acpi_lock_battery_dir();
 	if (!acpi_battery_dir)
