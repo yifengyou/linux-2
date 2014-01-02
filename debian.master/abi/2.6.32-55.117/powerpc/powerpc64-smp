@@ -5935,6 +5935,7 @@ EXPORT_SYMBOL vmlinux 0xf9a482f9	msleep
 EXPORT_SYMBOL vmlinux 0xf9b4fd53	security_inode_permission
 EXPORT_SYMBOL vmlinux 0xf9df1c8f	module_put
 EXPORT_SYMBOL vmlinux 0xf9e549de	nf_register_hook
+EXPORT_SYMBOL vmlinux 0xf9f88fbd	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xfa0a95fd	dev_addr_add
 EXPORT_SYMBOL vmlinux 0xfa0e5ed7	skb_copy
 EXPORT_SYMBOL vmlinux 0xfa31cd3b	kfifo_init

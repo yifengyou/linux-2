@@ -5852,6 +5852,7 @@ EXPORT_SYMBOL vmlinux 0xf733bcc4	sock_release
 EXPORT_SYMBOL vmlinux 0xf73ad43e	__pagevec_release
 EXPORT_SYMBOL vmlinux 0xf7584a9c	find_font
 EXPORT_SYMBOL vmlinux 0xf7623914	radix_tree_tag_clear
+EXPORT_SYMBOL vmlinux 0xf7816c3e	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xf78d04ab	netlink_register_notifier
 EXPORT_SYMBOL vmlinux 0xf799372e	invalidate_mapping_pages
 EXPORT_SYMBOL vmlinux 0xf7b12aee	__next_cpu

@@ -5553,6 +5553,7 @@ EXPORT_SYMBOL vmlinux 0xaeb6d7c3	journal_check_used_features
 EXPORT_SYMBOL vmlinux 0xaec1a7d9	kmem_ptr_validate
 EXPORT_SYMBOL vmlinux 0xaec655c7	alloc_pages_exact
 EXPORT_SYMBOL vmlinux 0xaed013b9	posix_acl_valid
+EXPORT_SYMBOL vmlinux 0xaefb596f	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xaf0ac6d9	__getblk
 EXPORT_SYMBOL vmlinux 0xaf0b984e	free_mdio_bitbang
 EXPORT_SYMBOL vmlinux 0xaf131f7b	ipv6_getsockopt

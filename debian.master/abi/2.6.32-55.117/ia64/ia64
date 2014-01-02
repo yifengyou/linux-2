@@ -3144,6 +3144,7 @@ EXPORT_SYMBOL vmlinux 0x16cf87b2	pci_enable_device_mem
 EXPORT_SYMBOL vmlinux 0x16e23b0b	d_lookup
 EXPORT_SYMBOL vmlinux 0x16fb974b	skb_split
 EXPORT_SYMBOL vmlinux 0x16fbe8ae	xfrm_state_add
+EXPORT_SYMBOL vmlinux 0x17049004	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0x170c25ee	acpi_get_next_object
 EXPORT_SYMBOL vmlinux 0x1712fb5f	dquot_initialize
 EXPORT_SYMBOL vmlinux 0x1713e5eb	dquot_free_inode

@@ -6564,6 +6564,7 @@ EXPORT_SYMBOL vmlinux 0xf8b30e93	mempool_create
 EXPORT_SYMBOL vmlinux 0xf8cf9ee5	abort_exclusive_wait
 EXPORT_SYMBOL vmlinux 0xf8d117ae	inet6_add_protocol
 EXPORT_SYMBOL vmlinux 0xf8f13129	block_sync_page
+EXPORT_SYMBOL vmlinux 0xf8f91ce8	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xf90c6a0a	blk_queue_alignment_offset
 EXPORT_SYMBOL vmlinux 0xf940a328	__next_cpu
 EXPORT_SYMBOL vmlinux 0xf94e938b	kobject_del

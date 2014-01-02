@@ -5626,6 +5626,7 @@ EXPORT_SYMBOL vmlinux 0xbd86faf6	phy_mii_ioctl
 EXPORT_SYMBOL vmlinux 0xbda9071d	ip_nat_decode_session
 EXPORT_SYMBOL vmlinux 0xbdaf5b07	acpi_os_read_port
 EXPORT_SYMBOL vmlinux 0xbdb16de6	dev_get_by_index
+EXPORT_SYMBOL vmlinux 0xbdbc73df	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xbdc5ca31	bfifo_qdisc_ops
 EXPORT_SYMBOL vmlinux 0xbdd17a2e	vlan_gro_frags
 EXPORT_SYMBOL vmlinux 0xbdf5c25c	rb_next

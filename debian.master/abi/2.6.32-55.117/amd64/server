@@ -3270,6 +3270,7 @@ EXPORT_SYMBOL vmlinux 0x0f9df6aa	__skb_checksum_complete
 EXPORT_SYMBOL vmlinux 0x0fc5e8eb	radix_tree_gang_lookup_slot
 EXPORT_SYMBOL vmlinux 0x0fd00a68	acpi_clear_event
 EXPORT_SYMBOL vmlinux 0x0ff2b602	slhc_compress
+EXPORT_SYMBOL vmlinux 0x100b627b	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0x103d77c1	pcim_iounmap_regions
 EXPORT_SYMBOL vmlinux 0x10400e26	vlan_gro_receive
 EXPORT_SYMBOL vmlinux 0x105e2727	__tracepoint_kmalloc

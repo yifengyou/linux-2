@@ -5142,6 +5142,7 @@ EXPORT_SYMBOL vmlinux 0xf57c239d	neigh_table_clear
 EXPORT_SYMBOL vmlinux 0xf5c9012e	timespec_trunc
 EXPORT_SYMBOL vmlinux 0xf5eb86ea	blk_verify_command
 EXPORT_SYMBOL vmlinux 0xf5fb9023	netif_device_attach
+EXPORT_SYMBOL vmlinux 0xf606f870	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xf60efa23	__sg_alloc_table
 EXPORT_SYMBOL vmlinux 0xf610a558	netdev_set_master
 EXPORT_SYMBOL vmlinux 0xf6166650	inode_init_always

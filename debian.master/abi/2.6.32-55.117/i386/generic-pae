@@ -4337,6 +4337,7 @@ EXPORT_SYMBOL vmlinux 0x53e36664	unregister_framebuffer
 EXPORT_SYMBOL vmlinux 0x53eca445	rfkill_set_states
 EXPORT_SYMBOL vmlinux 0x53edfd6c	scsi_device_quiesce
 EXPORT_SYMBOL vmlinux 0x53f429b0	generic_unplug_device
+EXPORT_SYMBOL vmlinux 0x5402b7ba	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0x541dfef4	atomic64_inc
 EXPORT_SYMBOL vmlinux 0x54290dc9	nla_validate
 EXPORT_SYMBOL vmlinux 0x54344dd0	bitmap_startwrite

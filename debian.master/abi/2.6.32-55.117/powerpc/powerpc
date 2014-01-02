@@ -3158,6 +3158,7 @@ EXPORT_SYMBOL vmlinux 0x1c324357	idr_replace
 EXPORT_SYMBOL vmlinux 0x1c5b2c15	pmu_wait_complete
 EXPORT_SYMBOL vmlinux 0x1c80de9c	ip_send_check
 EXPORT_SYMBOL vmlinux 0x1c90afc8	of_platform_bus_type
+EXPORT_SYMBOL vmlinux 0x1c9fdebf	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0x1cc6719a	register_reboot_notifier
 EXPORT_SYMBOL vmlinux 0x1cd5d266	bio_endio
 EXPORT_SYMBOL vmlinux 0x1d075b49	path_put

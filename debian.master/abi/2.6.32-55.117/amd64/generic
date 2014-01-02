@@ -5620,6 +5620,7 @@ EXPORT_SYMBOL vmlinux 0xbd7423fd	vc_cons
 EXPORT_SYMBOL vmlinux 0xbda9071d	ip_nat_decode_session
 EXPORT_SYMBOL vmlinux 0xbdaf5b07	acpi_os_read_port
 EXPORT_SYMBOL vmlinux 0xbdb16de6	dev_get_by_index
+EXPORT_SYMBOL vmlinux 0xbdbc73df	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0xbdf5c25c	rb_next
 EXPORT_SYMBOL vmlinux 0xbe137845	key_revoke
 EXPORT_SYMBOL vmlinux 0xbe22bb5f	skb_dequeue_tail

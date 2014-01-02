@@ -3378,6 +3378,7 @@ EXPORT_SYMBOL vmlinux 0x61240d43	__sg_free_table
 EXPORT_SYMBOL vmlinux 0x6146b15c	lock_fb_info
 EXPORT_SYMBOL vmlinux 0x618d3a97	audit_log_end
 EXPORT_SYMBOL vmlinux 0x618d8299	set_notify_swap_entry_free
+EXPORT_SYMBOL vmlinux 0x6193c859	vm_iomap_memory
 EXPORT_SYMBOL vmlinux 0x61ac35ac	ida_destroy
 EXPORT_SYMBOL vmlinux 0x61b7b126	simple_strtoull
 EXPORT_SYMBOL vmlinux 0x61eabc22	__lock_page
