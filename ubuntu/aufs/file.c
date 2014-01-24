@@ -85,7 +85,7 @@ struct file *au_h_open(struct dentry *dentry, aufs_bindex_t bindex, int flags,
 			goto out_br;
 		}
 	}
-	fsnotify_open(h_dentry);
+	fsnotify_open(h_file);
 	goto out; /* success */
 
  out_br:
