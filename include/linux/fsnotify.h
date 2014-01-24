@@ -183,8 +183,9 @@ static inline void fsnotify_mkdir(struct inode *inode, struct dentry *dentry)
 /*
  * fsnotify_access - file was read
  */
-static inline void fsnotify_access(struct dentry *dentry)
+static inline void fsnotify_access(struct file *file)
 {
+	struct dentry *dentry = file->f_path.dentry;
 	struct inode *inode = dentry->d_inode;
 	__u32 mask = FS_ACCESS;
 
@@ -194,14 +195,15 @@ static inline void fsnotify_access(struct dentry *dentry)
 	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
 	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
+	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
 }
 
 /*
  * fsnotify_modify - file was modified
  */
-static inline void fsnotify_modify(struct dentry *dentry)
+static inline void fsnotify_modify(struct file *file)
 {
+	struct dentry *dentry = file->f_path.dentry;
 	struct inode *inode = dentry->d_inode;
 	__u32 mask = FS_MODIFY;
 
@@ -211,14 +213,15 @@ static inline void fsnotify_modify(struct dentry *dentry)
 	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
 	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
+	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
 }
 
 /*
  * fsnotify_open - file was opened
  */
-static inline void fsnotify_open(struct dentry *dentry)
+static inline void fsnotify_open(struct file *file)
 {
+	struct dentry *dentry = file->f_path.dentry;
 	struct inode *inode = dentry->d_inode;
 	__u32 mask = FS_OPEN;
 
@@ -228,7 +231,7 @@ static inline void fsnotify_open(struct dentry *dentry)
 	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
 	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, inode, FSNOTIFY_EVENT_INODE, NULL, 0);
+	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
 }
 
 /*
