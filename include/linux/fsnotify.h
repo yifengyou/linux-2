@@ -192,10 +192,12 @@ static inline void fsnotify_access(struct file *file)
 	if (S_ISDIR(inode->i_mode))
 		mask |= FS_IN_ISDIR;
 
-	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
+	if (!(file->f_mode & FMODE_NONOTIFY)) {
+		inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
-	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+		fsnotify_parent(dentry, mask);
+		fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+	}
 }
 
 /*
@@ -210,10 +212,12 @@ static inline void fsnotify_modify(struct file *file)
 	if (S_ISDIR(inode->i_mode))
 		mask |= FS_IN_ISDIR;
 
-	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
+	if (!(file->f_mode & FMODE_NONOTIFY)) {
+		inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
-	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+		fsnotify_parent(dentry, mask);
+		fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+	}
 }
 
 /*
@@ -228,10 +232,12 @@ static inline void fsnotify_open(struct file *file)
 	if (S_ISDIR(inode->i_mode))
 		mask |= FS_IN_ISDIR;
 
-	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
+	if (!(file->f_mode & FMODE_NONOTIFY)) {
+		inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
-	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+		fsnotify_parent(dentry, mask);
+		fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+	}
 }
 
 /*
@@ -247,10 +253,12 @@ static inline void fsnotify_close(struct file *file)
 	if (S_ISDIR(inode->i_mode))
 		mask |= FS_IN_ISDIR;
 
-	inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
+	if (!(file->f_mode & FMODE_NONOTIFY)) {
+		inotify_inode_queue_event(inode, mask, 0, NULL, NULL);
 
-	fsnotify_parent(dentry, mask);
-	fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+		fsnotify_parent(dentry, mask);
+		fsnotify(inode, mask, file, FSNOTIFY_EVENT_FILE, NULL, 0);
+	}
 }
 
 /*
