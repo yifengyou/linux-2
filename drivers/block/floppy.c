@@ -3209,9 +3209,12 @@ static inline int raw_cmd_copyin(int cmd, char __user *param,
 		if (!ptr)
 			return -ENOMEM;
 		*rcmd = ptr;
-		COPYIN(*ptr);
+		ret = _COPYIN(*ptr);
 		ptr->next = NULL;
 		ptr->buffer_length = 0;
+		ptr->kernel_data = NULL;
+		if (ret)
+			return ret;
 		param += sizeof(struct floppy_raw_cmd);
 		if (ptr->cmd_count > 33)
 			/* the command may now also take up the space
@@ -3227,7 +3230,6 @@ static inline int raw_cmd_copyin(int cmd, char __user *param,
 		for (i = 0; i < 16; i++)
 			ptr->reply[i] = 0;
 		ptr->resultcode = 0;
-		ptr->kernel_data = NULL;
 
 		if (ptr->flags & (FD_RAW_READ | FD_RAW_WRITE)) {
 			if (ptr->length <= 0)
