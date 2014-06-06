@@ -932,7 +932,7 @@ static int wake_futex_pi(u32 __user *uaddr, u32 uval, struct futex_q *this)
 	newval = FUTEX_WAITERS | task_pid_vnr(new_owner);
 
 	curval = cmpxchg_futex_value_locked(uaddr, uval, newval);
-	if (curval)
+	if (curval == -EFAULT)
 		ret = -EFAULT;
 	else if (curval != uval)
 		ret = -EINVAL;
