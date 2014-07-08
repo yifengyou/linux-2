@@ -33,6 +33,16 @@ linux (2.6.32-63.126) lucid; urgency=low
 
  -- Luis Henriques <luis.henriques@canonical.com>  Mon, 30 Jun 2014 15:34:17 +0100
 
+linux (2.6.32-62.126) lucid; urgency=low
+
+  [ Upstream Kernel Changes ]
+
+  * x86_64,ptrace: Enforce RIP <= TASK_SIZE_MAX (CVE-2014-4699)
+    - LP: #1337339
+    - CVE-2014-4699
+
+ -- Luis Henriques <luis.henriques@canonical.com>  Fri, 04 Jul 2014 11:45:45 +0100
+
 linux (2.6.32-62.125) lucid; urgency=low
 
   [ Brad Figg ]
