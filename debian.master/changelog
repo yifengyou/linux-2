@@ -1,3 +1,18 @@
+linux (2.6.32-65.130) lucid; urgency=low
+
+  [ Joseph Salisbury ]
+
+  * Release Tracking Bug
+    - LP: #1357394
+
+  [ Upstream Kernel Changes ]
+
+  * x86_32, entry: Store badsys error code in %eax
+    - LP: #1334989
+    - CVE-2014-4508
+
+ -- Joseph Salisbury <joseph.salisbury@canonical.com>  Fri, 15 Aug 2014 11:16:58 -0400
+
 linux (2.6.32-65.129) lucid; urgency=low
 
   [ Brad Figg ]
