@@ -1,4 +1,4 @@
-linux (2.6.32-65.130) lucid; urgency=low
+linux (2.6.32-65.131) lucid; urgency=low
 
   [ Joseph Salisbury ]
 
@@ -11,7 +11,7 @@ linux (2.6.32-65.130) lucid; urgency=low
     - LP: #1334989
     - CVE-2014-4508
 
- -- Joseph Salisbury <joseph.salisbury@canonical.com>  Fri, 15 Aug 2014 11:16:58 -0400
+ -- Kamal Mostafa <kamal@canonical.com>  Fri, 15 Aug 2014 11:22:44 -0700
 
 linux (2.6.32-65.129) lucid; urgency=low
 
