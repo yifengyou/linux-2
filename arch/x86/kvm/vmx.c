@@ -3121,7 +3121,7 @@ static int handle_wrmsr(struct kvm_vcpu *vcpu, struct kvm_run *kvm_run)
 
 	trace_kvm_msr_write(ecx, data);
 
-	if (vmx_set_msr(vcpu, ecx, data) != 0) {
+	if (kvm_set_msr(vcpu, ecx, data) != 0) {
 		kvm_inject_gp(vcpu, 0);
 		return 1;
 	}
