@@ -6687,6 +6687,7 @@ EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x3b7706d2	__tracepoint_kvm_exit
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x43d78c3b	kvm_set_cr0
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x45381b07	kvm_mmu_reset_context
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x49e1d854	kvm_inject_nmi
+EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x4a435dee	kvm_set_msr
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x4a7cbe69	is_error_pfn
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x51b58c79	kvm_mmu_page_fault
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x5323ae5e	kvm_emulate_halt

@@ -6681,6 +6681,7 @@ EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x20de5193	kvm_disable_largepages
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x2322e039	kvm_set_pfn_accessed
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x23a8e119	kvm_resched
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x24a98b5b	kvm_lmsw
+EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x25abd552	kvm_set_msr
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x27046576	kvm_exit
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x2ed1e2c5	kvm_get_cr8
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x317f9e6b	kvm_enable_efer_bits

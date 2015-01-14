@@ -6710,6 +6710,7 @@ EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x817b16d6	kvm_get_cs_db_l_bits
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x841c6e1d	kvm_read_guest_page
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8ce4f3ab	kvm_enable_tdp
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8e7f9b47	segment_base
+EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x991ed31c	kvm_set_msr
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x9b9af32f	kvm_set_cr0
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x9d1b7067	kvm_emulate_pio
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x9e1d27c7	kvm_vcpu_uninit

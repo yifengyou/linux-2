@@ -6550,6 +6550,7 @@ EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8bbd997b	is_error_page
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8cdc1ecc	kvm_write_guest_page
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8ce4f3ab	kvm_enable_tdp
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x8e7f9b47	segment_base
+EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0x99d43ee2	kvm_set_msr
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0xa361bc65	kvm_set_pfn_dirty
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0xa9be2337	kvm_put_guest_fpu
 EXPORT_SYMBOL_GPL arch/x86/kvm/kvm 0xaababb30	kvm_queue_exception_e
