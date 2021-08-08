@@ -2006,6 +2006,10 @@ static const unsigned char nargs[18]={
 
 asmlinkage long sys_socketcall(int call, unsigned long __user *args)
 {
+	/*
+	call : 存放ebx中，具体调用号
+	args : 存放ecx中，参数数组
+	*/
 	unsigned long a[6];
 	unsigned long a0, a1;
 	int err;
