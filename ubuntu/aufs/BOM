@@ -1,0 +1,12 @@
+Git Tree:      http://git.c3sl.ufpr.br/pub/scm/aufs/aufs2-standalone.git
+Git Branch:    aufs2 (86695db9a39ac200a441f8ff0ddd0bb24005238d)
+
+This standalone snapshot was built from the commit below in the main
+aufs2-2.6.git tree (http://git.c3sl.ufpr.br/pub/scm/aufs/aufs2-2.6.git):
+
+    commit 2a119c29c8bb5f9953d2866450e5fe13ea88520f
+    Author: J. R. Okajima <hooanon05@yahoo.co.jp>
+    Date:   Sat Dec 5 11:05:06 2009 +0900
+
+	aufs: tiny, a note about pathconf(3) wrapper
+

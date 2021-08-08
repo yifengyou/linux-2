@@ -1,0 +1,18 @@
+# arch	version		flavour		installedname			suffix	bdep
+amd64	2.6.32-74	generic		2.6.32-74-generic		-	
+
+i386	2.6.32-74	generic		2.6.32-74-generic		-	
+i386	2.6.32-74	generic-pae	2.6.32-74-generic-pae	-	
+
+lpia	2.6.32-74	lpia		2.6.32-74-lpia
+
+armel	2.6.32-74	versatile	2.6.32-74-versatile		-
+
+# Ports
+# arch	version		flavour		installedname			suffix	bdep
+ia64	2.6.32-74	ia64			2.6.32-74-ia64	-	
+
+powerpc	2.6.32-74	powerpc			2.6.32-74-powerpc		-	
+powerpc	2.6.32-74	powerpc64-smp		2.6.32-74-powerpc64-smp	-	
+
+sparc	2.6.32-74	sparc64			2.6.32-74-sparc64		-	

@@ -1,0 +1,6 @@
+supported="64-bit UltraSPARC"
+target="Geared toward desktop or server systems."
+desc="64-bit UltraSPARC"
+bootloader="silo"
+provides="redhat-cluster-modules, ivtv-modules"
+arch="sparc"

@@ -1,0 +1,6 @@
+supported="IA-64 SMP"
+target="Geared toward desktop or server systems."
+desc="IA-64 SMP"
+bootloader="elilo (>= 3.6-1)"
+provides="redhat-cluster-modules, ivtv-modules"
+arch="ia64"

@@ -1,0 +1,14 @@
+menu "Ubuntu Supplied Third-Party Device Drivers"
+
+source "ubuntu/aufs/Kconfig"
+source "ubuntu/compcache/Kconfig"
+source "ubuntu/dm-raid4-5/Kconfig"
+source "ubuntu/fsam7400/Kconfig"
+source "ubuntu/iscsitarget/Kconfig"
+source "ubuntu/lirc/Kconfig"
+source "ubuntu/ndiswrapper/Kconfig"
+source "ubuntu/omnibook/Kconfig"
+source "ubuntu/rtl8192se/Kconfig"
+source "ubuntu/rfkill/Kconfig"
+
+endmenu
