@@ -1,0 +1,16 @@
+#
+# I2C algorithm drivers configuration
+#
+
+config I2C_ALGOBIT
+	tristate
+
+config I2C_ALGOPCF
+	tristate
+
+config I2C_ALGOPCA
+	tristate
+
+config I2C_ALGO_SGI
+	tristate
+	depends on SGI_IP22 || SGI_IP32 || X86_VISWS

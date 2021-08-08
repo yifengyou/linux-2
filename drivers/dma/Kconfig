@@ -1,0 +1,64 @@
+#
+# DMA engine configuration
+#
+
+menuconfig DMADEVICES
+	bool "DMA Engine support"
+	depends on (PCI && X86) || ARCH_IOP32X || ARCH_IOP33X || ARCH_IOP13XX || PPC
+	depends on !HIGHMEM64G
+	help
+	  DMA engines can do asynchronous data transfers without
+	  involving the host CPU.  Currently, this framework can be
+	  used to offload memory copies in the network stack and
+	  RAID operations in the MD driver.
+
+if DMADEVICES
+
+comment "DMA Devices"
+
+config INTEL_IOATDMA
+	tristate "Intel I/OAT DMA support"
+	depends on PCI && X86
+	select DMA_ENGINE
+	select DCA
+	help
+	  Enable support for the Intel(R) I/OAT DMA engine present
+	  in recent Intel Xeon chipsets.
+
+	  Say Y here if you have such a chipset.
+
+	  If unsure, say N.
+
+config INTEL_IOP_ADMA
+	tristate "Intel IOP ADMA support"
+	depends on ARCH_IOP32X || ARCH_IOP33X || ARCH_IOP13XX
+	select ASYNC_CORE
+	select DMA_ENGINE
+	help
+	  Enable support for the Intel(R) IOP Series RAID engines.
+
+config FSL_DMA
+	bool "Freescale MPC85xx/MPC83xx DMA support"
+	depends on PPC
+	select DMA_ENGINE
+	---help---
+	  Enable support for the Freescale DMA engine. Now, it support
+	  MPC8560/40, MPC8555, MPC8548 and MPC8641 processors.
+	  The MPC8349, MPC8360 is also supported.
+
+config DMA_ENGINE
+	bool
+
+comment "DMA Clients"
+	depends on DMA_ENGINE
+
+config NET_DMA
+	bool "Network: TCP receive copy offload"
+	depends on DMA_ENGINE && NET
+	help
+	  This enables the use of DMA engines in the network stack to
+	  offload receive copy-to-user operations, freeing CPU cycles.
+	  Since this is the main user of the DMA engine, it should be enabled;
+	  say Y here.
+
+endif
