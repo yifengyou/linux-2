@@ -8,8 +8,25 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 
 ## 目录
 
-* [O0编译处理](docs/O0编译处理.md)
-* [virtio模块oops处理](docs/virtio模块oops处理.md)
+* [环境搭建](docs/环境搭建.md)
+    * [x86_64](docs/环境搭建/x86_64.md)
+    * [编译适配](docs/环境搭建/编译适配.md)
+    * [O0编译处理](docs/环境搭建/O0编译处理.md)
+* [带着问题读内核](docs/带着问题读内核.md)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
