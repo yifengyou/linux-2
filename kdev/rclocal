@@ -77,22 +77,23 @@ export HISTSIZE=10000
 PS1='\[\e[32;1m\][\[\e[31;1m\]\u\[\e[33;1m\]@\[\e[35;1m\]\h\[\e[36;1m\] \w\[\e[32;1m\]]\[\e[37;1m\]\\$\[\e[0m\] '
 EOF
 	sync
-	dhclient
+	dhclient eth0
 	sync
 	cat > /etc/apt/sources.list << EOF
 
-deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ lucid main restricted universe multiverse
-deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ lucid-updates main restricted universe multiverse
-deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ lucid-security main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ precise main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ precise-updates main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ precise-security main restricted universe multiverse
 
 EOF
-	apt-get update && apt-get install -y vim tmux openssh-server net-tools build-essential lrzsz
+	apt-get update && apt-get install -y --force-yes vim tmux openssh-server net-tools build-essential lrzsz
 	sed -i '/^#PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
 	sync
+	ln -svf /usr/src/linux-headers-2.6.32-kdev /kernel
 	#reboot -f
 else
 	sync
-	dhclient
+	dhclient eth0
 fi
 
 exit 0
