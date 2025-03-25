@@ -86,7 +86,8 @@ deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ precise-updates main 
 deb http://mirrors.ustc.edu.cn/ubuntu-old-releases/ubuntu/ precise-security main restricted universe multiverse
 
 EOF
-	apt-get update && apt-get install -y --force-yes vim tmux openssh-server net-tools build-essential lrzsz
+	apt-get update
+	apt-get install -y --force-yes vim tmux openssh-server net-tools build-essential lrzsz make
 	sed -i '/^#PermitRootLogin/c\PermitRootLogin yes' /etc/ssh/sshd_config
 	sync
 	ln -svf /usr/src/linux-headers-2.6.32-kdev /kernel
