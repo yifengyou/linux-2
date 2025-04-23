@@ -1,6 +1,7 @@
 sourcedir = /linux/linux-2.git
 arch = x86_64
 debug = True
+docker_image = yifengyou/linux2.0:latest
 skipimagecheck = True
 vmname = kdev-linux2
 config = ubuntu10_x86_64_defconfig
